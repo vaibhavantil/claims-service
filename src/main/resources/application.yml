@@ -1,0 +1,48 @@
+server:
+  port: 4083
+
+logging:
+  level:
+    com:
+      hedvig: DEBUG
+management:
+  security:
+    enabled: false
+
+hedvig:
+  kafka:
+    acks: all
+    retries: 3
+    bootstrap:
+      servers: localhost:9092
+      schema:
+        registry:
+          url: http://localhost:8081
+
+spring:
+  jpa:
+    generate-ddl: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        hbm2ddl:
+       #   auto: update
+      javax:
+        persistence:
+          schema-generation:
+            create-source: metadata
+            scripts:
+              action: create
+              create-target: create.sql
+    hibernate:
+      ddl-auto: none
+      show_sql: true
+      format_sql: true
+      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/product-pricing
+    username: postgres
+    password: iambatman
+    platform: POSTGRESQL
