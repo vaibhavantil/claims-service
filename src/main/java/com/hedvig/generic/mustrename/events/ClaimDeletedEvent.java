@@ -6,11 +6,9 @@ import org.axonframework.commandhandling.model.AggregateIdentifier;
 import java.time.LocalDate;
 
 @Value
-public class AssetUpdatedEvent {
+public class ClaimDeletedEvent {
 
 	@AggregateIdentifier
     private String id;
-    private String name;
-    private LocalDate registrationDate;
 
 }

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 import java.time.LocalDate;
 
-public class AssetDTO {
+public class ClaimDTO {
 
     public String id;
     public String name;
@@ -15,11 +15,11 @@ public class AssetDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate registrationDate;
 
-    public AssetDTO(){}
+    public ClaimDTO(){}
 
-    public AssetDTO(String id, String name, LocalDate birthDate) {
+    public ClaimDTO(String id, String name, LocalDate registrationDate) {
         this.id = id;
         this.name = name;
-        this.registrationDate = birthDate;
+        this.registrationDate = registrationDate;
     }
 }

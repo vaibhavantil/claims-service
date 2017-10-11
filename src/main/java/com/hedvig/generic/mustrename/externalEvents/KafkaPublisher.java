@@ -2,7 +2,7 @@ package com.hedvig.generic.mustrename.externalEvents;
 
 import com.hedvig.generic.event.UserCreatedEvent_v1;
 import com.hedvig.generic.event.UserEvent_v1;
-import com.hedvig.generic.mustrename.events.AssetCreatedEvent;
+import com.hedvig.generic.mustrename.events.ClaimCreatedEvent;
 import org.apache.jute.Record;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
