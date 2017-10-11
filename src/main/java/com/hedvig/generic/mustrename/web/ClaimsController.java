@@ -52,7 +52,7 @@ public class ClaimsController {
         this.filerepo = filerepo;
     }
 
-    @RequestMapping(value = "/claims/fileupload/{claims_id}/{meta_info}", method = RequestMethod.POST, produces="application/json;charset=UTF-8")
+    @RequestMapping(value = "/claim/fileupload/{claims_id}/{meta_info}", method = RequestMethod.POST, produces="application/json;charset=UTF-8")
     public String handleFileUpload(@ModelAttribute("file") MultipartFile fileUpload, @PathVariable String meta_info, @PathVariable UUID claims_id,
     		@RequestHeader(value="hedvig.token", required = false) String hid) throws Exception {
     		UUID uid = UUID.randomUUID();
@@ -72,7 +72,7 @@ public class ClaimsController {
         return "{id:"+uid+"}";
     } 
     
-    @RequestMapping(value = "/claims/file/{file_id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/claim/file/{file_id}", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getImageAsResponseEntity(@PathVariable UUID file_id, 
     		@RequestHeader(value="hedvig.token", required = false) String hid) {
         HttpHeaders headers = new HttpHeaders();
