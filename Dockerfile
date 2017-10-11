@@ -1,6 +1,6 @@
 FROM openjdk:8
 
 
-ADD target/asset-tracker-0.0.1-SNAPSHOT.jar /
+ADD target/claims-service-0.0.1-SNAPSHOT.jar /
 
-ENTRYPOINT java -jar asset-tracker-0.0.1-SNAPSHOT.jar
+ENTRYPOINT java -jar claims-service-0.0.1-SNAPSHOT.jar
