@@ -102,7 +102,7 @@ public class ClaimsController {
     }
 
     @RequestMapping(path = "/claim/", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateClaim(@RequestBody ClaimDTO user, @RequestHeader(value="hedvig.token", required = false) String hid) {
+    public ResponseEntity<?> initiateClaim(@RequestHeader(value="hedvig.token", required = false) String hid) {
     	
         UUID uid = UUID.randomUUID();
         log.info("Initiate claims with id: " + uid.toString());
@@ -111,7 +111,7 @@ public class ClaimsController {
     }
 
     @RequestMapping(path = "/claim/asset/{asset_id}", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateAssetClaim(@RequestBody ClaimDTO user, @PathVariable UUID asset_id, @RequestHeader(value="hedvig.token", required = false) String hid) {
+    public ResponseEntity<?> initiateAssetClaim(@PathVariable UUID asset_id, @RequestHeader(value="hedvig.token", required = false) String hid) {
     	
         UUID uid = UUID.randomUUID();
         log.info("Initiate claims for asset:"+ asset_id +" with new claims id: " + uid.toString());
