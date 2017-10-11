@@ -52,7 +52,7 @@ public class ClaimsController {
         this.filerepo = filerepo;
     }
 
-    @RequestMapping(value = "/claims/fileupload/{claims_id}/{meta_info}", method = RequestMethod.POST, produces="application/json;charset=UTF-8")
+    @RequestMapping(value = "/claim/fileupload/{claims_id}/{meta_info}", method = RequestMethod.POST, produces="application/json;charset=UTF-8")
     public String handleFileUpload(@ModelAttribute("file") MultipartFile fileUpload, @PathVariable String meta_info, @PathVariable UUID claims_id,
     		@RequestHeader(value="hedvig.token", required = false) String hid) throws Exception {
     		UUID uid = UUID.randomUUID();
@@ -72,7 +72,7 @@ public class ClaimsController {
         return "{id:"+uid+"}";
     } 
     
-    @RequestMapping(value = "/claims/file/{file_id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/claim/file/{file_id}", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getImageAsResponseEntity(@PathVariable UUID file_id, 
     		@RequestHeader(value="hedvig.token", required = false) String hid) {
         HttpHeaders headers = new HttpHeaders();
@@ -102,7 +102,7 @@ public class ClaimsController {
     }
 
     @RequestMapping(path = "/claim/", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateClaim(@RequestBody ClaimDTO user, @RequestHeader(value="hedvig.token", required = false) String hid) {
+    public ResponseEntity<?> initiateClaim(@RequestHeader(value="hedvig.token", required = false) String hid) {
     	
         UUID uid = UUID.randomUUID();
         log.info("Initiate claims with id: " + uid.toString());
@@ -111,7 +111,7 @@ public class ClaimsController {
     }
 
     @RequestMapping(path = "/claim/asset/{asset_id}", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateAssetClaim(@RequestBody ClaimDTO user, @PathVariable UUID asset_id, @RequestHeader(value="hedvig.token", required = false) String hid) {
+    public ResponseEntity<?> initiateAssetClaim(@PathVariable UUID asset_id, @RequestHeader(value="hedvig.token", required = false) String hid) {
     	
         UUID uid = UUID.randomUUID();
         log.info("Initiate claims for asset:"+ asset_id +" with new claims id: " + uid.toString());
