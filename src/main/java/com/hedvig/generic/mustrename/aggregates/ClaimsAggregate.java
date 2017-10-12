@@ -15,6 +15,12 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -28,6 +34,12 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 public class ClaimsAggregate {
 
 	private static Logger log = LoggerFactory.getLogger(ClaimsAggregate.class);
+	//private static final String botURL = "http://bot-service/initclaim";
+	
+	@Value("${bot-service.url}")
+	private String botURL;
+	//private static final String botURL = "http://localhost:4081/initclaim/";
+	
     @AggregateIdentifier
     public String id;
     public String name;
@@ -39,15 +51,30 @@ public class ClaimsAggregate {
         log.info("Instansiating ClaimsAggregate");
     }
 
+    public void startClaimsConversation(String hid){
+    	log.info("Tell bot to initiate claims conversation...");
+    	botURL = "http://bot-service/initclaim";
+    	log.info("bot-service claim URL:" + botURL);
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders head = new HttpHeaders();
+		head.add("hedvig.token", hid);
+		HttpEntity<String> entity = new HttpEntity<String>("",head);
+		ResponseEntity<String> response = restTemplate.postForEntity(botURL, entity, String.class);
+		HttpStatus statusCode = response.getStatusCode();
+		log.info("HttpStatus:" + statusCode);
+    }
+    
     @CommandHandler
     public ClaimsAggregate(InitiateClaimCommand command) {
         log.info("create claim");
+        startClaimsConversation(command.getUserId());
         apply(new ClaimCreatedEvent(command.getId(), command.getUserId(), command.getRegistrationDate()));
     }
 
     @CommandHandler
     public ClaimsAggregate(InitiateClaimForAssetCommand command) {
         log.info("create asset claim");
+        startClaimsConversation(command.getUserId());
         apply(new AssetClaimCreatedEvent(command.getId(), command.getUserId(), command.getAssetId(), command.getRegistrationDate()));
     }
     
