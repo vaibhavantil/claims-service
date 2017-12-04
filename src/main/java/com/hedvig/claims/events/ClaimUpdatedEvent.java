@@ -1,0 +1,16 @@
+package com.hedvig.claims.events;
+
+import lombok.Value;
+import org.axonframework.commandhandling.model.AggregateIdentifier;
+
+import java.time.LocalDate;
+
+@Value
+public class ClaimUpdatedEvent {
+
+	@AggregateIdentifier
+    private String id;
+    private String name;
+    private LocalDate registrationDate;
+
+}
