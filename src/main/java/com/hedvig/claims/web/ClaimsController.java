@@ -1,13 +1,12 @@
 package com.hedvig.claims.web;
 
-import com.hedvig.claims.commands.DeleteClaimCommand;
-import com.hedvig.claims.commands.InitiateClaimCommand;
-import com.hedvig.claims.commands.InitiateClaimForAssetCommand;
-import com.hedvig.claims.commands.UpdateClaimCommand;
-import com.hedvig.claims.query.ClaimsRepository;
-import com.hedvig.claims.query.FileUploadRepository;
-import com.hedvig.claims.query.UploadFile;
-import com.hedvig.claims.web.dto.ClaimDTO;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.axonframework.commandhandling.CommandBus;
@@ -21,21 +20,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.hedvig.claims.audio.FfmpegClient;
+import com.hedvig.claims.audio.NuanceClient;
+import com.hedvig.claims.commands.InitiateClaimCommand;
+import com.hedvig.claims.commands.InitiateClaimForAssetCommand;
+import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.query.FileUploadRepository;
+import com.hedvig.claims.query.UploadFile;
+import com.hedvig.claims.web.dto.ClaimDTO;
 
 @RestController
 public class ClaimsController {
@@ -52,25 +53,42 @@ public class ClaimsController {
         this.filerepo = filerepo;
     }
 
-    @RequestMapping(value = "/claim/fileupload/{claims_id}/{meta_info}", method = RequestMethod.POST, produces="application/json;charset=UTF-8")
-    public String handleFileUpload(@ModelAttribute("file") MultipartFile fileUpload, @PathVariable String meta_info, @PathVariable UUID claims_id,
+    @RequestMapping(value = "/claim/fileupload/", method = RequestMethod.POST, produces="application/json;charset=UTF-8")
+    public String handleFileUpload(@ModelAttribute("file") Optional<MultipartFile> fileUpload, @PathVariable Optional<String> meta_info, //@PathVariable UUID claims_id,
     		@RequestHeader(value="hedvig.token", required = false) String hid) throws Exception {
-    		UUID uid = UUID.randomUUID();
-            log.info("Saving file: " + fileUpload.getOriginalFilename());
-
-            UploadFile uploadFile = new UploadFile();
-            uploadFile.setFileName(fileUpload.getOriginalFilename());
-            uploadFile.setData(fileUpload.getBytes());
-            uploadFile.setUserId(hid);
-            uploadFile.setImageId(uid);
-            uploadFile.setMetaInfo(meta_info);
-            uploadFile.setClaimsId(claims_id);
-            uploadFile.setSize(fileUpload.getSize());
-            uploadFile.setContentType(fileUpload.getContentType());
-            filerepo.save(uploadFile);             
-
+    		
+    	// File database id
+    	UUID uid = UUID.randomUUID();
+    	UUID claims_id = UUID.randomUUID();
+    		if(fileUpload.isPresent()){
+    			storeFile(fileUpload.get(), hid, uid, meta_info.isPresent()?meta_info.get():"", claims_id);
+    			
+    			String destination = "C:\\Users\\John\\Documents\\" + fileUpload.get().getOriginalFilename();
+    			File file = new File(destination);
+    			fileUpload.get().transferTo(file);
+    			
+    	        NuanceClient nc = new NuanceClient();
+    	        FfmpegClient fc = new FfmpegClient();
+    	        String pcmFile = fc.convertToPCM(destination);
+    	        nc.runDictation("C:\\Users\\John\\Documents\\test.pcm");
+    		}
+            
         return "{id:"+uid+"}";
     } 
+    
+    private void storeFile(MultipartFile fileUpload, String hid, UUID uid, String meta_info, UUID claims_id) throws IOException{
+        log.info("Storing file: " + fileUpload.getOriginalFilename());
+        UploadFile uploadFile = new UploadFile();
+        uploadFile.setFileName(fileUpload.getOriginalFilename());
+        uploadFile.setData(fileUpload.getBytes());
+        uploadFile.setUserId(hid);
+        uploadFile.setImageId(uid);
+        uploadFile.setMetaInfo(meta_info);
+        uploadFile.setClaimsId(claims_id);
+        uploadFile.setSize(fileUpload.getSize());
+        uploadFile.setContentType(fileUpload.getContentType());
+        filerepo.save(uploadFile); 
+    }
     
     @RequestMapping(value = "/claim/file/{file_id}", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getImageAsResponseEntity(@PathVariable UUID file_id, 
@@ -103,19 +121,28 @@ public class ClaimsController {
 
     @RequestMapping(path = "/claim", method = RequestMethod.POST)
     public ResponseEntity<?> initiateClaim(@RequestHeader(value="hedvig.token", required = false) String hid) {
-    	
+    
+    	//public ResponseEntity<?> initiateClaim(@RequestBody ClaimDTO claim, @RequestHeader(value="hedvig.token", required = false) String hid) {
+
         UUID uid = UUID.randomUUID();
         log.info("Initiate claims with id: " + uid.toString());
-        commandBus.sendAndWait(new InitiateClaimCommand(hid, uid.toString(), LocalDate.now()));
+        /*NuanceClient nc = new NuanceClient();
+        FfmpegClient fc = new FfmpegClient();
+        fc.convert("test.caf", "test.pcm");
+        nc.runDictation("test.pcm");*/
+        //commandBus.sendAndWait(new InitiateClaimCommand(hid, uid.toString(), LocalDate.now()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /*
+     * Deprecated. Store information about asset in ClaimDTO
+     * */
     @RequestMapping(path = "/claim/asset/{asset_id}", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateAssetClaim(@PathVariable UUID asset_id, @RequestHeader(value="hedvig.token", required = false) String hid) {
-    	
-        UUID uid = UUID.randomUUID();
+    public ResponseEntity<?> initiateAssetClaim(@RequestBody ClaimDTO claim, @PathVariable UUID asset_id, @RequestHeader(value="hedvig.token", required = false) String hid) {
+
+    	UUID uid = UUID.randomUUID();
         log.info("Initiate claims for asset:"+ asset_id +" with new claims id: " + uid.toString());
-        commandBus.sendAndWait(new InitiateClaimForAssetCommand(hid, uid.toString(), asset_id, LocalDate.now()));
+        commandBus.sendAndWait(new InitiateClaimForAssetCommand(hid, uid.toString(), asset_id, LocalDate.now(), claim.audioURL));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

@@ -15,5 +15,6 @@ public class AssetClaimCreatedEvent {
 	private String userId;
     private UUID assetId;
     private LocalDate registrationDate;
+    private String audioURL;
 
 }

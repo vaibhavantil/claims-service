@@ -45,6 +45,7 @@ public class ClaimsAggregate {
     public String name;
     public String userId;
     public UUID assetId;
+    public String audioURL;
     public LocalDate registrationDate;
 
     public ClaimsAggregate(){
@@ -79,7 +80,7 @@ public class ClaimsAggregate {
     public ClaimsAggregate(InitiateClaimForAssetCommand command) {
         log.info("create asset claim");
         startClaimsConversation(command.getUserId());
-        apply(new AssetClaimCreatedEvent(command.getId(), command.getUserId(), command.getAssetId(), command.getRegistrationDate()));
+        apply(new AssetClaimCreatedEvent(command.getId(), command.getUserId(), command.getAssetId(), command.getRegistrationDate(), command.getAudioURL()));
     }
     
     @CommandHandler
@@ -106,6 +107,7 @@ public class ClaimsAggregate {
         this.id = e.getId();
         this.userId = e.getUserId();
         this.assetId = e.getAssetId();
+        this.audioURL = e.getAudioURL();
         this.registrationDate = e.getRegistrationDate();
     }
 }

@@ -22,12 +22,13 @@ public class ClaimEntity {
     public String userId;
     public String name;
     public UUID assetId;
+    public String audioURL;
     public LocalDate registrationDate;
 
     // Not user if this is the right place for this but...
     public ClaimDTO convertToDTO(){
     	log.info("Return dto version of:" + this);
-    	return new ClaimDTO(id, name, registrationDate);
+    	return new ClaimDTO(id, name, assetId.toString(), audioURL, registrationDate);
     }
     
 }

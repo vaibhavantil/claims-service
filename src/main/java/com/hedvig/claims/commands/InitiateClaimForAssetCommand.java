@@ -20,13 +20,15 @@ public class InitiateClaimForAssetCommand {
     public String userId;
     public UUID assetId;
     private LocalDate registrationDate;
+    public String audioURL;
 
-    public InitiateClaimForAssetCommand(String userId, String id, UUID assetId, LocalDate registrationDate) {
+    public InitiateClaimForAssetCommand(String userId, String id, UUID assetId, LocalDate registrationDate, String audioURL) {
         log.info("InitiateClaimForAssetCommand");
         this.id = id;
         this.userId = userId;
         this.assetId = assetId;
         this.registrationDate = registrationDate;
+        this.audioURL = audioURL;
         log.info(this.toString());
     } 
 }
