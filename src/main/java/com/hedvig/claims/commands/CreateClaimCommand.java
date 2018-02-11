@@ -8,25 +8,23 @@ import org.slf4j.LoggerFactory;
 import com.hedvig.claims.query.ClaimsEventListener;
 
 import java.time.LocalDate;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Value
-public class InitiateClaimForAssetCommand {
+public class CreateClaimCommand {
 
-	private static Logger log = LoggerFactory.getLogger(InitiateClaimForAssetCommand.class);
+	private static Logger log = LoggerFactory.getLogger(CreateClaimCommand.class);
 	
     @TargetAggregateIdentifier
     public String id;
     public String userId;
-    public UUID assetId;
-    private LocalDate registrationDate;
+    private LocalDateTime registrationDate;
     public String audioURL;
 
-    public InitiateClaimForAssetCommand(String userId, String id, UUID assetId, LocalDate registrationDate, String audioURL) {
-        log.info("InitiateClaimForAssetCommand");
+    public CreateClaimCommand(String userId, String id, LocalDateTime registrationDate, String audioURL) {
+        log.info("InitiateClaimCommand");
         this.id = id;
         this.userId = userId;
-        this.assetId = assetId;
         this.registrationDate = registrationDate;
         this.audioURL = audioURL;
         log.info(this.toString());

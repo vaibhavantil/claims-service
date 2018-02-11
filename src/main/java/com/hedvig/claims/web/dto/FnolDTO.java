@@ -3,27 +3,22 @@ package com.hedvig.claims.web.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 import lombok.Value;
 
-public class ClaimDTO extends HedvigBackofficeDTO{
+public class FnolDTO extends HedvigBackofficeDTO{
 
     public String assetId;
     public String audioURL;
-    public ArrayList<NoteDTO> notes = new ArrayList<NoteDTO>();
-    public ClaimStates state;
 
     @JsonDeserialize(using= LocalDateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss") //TODO: change date format
     public LocalDateTime registrationDate;
 
-    public ClaimDTO(){}
+    public FnolDTO(){}
     
-    public ClaimDTO(String id, String name, String assetId, String audioURL, LocalDateTime registrationDate) {
+    public FnolDTO(String id, String name, String assetId, String audioURL, LocalDateTime registrationDate) {
         this.id = id;
         this.userId = name;
         this.registrationDate = registrationDate;
@@ -31,15 +26,10 @@ public class ClaimDTO extends HedvigBackofficeDTO{
         this.audioURL = audioURL;
     }
     
-    public void addNote(NoteDTO n){
-    	this.notes.add(n);
-    }
-    
     public String toString(){
-    	return "\nid:" + this.id + "\n"
+    	return "id:" + this.id + "\n"
     			+ "userId:" + this.userId + "\n"
     			+ "registrationDate:" + this.registrationDate + "\n"
-    			+ "state:" + this.state.toString() + "\n"
     			+ "assetId:" + this.assetId + "\n"
     			+ "audioURL:" + this.audioURL;
     }

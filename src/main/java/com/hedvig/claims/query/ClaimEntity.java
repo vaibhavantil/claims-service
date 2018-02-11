@@ -1,16 +1,22 @@
 package com.hedvig.claims.query;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hedvig.claims.web.ClaimsController;
-import com.hedvig.claims.web.dto.ClaimDTO;
-
-import java.time.LocalDate;
-import java.util.UUID;
+import com.hedvig.claims.aggregates.Note;
+import com.hedvig.claims.aggregates.Payment;
 
 @Entity
 public class ClaimEntity {
@@ -20,15 +26,31 @@ public class ClaimEntity {
     @Id
     public String id;
     public String userId;
-    public String name;
-    public UUID assetId;
     public String audioURL;
-    public LocalDate registrationDate;
+    public LocalDateTime registrationDate;
+    public String state;
+    public String type;
+    public Double reserve;
+	private ArrayList<String> assets;
+	
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name="claimsId")
+	private Set<Note> notes;
+	
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name="claimsId")
+	private Set<Payment> payments;
+	
+	public void addNote(Note n){
+		notes.add(n);
+	}
+	
+	public void addPayment(Payment p){
+		payments.add(p);
+	}
+	
+	public void addAsset(String a){
+		assets.add(a);
+	}
 
-    // Not user if this is the right place for this but...
-    public ClaimDTO convertToDTO(){
-    	log.info("Return dto version of:" + this);
-    	return new ClaimDTO(id, name, assetId.toString(), audioURL, registrationDate);
-    }
-    
 }

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,12 +29,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hedvig.claims.audio.FfmpegClient;
 import com.hedvig.claims.audio.NuanceClient;
-import com.hedvig.claims.commands.InitiateClaimCommand;
-import com.hedvig.claims.commands.InitiateClaimForAssetCommand;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.query.FileUploadRepository;
 import com.hedvig.claims.query.UploadFile;
-import com.hedvig.claims.web.dto.ClaimDTO;
 
 @RestController
 public class ClaimsController {
@@ -117,33 +112,6 @@ public class ClaimsController {
         	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-    }
-
-    @RequestMapping(path = "/claim", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateClaim(@RequestHeader(value="hedvig.token", required = false) String hid) {
-    
-    	//public ResponseEntity<?> initiateClaim(@RequestBody ClaimDTO claim, @RequestHeader(value="hedvig.token", required = false) String hid) {
-
-        UUID uid = UUID.randomUUID();
-        log.info("Initiate claims with id: " + uid.toString());
-        /*NuanceClient nc = new NuanceClient();
-        FfmpegClient fc = new FfmpegClient();
-        fc.convert("test.caf", "test.pcm");
-        nc.runDictation("test.pcm");*/
-        //commandBus.sendAndWait(new InitiateClaimCommand(hid, uid.toString(), LocalDate.now()));
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    /*
-     * Deprecated. Store information about asset in ClaimDTO
-     * */
-    @RequestMapping(path = "/claim/asset/{asset_id}", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateAssetClaim(@RequestBody ClaimDTO claim, @PathVariable UUID asset_id, @RequestHeader(value="hedvig.token", required = false) String hid) {
-
-    	UUID uid = UUID.randomUUID();
-        log.info("Initiate claims for asset:"+ asset_id +" with new claims id: " + uid.toString());
-        commandBus.sendAndWait(new InitiateClaimForAssetCommand(hid, uid.toString(), asset_id, LocalDate.now(), claim.audioURL));
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }

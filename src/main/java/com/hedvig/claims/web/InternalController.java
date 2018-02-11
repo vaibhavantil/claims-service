@@ -1,25 +1,83 @@
 package com.hedvig.claims.web;
 
+import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.commandhandling.callbacks.LoggingCallback;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hedvig.claims.commands.AddNoteCommand;
+import com.hedvig.claims.commands.AddPaymentCommand;
+import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.UpdateClaimsStateCommand;
+import com.hedvig.claims.events.NoteAddedEvent;
+import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.query.FileUploadRepository;
+import com.hedvig.claims.web.dto.FnolDTO;
+import com.hedvig.claims.web.dto.NoteDTO;
+import com.hedvig.claims.web.dto.PaymentDTO;
+import com.hedvig.claims.web.dto.ClaimDTO;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import com.hedvig.claims.web.dto.ClaimType;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.UUID;
 
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
 public class InternalController {
 
     private Logger log = LoggerFactory.getLogger(InternalController.class);
+    private final ClaimsRepository claimsRepository;
+    private final CommandGateway commandBus;
+    
+    @Autowired
+    public InternalController(CommandBus commandBus, ClaimsRepository repository, FileUploadRepository filerepo) {
+        this.commandBus = new DefaultCommandGateway(commandBus);
+        this.claimsRepository = repository;
+    }
+    
+    @RequestMapping(path = "/claim", method = RequestMethod.POST)
+    public ResponseEntity<?> initiateClaim(@RequestBody FnolDTO fnol) {
+    	log.info("Claim FNOL recieved!:" + fnol.toString());
+        UUID uid = UUID.randomUUID();
+    	commandBus.sendAndWait(new CreateClaimCommand(fnol.getUserId(),uid.toString(), LocalDateTime.now(), fnol.getAudioURL()));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 
+    @RequestMapping(path = "/addnote", method = RequestMethod.POST)
+    public ResponseEntity<?> addNote(@RequestBody NoteDTO note) {
+    	log.info("Adding claim note:" + note.toString());
+        UUID uid = UUID.randomUUID();     
+        AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, LocalDateTime.now(), note.text, note.userId, note.fileURL);
+    	commandBus.sendAndWait(command);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    
+    @RequestMapping(path = "/addpayment", method = RequestMethod.POST)
+    public ResponseEntity<?> addPayment(@RequestBody PaymentDTO payment) {
+    	log.info("Adding payment note:" + payment.toString());
+        UUID uid = UUID.randomUUID();     
+        AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID, LocalDateTime.now(), 
+        		payment.userId, payment.amount, payment.note, payment.payoutDate, payment.exGratia);
+        
+    	commandBus.sendAndWait(command);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    
     @RequestMapping(path = "claimTypes", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<ClaimType>> claimTypes() {
 
