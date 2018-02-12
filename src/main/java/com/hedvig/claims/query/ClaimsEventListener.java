@@ -1,5 +1,10 @@
 package com.hedvig.claims.query;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.UUID;
+
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.slf4j.Logger;
@@ -7,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.hedvig.claims.aggregates.Asset;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 import com.hedvig.claims.events.ClaimCreatedEvent;
@@ -34,6 +40,19 @@ public class ClaimsEventListener {
         claim.userId = e.getUserId();
         claim.registrationDate = e.getRegistrationDate();
         claim.audioURL = e.getAudioURL();
+        
+        // Init data structures
+        claim.notes = new HashSet<Note>();
+        claim.payments = new HashSet<Payment>();
+        claim.assets = new HashSet<Asset>();
+        claim.events = new HashSet<Event>();
+        
+        Event ev = new Event();
+        ev.type = e.getClass().getName();
+        ev.userId = e.getUserId();
+        ev.text = "Claim created";
+        claim.addEvent(ev);
+        
         repository.save(claim);
     }
     
@@ -48,20 +67,44 @@ public class ClaimsEventListener {
         n.text = e.getText();
         n.userId = e.getUserId();
         claim.addNote(n);
+        
+        Event ev = new Event();
+        ev.type = e.getClass().getName();
+        ev.userId = e.getUserId();
+        ev.text = "Note added:" + n.text;
+        claim.addEvent(ev);
+        
         repository.save(claim);
     }
 
     @EventSourcingHandler
     public void on(ClaimStatusUpdatedEvent e) {
         ClaimEntity claim = repository.findById(e.getClaimsId()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
+        
+        Event ev = new Event();
+        ev.type = e.getClass().getName();
+        ev.userId = e.getUserId();
+        ev.text = "Status updated from " + claim.state + " to " + e.getState().toString();
+        
         claim.state = e.getState().toString();
+        claim.addEvent(ev);
+        
         repository.save(claim);
     }
     
     @EventSourcingHandler
     public void on(ClaimsReserveUpdateEvent e) {
         ClaimEntity claim = repository.findById(e.getClaimID()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimID()));
+        
+        
+        Event ev = new Event();
+        ev.type = e.getClass().getName();
+        ev.userId = e.getUserId();
+        ev.text = "Reserve updated from " + claim.reserve + " to " + e.getAmount();
+        
         claim.reserve = e.getAmount();
+        claim.addEvent(ev);
+        
         repository.save(claim);
     }
     
@@ -78,6 +121,13 @@ public class ClaimsEventListener {
     	p.note = e.getNote();
     	p.exGratia = e.getExGratia();
     	claim.addPayment(p);
+    	
+        Event ev = new Event();
+        ev.type = e.getClass().getName();
+        ev.userId = e.getUserId();
+        ev.text = "Payment added. Amount " + p.amount + " with payout date " + p.payoutDate;
+        claim.addEvent(ev);
+        
     	repository.save(claim);
     }
 }

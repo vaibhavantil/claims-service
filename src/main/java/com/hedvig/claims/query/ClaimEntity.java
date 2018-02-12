@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hedvig.claims.aggregates.Asset;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 
@@ -30,16 +31,27 @@ public class ClaimEntity {
     public LocalDateTime registrationDate;
     public String state;
     public String type;
-    public Double reserve;
-	private ArrayList<String> assets;
+    public Double reserve; 
+    
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name="claimsId")
+	public Set<Asset> assets;
 	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name="claimsId")
-	private Set<Note> notes;
+	public Set<Event> events;
+	
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name="claimsId") 
+	public Set<Note> notes;
 	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name="claimsId")
-	private Set<Payment> payments;
+	public Set<Payment> payments;
+	
+	public void addEvent(Event e){
+		events.add(e);
+	}
 	
 	public void addNote(Note n){
 		notes.add(n);
@@ -49,7 +61,7 @@ public class ClaimEntity {
 		payments.add(p);
 	}
 	
-	public void addAsset(String a){
+	public void addAsset(Asset a){
 		assets.add(a);
 	}
 

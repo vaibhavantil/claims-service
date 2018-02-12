@@ -98,6 +98,7 @@ public class ClaimsAggregate {
         this.notes = new ArrayList<Note>();
         this.payments = new ArrayList<Payment>();
         this.assets = new ArrayList<String>();
+        this.notes = new ArrayList<Note>();
     }
 
     @EventSourcingHandler
