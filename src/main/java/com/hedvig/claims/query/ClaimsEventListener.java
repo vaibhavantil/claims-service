@@ -13,11 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.hedvig.claims.aggregates.Asset;
+import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
+import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
+import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
 
@@ -93,6 +96,22 @@ public class ClaimsEventListener {
     }
     
     @EventSourcingHandler
+    public void on(ClaimsTypeUpdateEvent e) {
+        ClaimEntity claim = repository.findById(e.getClaimID()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimID()));
+        
+        
+        Event ev = new Event();
+        ev.type = e.getClass().getName();
+        ev.userId = e.getUserId();
+        ev.text = "Claims type udate " + claim.type + " to " + e.getType();
+        
+        claim.type = e.getType();
+        claim.addEvent(ev);
+        
+        repository.save(claim);
+    }
+    
+    @EventSourcingHandler
     public void on(ClaimsReserveUpdateEvent e) {
         ClaimEntity claim = repository.findById(e.getClaimID()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimID()));
         
@@ -106,6 +125,31 @@ public class ClaimsEventListener {
         claim.addEvent(ev);
         
         repository.save(claim);
+    }
+    
+    
+    @EventSourcingHandler
+    public void on(DataItemAddedEvent e) {
+    	log.info("DattaItemAddedEvent: " + e);
+    	ClaimEntity claim = repository.findById(e.getClaimsId()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
+
+    	DataItem d = new DataItem();
+    	d.id = e.getId();
+    	d.date = e.getDate();
+    	d.userId = e.getUserId();
+    	d.name = e.getName();
+    	d.recieved = e.getRecieved();
+    	d.title = e.getTitle();
+    	d.type = e.getType();
+    	claim.addDataItem(d);
+    	
+        Event ev = new Event();
+        ev.type = e.getClass().getName();
+        ev.userId = e.getUserId();
+        ev.text = "Data item added. " + d.name + ":" + (d.recieved?"":"not ") + "recieved ";
+        claim.addEvent(ev);
+        
+    	repository.save(claim);
     }
     
     @EventSourcingHandler

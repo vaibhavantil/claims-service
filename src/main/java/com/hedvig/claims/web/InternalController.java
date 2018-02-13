@@ -14,19 +14,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.events.NoteAddedEvent;
+import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.query.FileUploadRepository;
+import com.hedvig.claims.query.ResourceNotFoundException;
 import com.hedvig.claims.web.dto.FnolDTO;
 import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
 import com.hedvig.claims.web.dto.ClaimDTO;
+import com.hedvig.claims.web.dto.ClaimDataDTO;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import com.hedvig.claims.web.dto.ClaimType;
@@ -34,6 +39,7 @@ import com.hedvig.claims.web.dto.ClaimType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -58,6 +64,24 @@ public class InternalController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @RequestMapping(path = "/claim", method = RequestMethod.GET)
+    public ResponseEntity<?> getClaim(@RequestParam String claimID) {
+    	log.info("Getting claim with ID:" + claimID);
+        ClaimEntity claim = claimsRepository.findById(claimID).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
+        
+        return ResponseEntity.ok(claim);
+    }
+    
+    @RequestMapping(path = "/adddataitem", method = RequestMethod.POST)
+    public ResponseEntity<?> addDataItem(@RequestBody ClaimDataDTO data) {
+    	log.info("Adding data item:" + data.toString());
+        UUID uid = UUID.randomUUID();     
+        AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId, 
+        		data.type, data.name, data.title, data.recieved);
+    	commandBus.sendAndWait(command);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    
     @RequestMapping(path = "/addnote", method = RequestMethod.POST)
     public ResponseEntity<?> addNote(@RequestBody NoteDTO note) {
     	log.info("Adding claim note:" + note.toString());

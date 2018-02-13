@@ -12,13 +12,16 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
+import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
 
@@ -36,6 +39,7 @@ public class ClaimsAggregate {
     public ClaimStates state;
     public Double reserve;
 
+    public ArrayList<DataItem> data;
     public ArrayList<Payment> payments;
     public ArrayList<Note> notes;
     public ArrayList<String> assets;
@@ -54,6 +58,28 @@ public class ClaimsAggregate {
     public void update(UpdateClaimsStateCommand command) {
         log.info("update claim state");
         apply(new ClaimStatusUpdatedEvent(command.getClaimsId(), command.getUserId(), command.getRegistrationDate(), command.getState()));
+    }
+    
+    @CommandHandler
+    public void updateReserve(UpdateClaimsReserveCommand command) {
+        log.info("update claim reserve");
+        apply(new ClaimsReserveUpdateEvent(command.getClaimsId(), command.getRegistrationDate(), command.getUserId(), command.getAmount()));
+    }
+    
+    @CommandHandler
+    public void addDataItem(AddDataItemCommand command) {
+        log.info("adding data item to claim");
+        DataItemAddedEvent ne = new DataItemAddedEvent();
+        ne.setClaimsId(command.getClaimID());
+        ne.setDate(command.getDate());
+        ne.setId(command.getId());
+        ne.setUserId(command.getUserId());
+        
+        ne.setName(command.getName());
+        ne.setRecieved(command.getRecieved());
+        ne.setTitle(command.getTitle());
+        ne.setType(command.getType());
+        apply(ne);
     }
     
     @CommandHandler
@@ -109,6 +135,19 @@ public class ClaimsAggregate {
     @EventSourcingHandler
     public void on(ClaimsReserveUpdateEvent e) {
         this.reserve = e.amount;
+    }
+    
+    @EventSourcingHandler
+    public void on(DataItemAddedEvent e) {
+    	DataItem d = new DataItem();
+    	d.id = e.getId();
+    	d.date = e.getDate();
+    	d.userId = e.getUserId();
+    	d.name = e.getName();
+    	d.recieved = e.getRecieved();
+    	d.title = e.getTitle();
+    	d.type = e.getType();
+    	data.add(d);
     }
     
     @EventSourcingHandler

@@ -1,5 +1,6 @@
 package com.hedvig.claims.events;
 
+import lombok.Data;
 import lombok.Value;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 
@@ -8,13 +9,17 @@ import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Value
-public class ClaimsReserveUpdateEvent {
+@Data
+public class DataItemAddedEvent {
 
-	@AggregateIdentifier
-	public String claimID;
+	private String id;
+    private String claimsId;
 	public LocalDateTime date;
 	public String userId;
-	public Double amount;
 	
+	public DataType type;
+	public String name;
+	public String title;
+	public Boolean recieved;
+
 }

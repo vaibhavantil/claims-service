@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hedvig.claims.aggregates.Asset;
+import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 
@@ -35,6 +36,10 @@ public class ClaimEntity {
     
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name="claimsId")
+	public Set<DataItem> data;
+	
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name="claimsId")
 	public Set<Asset> assets;
 	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -48,6 +53,10 @@ public class ClaimEntity {
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name="claimsId")
 	public Set<Payment> payments;
+	
+	public void addDataItem(DataItem d){
+		data.add(d);
+	}
 	
 	public void addEvent(Event e){
 		events.add(e);
