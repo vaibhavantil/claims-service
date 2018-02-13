@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.hedvig.claims.audio.FfmpegClient;
-import com.hedvig.claims.audio.NuanceClient;
+//import com.hedvig.claims.audio.FfmpegClient;
+//import com.hedvig.claims.audio.NuanceClient;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.query.FileUploadRepository;
 import com.hedvig.claims.query.UploadFile;
@@ -62,10 +62,10 @@ public class ClaimsController {
     			File file = new File(destination);
     			fileUpload.get().transferTo(file);
     			
-    	        NuanceClient nc = new NuanceClient();
+    	        /*NuanceClient nc = new NuanceClient();
     	        FfmpegClient fc = new FfmpegClient();
     	        String pcmFile = fc.convertToPCM(destination);
-    	        nc.runDictation("C:\\Users\\John\\Documents\\test.pcm");
+    	        nc.runDictation("C:\\Users\\John\\Documents\\test.pcm");*/
     		}
             
         return "{id:"+uid+"}";
