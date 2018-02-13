@@ -45,9 +45,9 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     	for(Event e : c.events){ events.add(new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type));}
     }
     
-    public ClaimDTO(String id, String name, String audioURL, LocalDateTime registrationDate) {
+    public ClaimDTO(String id, String userId, String audioURL, LocalDateTime registrationDate) {
         this.id = id;
-        this.userId = name;
+        this.userId = userId;
         this.registrationDate = registrationDate;
         this.audioURL = audioURL;
     }

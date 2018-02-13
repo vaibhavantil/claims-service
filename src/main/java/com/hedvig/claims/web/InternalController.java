@@ -39,6 +39,7 @@ import com.hedvig.claims.web.dto.ClaimType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,12 +65,23 @@ public class InternalController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
+    public ResponseEntity<List<ClaimDTO>> getClaimsList() {
+    	log.info("Getting all claims:");
+    	ArrayList<ClaimDTO> claims = new ArrayList<ClaimDTO>();
+        for(ClaimEntity c : claimsRepository.findAll()){
+        	claims.add(new ClaimDTO(c.id, c.userId, c.audioURL, c.registrationDate));
+        }
+        
+        return ResponseEntity.ok(claims);
+    }
+    
     @RequestMapping(path = "/claim", method = RequestMethod.GET)
-    public ResponseEntity<?> getClaim(@RequestParam String claimID) {
+    public ResponseEntity<ClaimDTO> getClaim(@RequestParam String claimID) {
     	log.info("Getting claim with ID:" + claimID);
         ClaimEntity claim = claimsRepository.findById(claimID).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
-        
-        return ResponseEntity.ok(claim);
+        ClaimDTO cdto = new ClaimDTO(claim);
+        return ResponseEntity.ok(cdto);
     }
     
     @RequestMapping(path = "/adddataitem", method = RequestMethod.POST)
