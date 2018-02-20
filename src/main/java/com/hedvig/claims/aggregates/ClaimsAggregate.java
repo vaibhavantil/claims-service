@@ -5,25 +5,14 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import com.hedvig.claims.commands.*;
+import com.hedvig.claims.events.*;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hedvig.claims.commands.AddDataItemCommand;
-import com.hedvig.claims.commands.AddNoteCommand;
-import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
-import com.hedvig.claims.commands.UpdateClaimsStateCommand;
-import com.hedvig.claims.events.ClaimCreatedEvent;
-import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
-import com.hedvig.claims.events.DataItemAddedEvent;
-import com.hedvig.claims.events.NoteAddedEvent;
-import com.hedvig.claims.events.PaymentAddedEvent;
 
 @Aggregate
 public class ClaimsAggregate {
@@ -38,6 +27,7 @@ public class ClaimsAggregate {
     public LocalDateTime registrationDate;
     public ClaimStates state;
     public Double reserve;
+    public String type;
 
     public ArrayList<DataItem> data;
     public ArrayList<Payment> payments;
@@ -64,6 +54,12 @@ public class ClaimsAggregate {
     public void updateReserve(UpdateClaimsReserveCommand command) {
         log.info("update claim reserve");
         apply(new ClaimsReserveUpdateEvent(command.getClaimsId(), command.getRegistrationDate(), command.getUserId(), command.getAmount()));
+    }
+
+    @CommandHandler
+    public void updateType(UpdateClaimTypeCommand command) {
+        log.info("update claim type");
+        apply(new ClaimsTypeUpdateEvent(command.getClaimsId(), command.getRegistrationDate(), command.getUserId(), command.getType()));
     }
     
     @CommandHandler
@@ -124,7 +120,7 @@ public class ClaimsAggregate {
         this.notes = new ArrayList<Note>();
         this.payments = new ArrayList<Payment>();
         this.assets = new ArrayList<String>();
-        this.notes = new ArrayList<Note>();
+        this.data = new ArrayList<>();
     }
 
     @EventSourcingHandler
@@ -135,6 +131,11 @@ public class ClaimsAggregate {
     @EventSourcingHandler
     public void on(ClaimsReserveUpdateEvent e) {
         this.reserve = e.amount;
+    }
+
+    @EventSourcingHandler
+    public void on(ClaimsTypeUpdateEvent e) {
+        this.type = e.type;
     }
     
     @EventSourcingHandler

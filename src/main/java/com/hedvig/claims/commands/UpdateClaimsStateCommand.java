@@ -17,6 +17,7 @@ public class UpdateClaimsStateCommand {
 
 	private static Logger log = LoggerFactory.getLogger(UpdateClaimsStateCommand.class);
 
+	@TargetAggregateIdentifier
     public String claimsId;
     private String userId;
     private LocalDateTime registrationDate;

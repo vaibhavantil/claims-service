@@ -17,6 +17,7 @@ public class UpdateClaimsReserveCommand {
 
 	private static Logger log = LoggerFactory.getLogger(UpdateClaimsReserveCommand.class);
 
+	@TargetAggregateIdentifier
     public String claimsId;
     private String userId;
     private LocalDateTime registrationDate;

@@ -1,7 +1,13 @@
 package com.hedvig.claims.web;
 
+import com.hedvig.claims.commands.*;
+import com.hedvig.claims.query.ClaimEntity;
+import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.query.FileUploadRepository;
+import com.hedvig.claims.query.ResourceNotFoundException;
+import com.hedvig.claims.web.dto.*;
+import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import org.axonframework.commandhandling.CommandBus;
-import org.axonframework.commandhandling.callbacks.LoggingCallback;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.slf4j.Logger;
@@ -9,38 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.hedvig.claims.commands.AddDataItemCommand;
-import com.hedvig.claims.commands.AddNoteCommand;
-import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.UpdateClaimsStateCommand;
-import com.hedvig.claims.events.NoteAddedEvent;
-import com.hedvig.claims.query.ClaimEntity;
-import com.hedvig.claims.query.ClaimsRepository;
-import com.hedvig.claims.query.FileUploadRepository;
-import com.hedvig.claims.query.ResourceNotFoundException;
-import com.hedvig.claims.web.dto.FnolDTO;
-import com.hedvig.claims.web.dto.NoteDTO;
-import com.hedvig.claims.web.dto.PaymentDTO;
-import com.hedvig.claims.web.dto.ClaimDTO;
-import com.hedvig.claims.web.dto.ClaimDataDTO;
-import com.hedvig.claims.web.dto.ClaimDataType;
-import com.hedvig.claims.web.dto.ClaimDataType.DataType;
-import com.hedvig.claims.web.dto.ClaimType;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -85,11 +64,11 @@ public class InternalController {
     }
     
     @RequestMapping(path = "/adddataitem", method = RequestMethod.POST)
-    public ResponseEntity<?> addDataItem(@RequestBody ClaimDataDTO data) {
+    public ResponseEntity<?> addDataItem(@RequestBody DataItemDTO data) {
     	log.info("Adding data item:" + data.toString());
         UUID uid = UUID.randomUUID();     
         AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId, 
-        		data.type, data.name, data.title, data.recieved);
+        		data.type, data.name, data.title, data.received);
     	commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -111,6 +90,39 @@ public class InternalController {
         		payment.userId, payment.amount, payment.note, payment.payoutDate, payment.exGratia);
         
     	commandBus.sendAndWait(command);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @RequestMapping(path = "/updatereserve", method = RequestMethod.POST)
+    public ResponseEntity<?> updateReserve(@RequestBody ReserveDTO reserve) {
+        log.info("Updating claim reserve: " + reserve.toString());
+
+        UpdateClaimsReserveCommand command = new UpdateClaimsReserveCommand(reserve.claimID, reserve.userId,
+                LocalDateTime.now(), reserve.amount);
+
+        commandBus.sendAndWait(command);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @RequestMapping(path = "/updatestate", method = RequestMethod.POST)
+    public ResponseEntity<?> updateState(@RequestBody ClaimStateDTO state) {
+        log.info("Updating claim reserve: " + state.toString());
+
+        UpdateClaimsStateCommand command = new UpdateClaimsStateCommand(state.claimID, state.userId,
+                LocalDateTime.now(), state.state);
+
+        commandBus.sendAndWait(command);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @RequestMapping(path = "/updatetype", method = RequestMethod.POST)
+    public ResponseEntity<?> updateType(@RequestBody ClaimTypeDTO type) {
+        log.info("Updating claim reserve: " + type.toString());
+
+        UpdateClaimTypeCommand command = new UpdateClaimTypeCommand(type.claimID, type.userId,
+                LocalDateTime.now(), type.type);
+
+        commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     
