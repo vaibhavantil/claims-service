@@ -47,7 +47,7 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     	for(Payment p : c.payments){ payments.add(new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.note, p.payoutDate, p.exGratia));}    	
     	for(Note n : c.notes){ notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));}    	
     	for(Event e : c.events){ events.add(new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type));}
-    	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.recieved)); }
+    	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.recieved, d.value)); }
     }
     
     public ClaimDTO(String id, String userId, String audioURL, LocalDateTime registrationDate) {

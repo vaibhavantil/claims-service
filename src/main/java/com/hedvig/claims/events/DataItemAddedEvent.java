@@ -21,5 +21,6 @@ public class DataItemAddedEvent {
 	public String name;
 	public String title;
 	public Boolean recieved;
+	public String value;
 
 }

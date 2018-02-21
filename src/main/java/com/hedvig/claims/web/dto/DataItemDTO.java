@@ -10,10 +10,11 @@ public class DataItemDTO extends HedvigBackofficeDTO{
 	public String name;
 	public String title;
 	public Boolean received;
+	public String value;
 
 	public DataItemDTO() { }
 
-	public DataItemDTO(String id, String claimId, LocalDateTime date, String userId, DataType type, String name, String title, Boolean received) {
+	public DataItemDTO(String id, String claimId, LocalDateTime date, String userId, DataType type, String name, String title, Boolean received, String value) {
 		this.id = id;
 		this.claimID = claimId;
 		this.date = date;
@@ -22,6 +23,7 @@ public class DataItemDTO extends HedvigBackofficeDTO{
 		this.name = name;
 		this.title = title;
 		this.received = received;
+		this.value = value;
 	}
 
 }

@@ -68,7 +68,7 @@ public class InternalController {
     	log.info("Adding data item:" + data.toString());
         UUID uid = UUID.randomUUID();     
         AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId, 
-        		data.type, data.name, data.title, data.received);
+        		data.type, data.name, data.title, data.received, data.value);
     	commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

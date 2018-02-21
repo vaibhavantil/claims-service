@@ -129,6 +129,7 @@ public class ClaimsEventListener {
     	d.recieved = e.getRecieved();
     	d.title = e.getTitle();
     	d.type = e.getType();
+    	d.value= e.getValue();
     	claim.addDataItem(d);
     	
         Event ev = new Event();

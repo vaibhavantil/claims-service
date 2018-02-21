@@ -75,6 +75,8 @@ public class ClaimsAggregate {
         ne.setRecieved(command.getRecieved());
         ne.setTitle(command.getTitle());
         ne.setType(command.getType());
+        ne.setValue(command.getValue());
+
         apply(ne);
     }
     
@@ -148,6 +150,7 @@ public class ClaimsAggregate {
     	d.recieved = e.getRecieved();
     	d.title = e.getTitle();
     	d.type = e.getType();
+    	d.value = e.getValue();
     	data.add(d);
     }
     
