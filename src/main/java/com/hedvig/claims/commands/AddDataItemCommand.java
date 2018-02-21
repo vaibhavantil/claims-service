@@ -27,9 +27,10 @@ public class AddDataItemCommand {
 	public String name;
 	public String title;
 	public Boolean recieved;
+	public String value;
 
     public AddDataItemCommand(String id,String claimID, LocalDateTime date, String userId, 
-    		DataType type, String name, String title, Boolean recieved) {
+    		DataType type, String name, String title, Boolean recieved, String value) {
         log.info("InitiateClaimCommand");
     	this.id = id;
     	this.claimID = claimID;
@@ -40,6 +41,7 @@ public class AddDataItemCommand {
     	this.name = name;
     	this.title = title;
     	this.recieved = recieved;
+    	this.value = value;
         log.info(this.toString());
     } 
 }

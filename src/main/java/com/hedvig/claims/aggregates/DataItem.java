@@ -19,5 +19,6 @@ public class DataItem {
 	public String name;
 	public String title;
 	public Boolean recieved;
+	public String value;
 	
 }

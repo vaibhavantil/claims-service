@@ -1,10 +1,7 @@
 package com.hedvig.claims.query;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.UUID;
-
+import com.hedvig.claims.aggregates.*;
+import com.hedvig.claims.events.*;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.slf4j.Logger;
@@ -12,17 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.hedvig.claims.aggregates.Asset;
-import com.hedvig.claims.aggregates.DataItem;
-import com.hedvig.claims.aggregates.Note;
-import com.hedvig.claims.aggregates.Payment;
-import com.hedvig.claims.events.ClaimCreatedEvent;
-import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
-import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
-import com.hedvig.claims.events.DataItemAddedEvent;
-import com.hedvig.claims.events.NoteAddedEvent;
-import com.hedvig.claims.events.PaymentAddedEvent;
+import java.util.HashSet;
 
 @Component
 public class ClaimsEventListener {
@@ -43,6 +30,7 @@ public class ClaimsEventListener {
         claim.userId = e.getUserId();
         claim.registrationDate = e.getRegistrationDate();
         claim.audioURL = e.getAudioURL();
+        claim.state = ClaimsAggregate.ClaimStates.OPEN.name();
         
         // Init data structures
         claim.notes = new HashSet<Note>();
@@ -141,6 +129,7 @@ public class ClaimsEventListener {
     	d.recieved = e.getRecieved();
     	d.title = e.getTitle();
     	d.type = e.getType();
+    	d.value= e.getValue();
     	claim.addDataItem(d);
     	
         Event ev = new Event();

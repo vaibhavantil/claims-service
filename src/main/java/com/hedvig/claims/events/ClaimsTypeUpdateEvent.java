@@ -11,11 +11,10 @@ import java.time.LocalDateTime;
 @Value
 public class ClaimsTypeUpdateEvent {
 
-	public String id;
+	@AggregateIdentifier
 	public String claimID;
 	public LocalDateTime date;
 	public String userId;
-	
 	public String type;
 	
 }

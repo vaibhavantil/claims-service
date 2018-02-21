@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.hedvig.claims.aggregates.Asset;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
+import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 import com.hedvig.claims.query.ClaimEntity;
@@ -12,8 +13,6 @@ import com.hedvig.claims.query.Event;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
-import lombok.Value;
 
 public class ClaimDTO extends HedvigBackofficeDTO{
 
@@ -23,7 +22,10 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     public ArrayList<PaymentDTO> payments = new ArrayList<PaymentDTO>();
     public ArrayList<AssetDTO> assets = new ArrayList<AssetDTO>();
     public ArrayList<EventDTO> events = new ArrayList<EventDTO>();
+    public ArrayList<DataItemDTO> data = new ArrayList<>();
     public ClaimStates state;
+    public Double reserve;
+    public String type;
 
     @JsonDeserialize(using= LocalDateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss") //TODO: change date format
@@ -38,11 +40,14 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     	this.userId = c.userId;
     	this.state = ClaimStates.valueOf(c.state);
     	this.claimID = c.id;
-    	
+    	this.reserve = c.reserve;
+    	this.type = c.type;
+
     	for(Asset a : c.assets){ assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));}
     	for(Payment p : c.payments){ payments.add(new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.note, p.payoutDate, p.exGratia));}    	
     	for(Note n : c.notes){ notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));}    	
     	for(Event e : c.events){ events.add(new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type));}
+    	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.recieved, d.value)); }
     }
     
     public ClaimDTO(String id, String userId, String audioURL, LocalDateTime registrationDate) {
