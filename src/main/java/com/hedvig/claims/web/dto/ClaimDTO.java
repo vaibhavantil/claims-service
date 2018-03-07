@@ -1,8 +1,5 @@
 package com.hedvig.claims.web.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.hedvig.claims.aggregates.Asset;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
 import com.hedvig.claims.aggregates.DataItem;
@@ -27,10 +24,6 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     public Double reserve;
     public String type;
 
-    @JsonDeserialize(using= LocalDateDeserializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss") //TODO: change date format
-    public LocalDateTime registrationDate;
-
     public ClaimDTO(){}
     
     public ClaimDTO(ClaimEntity c){
@@ -50,10 +43,13 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.recieved, d.value)); }
     }
     
-    public ClaimDTO(String id, String userId, String audioURL, LocalDateTime registrationDate) {
+    public ClaimDTO(String id, String userId, String state, Double reserve, String type, String audioURL, LocalDateTime registrationDate) {
         this.id = id;
         this.userId = userId;
-        this.registrationDate = registrationDate;
+        this.state = ClaimStates.valueOf(state);
+        this.reserve = reserve;
+        this.type = type;
+        this.date = registrationDate;
         this.audioURL = audioURL;
     }
     
@@ -64,7 +60,7 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     public String toString(){
     	return "\nid:" + this.id + "\n"
     			+ "userId:" + this.userId + "\n"
-    			+ "registrationDate:" + this.registrationDate + "\n"
+    			+ "registrationDate:" + this.date + "\n"
     			+ "state:" + this.state.toString() + "\n"
     			+ "audioURL:" + this.audioURL;
     }
@@ -94,11 +90,11 @@ public class ClaimDTO extends HedvigBackofficeDTO{
 	}
 
 	public LocalDateTime getRegistrationDate() {
-		return registrationDate;
+		return date;
 	}
 
 	public void setRegistrationDate(LocalDateTime registrationDate) {
-		this.registrationDate = registrationDate;
+		this.date = registrationDate;
 	}
 
 }
