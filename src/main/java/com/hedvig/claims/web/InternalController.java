@@ -1,5 +1,6 @@
 package com.hedvig.claims.web;
 
+import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
@@ -18,9 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
@@ -49,12 +49,32 @@ public class InternalController {
     	log.info("Getting all claims:");
     	ArrayList<ClaimDTO> claims = new ArrayList<ClaimDTO>();
         for(ClaimEntity c : claimsRepository.findAll()){
-        	claims.add(new ClaimDTO(c.id, c.userId, c.audioURL, c.registrationDate));
+        	claims.add(new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate));
         }
         
         return ResponseEntity.ok(claims);
     }
-    
+
+    @RequestMapping(path = "/listclaims/{userId}", method = RequestMethod.GET)
+    public List<ClaimDTO> getClaimsByUserId(@PathVariable String userId) {
+        log.info("Getting claims for: {}", userId);
+        return claimsRepository
+                .findByUserId(userId)
+                .stream()
+                .map(c -> new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate))
+                .collect(Collectors.toList());
+    }
+
+    @RequestMapping(path = "/stat", method = RequestMethod.GET)
+    public Map<String,Long> getClaimsStatisticsByState() {
+        Map<String, Long> statistics = new HashMap<>();
+        for (ClaimsAggregate.ClaimStates state : ClaimsAggregate.ClaimStates.values()) {
+            statistics.put(state.name(), claimsRepository.countByState(state.name()));
+        }
+
+        return statistics;
+    }
+
     @RequestMapping(path = "/claim", method = RequestMethod.GET)
     public ResponseEntity<ClaimDTO> getClaim(@RequestParam String claimID) {
     	log.info("Getting claim with ID:" + claimID);
