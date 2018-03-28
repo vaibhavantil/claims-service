@@ -5,9 +5,6 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hedvig.claims.query.ClaimsEventListener;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Value
@@ -21,7 +18,7 @@ public class CreateClaimCommand {
     private LocalDateTime registrationDate;
     public String audioURL;
 
-    public CreateClaimCommand(String userId, String id, LocalDateTime registrationDate, String audioURL) {
+    public CreateClaimCommand(String id, String userId, LocalDateTime registrationDate, String audioURL) {
         log.info("InitiateClaimCommand");
         this.id = id;
         this.userId = userId;

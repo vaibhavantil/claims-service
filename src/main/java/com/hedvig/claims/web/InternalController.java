@@ -36,11 +36,11 @@ public class InternalController {
         this.claimsRepository = repository;
     }
     
-    @RequestMapping(path = "/claim", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateClaim(@RequestBody FnolDTO fnol) {
-    	log.info("Claim FNOL recieved!:" + fnol.toString());
+    @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
+    public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
+    	log.info("Claim recieved!:" + requestData.toString());
         UUID uid = UUID.randomUUID();
-    	commandBus.sendAndWait(new CreateClaimCommand(fnol.getUserId(),uid.toString(), LocalDateTime.now(), fnol.getAudioURL()));
+    	commandBus.sendAndWait(new CreateClaimCommand(uid.toString(), requestData.getUserId(), LocalDateTime.now(), requestData.getAudioURL()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
