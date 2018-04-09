@@ -44,7 +44,7 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     	for(Note n : c.notes){ notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));}
 
     	events = c.events.stream().
-				sorted(Comparator.comparing(event -> event.date)).
+				sorted(Comparator.comparing((Event event) -> event.date).reversed()).
 						map( e -> new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type)).
 						collect(Collectors.toList());
 
