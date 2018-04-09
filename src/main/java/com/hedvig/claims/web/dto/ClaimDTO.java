@@ -10,6 +10,9 @@ import com.hedvig.claims.query.Event;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClaimDTO extends HedvigBackofficeDTO{
 
@@ -18,7 +21,7 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     public ArrayList<NoteDTO> notes = new ArrayList<NoteDTO>();
     public ArrayList<PaymentDTO> payments = new ArrayList<PaymentDTO>();
     public ArrayList<AssetDTO> assets = new ArrayList<AssetDTO>();
-    public ArrayList<EventDTO> events = new ArrayList<EventDTO>();
+    public List<EventDTO> events = new ArrayList<EventDTO>();
     public ArrayList<DataItemDTO> data = new ArrayList<>();
     public ClaimStates state;
     public Double reserve;
@@ -38,8 +41,14 @@ public class ClaimDTO extends HedvigBackofficeDTO{
 
     	for(Asset a : c.assets){ assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));}
     	for(Payment p : c.payments){ payments.add(new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.note, p.payoutDate, p.exGratia));}    	
-    	for(Note n : c.notes){ notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));}    	
-    	for(Event e : c.events){ events.add(new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type));}
+    	for(Note n : c.notes){ notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));}
+
+    	events = c.events.stream().
+				sorted(Comparator.comparing(event -> event.date)).
+						map( e -> new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type)).
+						collect(Collectors.toList());
+
+
     	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.recieved, d.value)); }
     }
     
