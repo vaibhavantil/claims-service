@@ -1,11 +1,12 @@
 package com.hedvig.claims.commands;
 
-import lombok.Value;
+import java.time.Instant;
+
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
+import lombok.Value;
 
 @Value
 public class UpdateClaimTypeCommand {
@@ -15,10 +16,10 @@ public class UpdateClaimTypeCommand {
     @TargetAggregateIdentifier
     private String claimsId;
     private String userId;
-    private LocalDateTime registrationDate;
+    private Instant registrationDate;
     private String type;
 
-    public UpdateClaimTypeCommand(String claimsId, String userId, LocalDateTime registrationDate, String type) {
+    public UpdateClaimTypeCommand(String claimsId, String userId, Instant registrationDate, String type) {
         log.info("UpdateClaimTypeCommand. " + userId + " setting claim with id " + claimsId + " to: " + type);
         this.claimsId = claimsId;
         this.userId = userId;

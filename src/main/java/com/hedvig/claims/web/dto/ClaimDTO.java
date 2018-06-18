@@ -1,5 +1,11 @@
 package com.hedvig.claims.web.dto;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.hedvig.claims.aggregates.Asset;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
 import com.hedvig.claims.aggregates.DataItem;
@@ -7,12 +13,6 @@ import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.Event;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ClaimDTO extends HedvigBackofficeDTO{
 
@@ -52,7 +52,7 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.recieved, d.value)); }
     }
     
-    public ClaimDTO(String id, String userId, String state, Double reserve, String type, String audioURL, LocalDateTime registrationDate) {
+    public ClaimDTO(String id, String userId, String state, Double reserve, String type, String audioURL, Instant registrationDate) {
         this.id = id;
         this.userId = userId;
         this.state = ClaimStates.valueOf(state);
@@ -98,11 +98,11 @@ public class ClaimDTO extends HedvigBackofficeDTO{
 		this.audioURL = audioURL;
 	}
 
-	public LocalDateTime getRegistrationDate() {
+	public Instant getRegistrationDate() {
 		return date;
 	}
 
-	public void setRegistrationDate(LocalDateTime registrationDate) {
+	public void setRegistrationDate(Instant registrationDate) {
 		this.date = registrationDate;
 	}
 

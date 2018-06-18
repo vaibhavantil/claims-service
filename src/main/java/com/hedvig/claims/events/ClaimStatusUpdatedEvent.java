@@ -1,12 +1,12 @@
 package com.hedvig.claims.events;
 
-import lombok.Value;
+import java.time.Instant;
+
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import lombok.Value;
 
 @Value
 public class ClaimStatusUpdatedEvent {
@@ -14,7 +14,7 @@ public class ClaimStatusUpdatedEvent {
 	@AggregateIdentifier
     private String claimsId;
 	private String userId;
-    private LocalDateTime registrationDate;
+    private Instant registrationDate;
     private ClaimStates state;
 
 }

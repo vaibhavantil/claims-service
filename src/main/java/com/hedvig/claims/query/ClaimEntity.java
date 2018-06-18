@@ -1,9 +1,7 @@
 package com.hedvig.claims.query;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -29,7 +27,7 @@ public class ClaimEntity {
     public String id;
     public String userId;
     public String audioURL;
-    public LocalDateTime registrationDate;
+    public Instant registrationDate;
     public String state;
     public String type;
     public Double reserve; 

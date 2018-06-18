@@ -1,6 +1,6 @@
 package com.hedvig.claims.web.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class AssetDTO extends HedvigBackofficeDTO{
 	
@@ -8,7 +8,7 @@ public class AssetDTO extends HedvigBackofficeDTO{
 	
 	public AssetDTO(){}
 	
-	public AssetDTO(String assetId, String claimsId, LocalDateTime registrationDate, String userId){
+	public AssetDTO(String assetId, String claimsId, Instant registrationDate, String userId){
 		this.assetId = assetId;
 		this.id = claimsId;
 		this.date = registrationDate;

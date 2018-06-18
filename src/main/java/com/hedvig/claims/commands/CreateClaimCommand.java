@@ -5,7 +5,7 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Value
 public class CreateClaimCommand {
@@ -15,10 +15,10 @@ public class CreateClaimCommand {
     @TargetAggregateIdentifier
     public String id;
     public String userId;
-    private LocalDateTime registrationDate;
+    private Instant registrationDate;
     public String audioURL;
 
-    public CreateClaimCommand(String id, String userId, LocalDateTime registrationDate, String audioURL) {
+    public CreateClaimCommand(String id, String userId, Instant registrationDate, String audioURL) {
         log.info("InitiateClaimCommand");
         this.id = id;
         this.userId = userId;

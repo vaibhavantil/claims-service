@@ -2,7 +2,7 @@ package com.hedvig.claims.aggregates;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 
 import com.hedvig.claims.commands.*;
@@ -24,7 +24,7 @@ public class ClaimsAggregate {
     public String id;
     public String userId;
     public String audioURL;
-    public LocalDateTime registrationDate;
+    public Instant registrationDate;
     public ClaimStates state;
     public Double reserve;
     public String type;

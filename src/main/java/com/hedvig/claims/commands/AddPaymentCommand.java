@@ -1,14 +1,12 @@
 package com.hedvig.claims.commands;
 
-import lombok.Value;
+import java.time.Instant;
+
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hedvig.claims.query.ClaimsEventListener;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import lombok.Value;
 
 @Value
 public class AddPaymentCommand {
@@ -18,12 +16,12 @@ public class AddPaymentCommand {
 	public String id;
 	@TargetAggregateIdentifier
 	public String claimID;
-	public LocalDateTime date;
+	public Instant date;
 	public String userId;
 	
 	public Double amount;
 	public String note;
-	public LocalDateTime payoutDate;
+	public Instant payoutDate;
 	public Boolean exGratia;
 
 }

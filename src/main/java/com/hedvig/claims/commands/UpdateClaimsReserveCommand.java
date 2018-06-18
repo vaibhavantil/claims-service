@@ -1,16 +1,12 @@
 package com.hedvig.claims.commands;
 
-import lombok.Value;
+import java.time.Instant;
+
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
-import com.hedvig.claims.query.ClaimsEventListener;
-import com.hedvig.claims.web.dto.ClaimDTO;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import lombok.Value;
 
 @Value
 public class UpdateClaimsReserveCommand {
@@ -20,10 +16,10 @@ public class UpdateClaimsReserveCommand {
 	@TargetAggregateIdentifier
     public String claimsId;
     private String userId;
-    private LocalDateTime registrationDate;
+    private Instant registrationDate;
     private Double amount;
 
-    public UpdateClaimsReserveCommand(String claimsId, String userId, LocalDateTime registrationDate, Double amount) {
+    public UpdateClaimsReserveCommand(String claimsId, String userId, Instant registrationDate, Double amount) {
         log.info("UpdateClaimsReserveCommand. " + userId + " setting claim with id " + claimsId + " to:" + amount);
         this.claimsId = claimsId;
         this.userId = userId;

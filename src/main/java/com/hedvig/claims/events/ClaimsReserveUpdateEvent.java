@@ -1,19 +1,17 @@
 package com.hedvig.claims.events;
 
-import lombok.Value;
+import java.time.Instant;
+
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 
-import com.hedvig.claims.web.dto.ClaimDataType.DataType;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import lombok.Value;
 
 @Value
 public class ClaimsReserveUpdateEvent {
 
 	@AggregateIdentifier
 	public String claimID;
-	public LocalDateTime date;
+	public Instant date;
 	public String userId;
 	public Double amount;
 	

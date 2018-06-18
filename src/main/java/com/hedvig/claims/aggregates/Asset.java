@@ -1,6 +1,6 @@
 package com.hedvig.claims.aggregates;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,7 +10,7 @@ public class Asset {
 	
 	@Id
 	public String id;
-	public LocalDateTime date;
+	public Instant date;
 	public String userId;
 	
 }

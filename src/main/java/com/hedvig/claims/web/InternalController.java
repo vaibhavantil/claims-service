@@ -1,13 +1,13 @@
 package com.hedvig.claims.web;
 
-import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.commands.*;
-import com.hedvig.claims.query.ClaimEntity;
-import com.hedvig.claims.query.ClaimsRepository;
-import com.hedvig.claims.query.FileUploadRepository;
-import com.hedvig.claims.query.ResourceNotFoundException;
-import com.hedvig.claims.web.dto.*;
-import com.hedvig.claims.web.dto.ClaimDataType.DataType;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -16,11 +16,36 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.hedvig.claims.aggregates.ClaimsAggregate;
+import com.hedvig.claims.commands.AddDataItemCommand;
+import com.hedvig.claims.commands.AddNoteCommand;
+import com.hedvig.claims.commands.AddPaymentCommand;
+import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.UpdateClaimTypeCommand;
+import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
+import com.hedvig.claims.commands.UpdateClaimsStateCommand;
+import com.hedvig.claims.query.ClaimEntity;
+import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.query.FileUploadRepository;
+import com.hedvig.claims.query.ResourceNotFoundException;
+import com.hedvig.claims.web.dto.ClaimDTO;
+import com.hedvig.claims.web.dto.ClaimDataType;
+import com.hedvig.claims.web.dto.ClaimDataType.DataType;
+import com.hedvig.claims.web.dto.ClaimStateDTO;
+import com.hedvig.claims.web.dto.ClaimType;
+import com.hedvig.claims.web.dto.ClaimTypeDTO;
+import com.hedvig.claims.web.dto.DataItemDTO;
+import com.hedvig.claims.web.dto.NoteDTO;
+import com.hedvig.claims.web.dto.PaymentDTO;
+import com.hedvig.claims.web.dto.ReserveDTO;
+import com.hedvig.claims.web.dto.StartClaimAudioDTO;
 
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
@@ -40,7 +65,7 @@ public class InternalController {
     public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
     	log.info("Claim recieved!:" + requestData.toString());
         UUID uid = UUID.randomUUID();
-    	commandBus.sendAndWait(new CreateClaimCommand(uid.toString(), requestData.getUserId(), LocalDateTime.now(), requestData.getAudioURL()));
+    	commandBus.sendAndWait(new CreateClaimCommand(uid.toString(), requestData.getUserId(), Instant.now(), requestData.getAudioURL()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -87,7 +112,7 @@ public class InternalController {
     public ResponseEntity<?> addDataItem(@RequestBody DataItemDTO data) {
     	log.info("Adding data item:" + data.toString());
         UUID uid = UUID.randomUUID();     
-        AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId, 
+        AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, Instant.now(), data.userId, 
         		data.type, data.name, data.title, data.received, data.value);
     	commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -97,7 +122,7 @@ public class InternalController {
     public ResponseEntity<?> addNote(@RequestBody NoteDTO note) {
     	log.info("Adding claim note:" + note.toString());
         UUID uid = UUID.randomUUID();     
-        AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, LocalDateTime.now(), note.text, note.userId, note.fileURL);
+        AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, Instant.now(), note.text, note.userId, note.fileURL);
     	commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -106,7 +131,7 @@ public class InternalController {
     public ResponseEntity<?> addPayment(@RequestBody PaymentDTO payment) {
     	log.info("Adding payment note:" + payment.toString());
         UUID uid = UUID.randomUUID();     
-        AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID, LocalDateTime.now(), 
+        AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID, Instant.now(), 
         		payment.userId, payment.amount, payment.note, payment.payoutDate, payment.exGratia);
         
     	commandBus.sendAndWait(command);
@@ -118,7 +143,7 @@ public class InternalController {
         log.info("Updating claim reserve: " + reserve.toString());
 
         UpdateClaimsReserveCommand command = new UpdateClaimsReserveCommand(reserve.claimID, reserve.userId,
-                LocalDateTime.now(), reserve.amount);
+                Instant.now(), reserve.amount);
 
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -129,7 +154,7 @@ public class InternalController {
         log.info("Updating claim reserve: " + state.toString());
 
         UpdateClaimsStateCommand command = new UpdateClaimsStateCommand(state.claimID, state.userId,
-                LocalDateTime.now(), state.state);
+                Instant.now(), state.state);
 
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -140,7 +165,7 @@ public class InternalController {
         log.info("Updating claim reserve: " + type.toString());
 
         UpdateClaimTypeCommand command = new UpdateClaimTypeCommand(type.claimID, type.userId,
-                LocalDateTime.now(), type.type);
+                Instant.now(), type.type);
 
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

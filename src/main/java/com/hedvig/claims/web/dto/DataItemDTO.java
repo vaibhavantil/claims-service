@@ -2,7 +2,7 @@ package com.hedvig.claims.web.dto;
 
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class DataItemDTO extends HedvigBackofficeDTO{
 
@@ -14,7 +14,7 @@ public class DataItemDTO extends HedvigBackofficeDTO{
 
 	public DataItemDTO() { }
 
-	public DataItemDTO(String id, String claimId, LocalDateTime date, String userId, DataType type, String name, String title, Boolean received, String value) {
+	public DataItemDTO(String id, String claimId, Instant date, String userId, DataType type, String name, String title, Boolean received, String value) {
 		this.id = id;
 		this.claimID = claimId;
 		this.date = date;

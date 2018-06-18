@@ -1,15 +1,14 @@
 package com.hedvig.claims.commands;
 
-import lombok.Value;
+import java.time.Instant;
+
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hedvig.claims.query.ClaimsEventListener;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import lombok.Value;
 
 @Value
 public class AddDataItemCommand {
@@ -20,7 +19,7 @@ public class AddDataItemCommand {
 	
 	@TargetAggregateIdentifier
 	public String claimID;
-	public LocalDateTime date;
+	public Instant date;
 	public String userId;
 	
 	public DataType type;
@@ -29,7 +28,7 @@ public class AddDataItemCommand {
 	public Boolean recieved;
 	public String value;
 
-    public AddDataItemCommand(String id,String claimID, LocalDateTime date, String userId, 
+    public AddDataItemCommand(String id,String claimID, Instant date, String userId, 
     		DataType type, String name, String title, Boolean recieved, String value) {
         log.info("InitiateClaimCommand");
     	this.id = id;

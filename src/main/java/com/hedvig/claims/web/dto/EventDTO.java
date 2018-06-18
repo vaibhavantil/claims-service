@@ -1,6 +1,6 @@
 package com.hedvig.claims.web.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class EventDTO extends HedvigBackofficeDTO{
 	
@@ -9,7 +9,7 @@ public class EventDTO extends HedvigBackofficeDTO{
 	
 	public EventDTO(){}
 	
-	public EventDTO(String noteId, String claimsId, LocalDateTime registrationDate, String userId,
+	public EventDTO(String noteId, String claimsId, Instant registrationDate, String userId,
 			String text, String typ){
 		this.id = noteId;
 		this.claimID = claimsId;
