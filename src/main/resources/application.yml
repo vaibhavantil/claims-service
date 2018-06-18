@@ -45,7 +45,7 @@ spring:
 
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/product-pricing
+    url: jdbc:postgresql://localhost:5432/claim-service
     username: postgres
     password: iambatman
     platform: POSTGRESQL

@@ -17,11 +17,12 @@ import org.slf4j.LoggerFactory;
 @Aggregate
 public class ClaimsAggregate {
 
-	private static Logger log = LoggerFactory.getLogger(ClaimsAggregate.class);
-	public static enum ClaimStates {OPEN, CLOSED, REOPENED};
+    private static Logger log = LoggerFactory.getLogger(ClaimsAggregate.class);
+    public static enum ClaimStates {OPEN, CLOSED, REOPENED};
 
     @AggregateIdentifier
     public String id;
+
     public String userId;
     public String audioURL;
     public Instant registrationDate;
@@ -72,7 +73,7 @@ public class ClaimsAggregate {
         ne.setUserId(command.getUserId());
         
         ne.setName(command.getName());
-        ne.setRecieved(command.getRecieved());
+        ne.setReceived(command.getReceived());
         ne.setTitle(command.getTitle());
         ne.setType(command.getType());
         ne.setValue(command.getValue());
@@ -142,34 +143,34 @@ public class ClaimsAggregate {
     
     @EventSourcingHandler
     public void on(DataItemAddedEvent e) {
-    	DataItem d = new DataItem();
-    	d.id = e.getId();
-    	d.date = e.getDate();
-    	d.userId = e.getUserId();
-    	d.name = e.getName();
-    	d.recieved = e.getRecieved();
-    	d.title = e.getTitle();
-    	d.type = e.getType();
-    	d.value = e.getValue();
-    	data.add(d);
+        DataItem d = new DataItem();
+        d.id = e.getId();
+        d.date = e.getDate();
+        d.userId = e.getUserId();
+        d.name = e.getName();
+        d.received = e.getReceived();
+        d.title = e.getTitle();
+        d.type = e.getType();
+        d.value = e.getValue();
+        data.add(d);
     }
     
     @EventSourcingHandler
     public void on(PaymentAddedEvent e) {
-    	Payment p = new Payment();
-    	p.id = e.getId();
-    	p.date = e.getDate();
-    	p.userId = e.getUserId();
-    	p.amount = e.getAmount();
-    	p.payoutDate = e.getPayoutDate();
-    	p.note = e.getNote();
-    	p.exGratia = e.getExGratia();
-    	payments.add(p);
+        Payment p = new Payment();
+        p.id = e.getId();
+        p.date = e.getDate();
+        p.userId = e.getUserId();
+        p.amount = e.getAmount();
+        p.payoutDate = e.getPayoutDate();
+        p.note = e.getNote();
+        p.exGratia = e.getExGratia();
+        payments.add(p);
     }
     
     @EventSourcingHandler
     public void on(NoteAddedEvent e) {
-    	Note n = new Note();
+        Note n = new Note();
         n.id = e.getId();
         n.fileURL = e.getFileURL();
         n.text = e.getText();
