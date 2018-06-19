@@ -8,10 +8,10 @@ import javax.persistence.Id;
 public class Note {
 	
 	@Id
-	public String memberId;
+	public String id;
 	public Instant date;
 	public String text;
-	public String userId;
+	public String memberId;
 	public String fileURL;
 	
 }
