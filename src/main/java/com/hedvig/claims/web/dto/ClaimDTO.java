@@ -41,7 +41,7 @@ public class ClaimDTO extends HedvigBackofficeDTO{
 
     	for(Asset a : c.assets){ assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));}
     	for(Payment p : c.payments){ payments.add(new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.note, p.payoutDate, p.exGratia));}    	
-    	for(Note n : c.notes){ notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));}
+    	for(Note n : c.notes){ notes.add(new NoteDTO(n.memberId, c.id, n.date, n.userId, n.text, n.fileURL));}
 
     	events = c.events.stream().
 				sorted(Comparator.comparing((Event event) -> event.date).reversed()).

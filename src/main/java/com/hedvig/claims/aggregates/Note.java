@@ -8,7 +8,7 @@ import javax.persistence.Id;
 public class Note {
 	
 	@Id
-	public String id;
+	public String memberId;
 	public Instant date;
 	public String text;
 	public String userId;
