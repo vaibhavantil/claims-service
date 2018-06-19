@@ -52,7 +52,7 @@ public class ClaimsEventListener {
         log.info("NoteAddedEvent: " + e);
         ClaimEntity claim = repository.findById(e.getClaimsId()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
         Note n = new Note();
-        n.memberId = e.getId();
+        n.id = e.getId();
         n.date = e.getDate();
         n.fileURL = e.getFileURL();
         n.text = e.getText();
