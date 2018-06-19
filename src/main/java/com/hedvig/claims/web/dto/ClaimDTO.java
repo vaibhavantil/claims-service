@@ -30,7 +30,6 @@ public class ClaimDTO extends HedvigBackofficeDTO{
     public ClaimDTO(){}
     
     public ClaimDTO(ClaimEntity c){
-<<<<<<< HEAD
     	this.id = c.id;
     	this.date = c.registrationDate;
     	this.audioURL = c.audioURL;
@@ -50,29 +49,7 @@ public class ClaimDTO extends HedvigBackofficeDTO{
 						collect(Collectors.toList());
 
 
-    	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.recieved, d.value)); }
-=======
-        this.id = c.id;
-        this.date = c.registrationDate;
-        this.audioURL = c.audioURL;
-        this.userId = c.userId;
-        this.state = ClaimStates.valueOf(c.state);
-        this.claimID = c.id;
-        this.reserve = c.reserve;
-        this.type = c.type;
-
-        for(Asset a : c.assets){ assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));}
-        for(Payment p : c.payments){ payments.add(new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.note, p.payoutDate, p.exGratia));}
-        for(Note n : c.notes){ notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));}
-
-        events = c.events.stream().
-                sorted(Comparator.comparing((Event event) -> event.date).reversed()).
-                        map( e -> new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type)).
-                        collect(Collectors.toList());
-
-
-        for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.received, d.value)); }
->>>>>>> 6fbc030c4ad7e14e9de4ae2f8bd4bd6c15e802ef
+    	for(DataItem d : c.data) { data.add(new DataItemDTO(d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.received, d.value)); }
     }
     
     public ClaimDTO(String id, String userId, String state, Double reserve, String type, String audioURL, Instant registrationDate) {
