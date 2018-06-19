@@ -14,7 +14,7 @@ import java.util.HashSet;
 @Component
 public class ClaimsEventListener {
 
-	private static Logger log = LoggerFactory.getLogger(ClaimsEventListener.class);
+    private static Logger log = LoggerFactory.getLogger(ClaimsEventListener.class);
     private final ClaimsRepository repository;
 
     @Autowired
@@ -91,7 +91,7 @@ public class ClaimsEventListener {
         Event ev = new Event();
         ev.type = e.getClass().getName();
         ev.userId = e.getUserId();
-        ev.text = "Claims type udate " + claim.type + " to " + e.getType();
+        ev.text = "Claim's type " +  (claim.type == null ? "initialised as " : ("updated from " + claim.type  + " to ")) + e.getType();
         
         claim.type = e.getType();
         claim.addEvent(ev);
@@ -118,49 +118,49 @@ public class ClaimsEventListener {
     
     @EventSourcingHandler
     public void on(DataItemAddedEvent e) {
-    	log.info("DattaItemAddedEvent: " + e);
-    	ClaimEntity claim = repository.findById(e.getClaimsId()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
+        log.info("DattaItemAddedEvent: " + e);
+        ClaimEntity claim = repository.findById(e.getClaimsId()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
 
-    	DataItem d = new DataItem();
-    	d.id = e.getId();
-    	d.date = e.getDate();
-    	d.userId = e.getUserId();
-    	d.name = e.getName();
-    	d.recieved = e.getRecieved();
-    	d.title = e.getTitle();
-    	d.type = e.getType();
-    	d.value= e.getValue();
-    	claim.addDataItem(d);
-    	
+        DataItem d = new DataItem();
+        d.id = e.getId();
+        d.date = e.getDate();
+        d.userId = e.getUserId();
+        d.name = e.getName();
+        d.received = e.getReceived();
+        d.title = e.getTitle();
+        d.type = e.getType();
+        d.value= e.getValue();
+        claim.addDataItem(d);
+
         Event ev = new Event();
         ev.type = e.getClass().getName();
         ev.userId = e.getUserId();
-        ev.text = "Data item added. " + d.name + ":" + (d.recieved?"":"not ") + "recieved ";
+        ev.text = "Data item added. " + d.name + ":" + (d.received?"":"not ") + "received ";
         claim.addEvent(ev);
         
-    	repository.save(claim);
+        repository.save(claim);
     }
     
     @EventSourcingHandler
     public void on(PaymentAddedEvent e) {
-    	log.info("PaymentAddedEvent: " + e);
-    	ClaimEntity claim = repository.findById(e.getClaimsId()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
-    	Payment p = new Payment();
-    	p.id = e.getId();
-    	p.date = e.getDate();
-    	p.userId = e.getUserId();
-    	p.amount = e.getAmount();
-    	p.payoutDate = e.getPayoutDate();
-    	p.note = e.getNote();
-    	p.exGratia = e.getExGratia();
-    	claim.addPayment(p);
-    	
+        log.info("PaymentAddedEvent: " + e);
+        ClaimEntity claim = repository.findById(e.getClaimsId()).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
+        Payment p = new Payment();
+        p.id = e.getId();
+        p.date = e.getDate();
+        p.userId = e.getUserId();
+        p.amount = e.getAmount();
+        p.payoutDate = e.getPayoutDate();
+        p.note = e.getNote();
+        p.exGratia = e.getExGratia();
+        claim.addPayment(p);
+
         Event ev = new Event();
         ev.type = e.getClass().getName();
         ev.userId = e.getUserId();
         ev.text = "Payment added. Amount " + p.amount + " with payout date " + p.payoutDate;
         claim.addEvent(ev);
         
-    	repository.save(claim);
+        repository.save(claim);
     }
 }
