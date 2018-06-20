@@ -170,16 +170,12 @@ public class ClaimsAggregate {
     
     @EventSourcingHandler
     public void on(NoteAddedEvent e) {
-<<<<<<< .merge_file_a21272
-    	Note n = new Note();
-        n.memberId = e.getId();
-=======
         Note n = new Note();
         n.id = e.getId();
->>>>>>> .merge_file_a59792
+
         n.fileURL = e.getFileURL();
         n.text = e.getText();
-        n.userId = e.getUserId();
+        n.memberId = e.getUserId();
         n.date = e.getDate();
         notes.add(n);
     }
