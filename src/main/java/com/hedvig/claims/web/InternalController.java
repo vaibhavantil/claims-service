@@ -39,9 +39,9 @@ public class InternalController {
     
     @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
     public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
-    	log.info("Claim recieved!:" + requestData.toString());
+        log.info("Claim recieved!:" + requestData.toString());
         UUID uid = UUID.randomUUID();
-    	commandBus.sendAndWait(new CreateClaimCommand(uid.toString(), requestData.getUserId(), LocalDateTime.now(), requestData.getAudioURL()));
+        commandBus.sendAndWait(new CreateClaimCommand(uid.toString(), requestData.getUserId(), LocalDateTime.now(), requestData.getAudioURL()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -50,7 +50,7 @@ public class InternalController {
     	log.info("Getting all claims:");
     	ArrayList<ClaimDTO> claims = new ArrayList<>();
         for(ClaimEntity c : claimsRepository.findAll()){
-        	claims.add(new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate));
+            claims.add(new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate));
         }
         
         return ResponseEntity.ok(claims);
@@ -90,7 +90,7 @@ public class InternalController {
 
     @RequestMapping(path = "/claim", method = RequestMethod.GET)
     public ResponseEntity<ClaimDTO> getClaim(@RequestParam String claimID) {
-    	log.info("Getting claim with ID:" + claimID);
+        log.info("Getting claim with ID:" + claimID);
         ClaimEntity claim = claimsRepository.findById(claimID).orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
         ClaimDTO cdto = new ClaimDTO(claim);
         return ResponseEntity.ok(cdto);
@@ -98,31 +98,31 @@ public class InternalController {
     
     @RequestMapping(path = "/adddataitem", method = RequestMethod.POST)
     public ResponseEntity<?> addDataItem(@RequestBody DataItemDTO data) {
-    	log.info("Adding data item:" + data.toString());
+        log.info("Adding data item:" + data.toString());
         UUID uid = UUID.randomUUID();     
-        AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId, 
-        		data.type, data.name, data.title, data.received, data.value);
-    	commandBus.sendAndWait(command);
+        AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId,
+                data.type, data.name, data.title, data.received, data.value);
+        commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     
     @RequestMapping(path = "/addnote", method = RequestMethod.POST)
     public ResponseEntity<?> addNote(@RequestBody NoteDTO note) {
-    	log.info("Adding claim note:" + note.toString());
+        log.info("Adding claim note:" + note.toString());
         UUID uid = UUID.randomUUID();     
         AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, LocalDateTime.now(), note.text, note.userId, note.fileURL);
-    	commandBus.sendAndWait(command);
+        commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     
     @RequestMapping(path = "/addpayment", method = RequestMethod.POST)
     public ResponseEntity<?> addPayment(@RequestBody PaymentDTO payment) {
-    	log.info("Adding payment note:" + payment.toString());
+        log.info("Adding payment note:" + payment.toString());
         UUID uid = UUID.randomUUID();     
         AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID, LocalDateTime.now(), 
-        		payment.userId, payment.amount, payment.note, payment.payoutDate, payment.exGratia);
+                payment.userId, payment.amount, payment.note, payment.payoutDate, payment.exGratia);
         
-    	commandBus.sendAndWait(command);
+        commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
