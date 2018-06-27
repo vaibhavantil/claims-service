@@ -4,7 +4,6 @@ import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
-import com.hedvig.claims.query.FileUploadRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
 import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
@@ -33,7 +32,7 @@ public class InternalController {
     private final CommandGateway commandBus;
     
     @Autowired
-    public InternalController(CommandBus commandBus, ClaimsRepository repository, FileUploadRepository filerepo) {
+    public InternalController(CommandBus commandBus, ClaimsRepository repository) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.claimsRepository = repository;
     }
@@ -49,7 +48,7 @@ public class InternalController {
     @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
     public ResponseEntity<List<ClaimDTO>> getClaimsList() {
     	log.info("Getting all claims:");
-    	ArrayList<ClaimDTO> claims = new ArrayList<ClaimDTO>();
+    	ArrayList<ClaimDTO> claims = new ArrayList<>();
         for(ClaimEntity c : claimsRepository.findAll()){
         	claims.add(new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate));
         }
@@ -163,7 +162,7 @@ public class InternalController {
     @RequestMapping(path = "claimTypes", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<ClaimType>> claimTypes() {
 
-        ArrayList<ClaimType> claimTypes = new ArrayList<ClaimType>();
+        ArrayList<ClaimType> claimTypes = new ArrayList<>();
         
         ClaimDataType c11 = new ClaimDataType(DataType.DATE,"DATE","Datum");
         ClaimDataType c12 = new ClaimDataType(DataType.TEXT,"PLACE","Plats");
