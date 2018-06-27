@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
+
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
 public class InternalController {
@@ -63,6 +65,18 @@ public class InternalController {
                 .stream()
                 .map(c -> new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate))
                 .collect(Collectors.toList());
+    }
+
+    @RequestMapping(path = "/activeClaims/{userId}", method = RequestMethod.GET)
+    public ActiveClaimsDTO getActiveClaims(@PathVariable String userId) {
+        log.info("Getting active claim status for member: {}", userId);
+
+        Long activeClaims = claimsRepository
+                .findByUserId(userId)
+                .stream()
+                .filter(c -> Objects.equals(c.state, OPEN.name())).count();
+
+        return new ActiveClaimsDTO(activeClaims.intValue());
     }
 
     @RequestMapping(path = "/stat", method = RequestMethod.GET)
