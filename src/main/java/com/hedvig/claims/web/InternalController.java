@@ -4,7 +4,6 @@ import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
-import com.hedvig.claims.query.FileUploadRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
 import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
@@ -22,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
+
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
 public class InternalController {
@@ -31,7 +32,7 @@ public class InternalController {
     private final CommandGateway commandBus;
     
     @Autowired
-    public InternalController(CommandBus commandBus, ClaimsRepository repository, FileUploadRepository filerepo) {
+    public InternalController(CommandBus commandBus, ClaimsRepository repository) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.claimsRepository = repository;
     }
@@ -46,8 +47,8 @@ public class InternalController {
 
     @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
     public ResponseEntity<List<ClaimDTO>> getClaimsList() {
-        log.info("Getting all claims:");
-        ArrayList<ClaimDTO> claims = new ArrayList<ClaimDTO>();
+    	log.info("Getting all claims:");
+    	ArrayList<ClaimDTO> claims = new ArrayList<>();
         for(ClaimEntity c : claimsRepository.findAll()){
             claims.add(new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate));
         }
@@ -63,6 +64,18 @@ public class InternalController {
                 .stream()
                 .map(c -> new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate))
                 .collect(Collectors.toList());
+    }
+
+    @RequestMapping(path = "/activeClaims/{userId}", method = RequestMethod.GET)
+    public ActiveClaimsDTO getActiveClaims(@PathVariable String userId) {
+        log.info("Getting active claim status for member: {}", userId);
+
+        Long activeClaims = claimsRepository
+                .findByUserId(userId)
+                .stream()
+                .filter(c -> Objects.equals(c.state, OPEN.name())).count();
+
+        return new ActiveClaimsDTO(activeClaims.intValue());
     }
 
     @RequestMapping(path = "/stat", method = RequestMethod.GET)
@@ -149,7 +162,7 @@ public class InternalController {
     @RequestMapping(path = "claimTypes", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<ClaimType>> claimTypes() {
 
-        ArrayList<ClaimType> claimTypes = new ArrayList<ClaimType>();
+        ArrayList<ClaimType> claimTypes = new ArrayList<>();
         
         ClaimDataType c11 = new ClaimDataType(DataType.DATE,"DATE","Datum");
         ClaimDataType c12 = new ClaimDataType(DataType.TEXT,"PLACE","Plats");
