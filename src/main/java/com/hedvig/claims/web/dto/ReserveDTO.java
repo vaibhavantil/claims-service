@@ -1,7 +1,6 @@
 package com.hedvig.claims.web.dto;
 
-public class ReserveDTO extends HedvigBackofficeDTO{
+public class ReserveDTO extends HedvigBackofficeDTO {
 
-	public Double amount;
-	
+  public Double amount;
 }

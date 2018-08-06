@@ -4,6 +4,5 @@ import com.hedvig.claims.aggregates.ClaimsAggregate;
 
 public class ClaimStateDTO extends HedvigBackofficeDTO {
 
-    public ClaimsAggregate.ClaimStates state;
-
+  public ClaimsAggregate.ClaimStates state;
 }

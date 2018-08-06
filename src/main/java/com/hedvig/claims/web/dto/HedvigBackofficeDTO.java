@@ -7,9 +7,8 @@ import java.time.LocalDateTime;
  * */
 public class HedvigBackofficeDTO {
 
-	public String id;
-	public String claimID;
-	public LocalDateTime date;
-	public String userId;
-
+  public String id;
+  public String claimID;
+  public LocalDateTime date;
+  public String userId;
 }
