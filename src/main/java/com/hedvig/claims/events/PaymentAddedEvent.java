@@ -17,5 +17,5 @@ public class PaymentAddedEvent {
   public LocalDateTime payoutDate;
   public Boolean exGratia;
   public PaymentType type;
-  public String memberExperienceMail;
+  public String claimHandlerMail;
 }

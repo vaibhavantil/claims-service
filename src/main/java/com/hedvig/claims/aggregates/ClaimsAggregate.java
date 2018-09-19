@@ -146,7 +146,7 @@ public class ClaimsAggregate {
     pe.setPayoutDate(command.getPayoutDate());
     pe.setExGratia(command.getExGratia());
     pe.setType(command.getType());
-    pe.setMemberExperienceMail(command.getMemberExperienceMail());
+    pe.setClaimHandlerMail(command.getClaimHandlerMail());
     apply(pe);
   }
 

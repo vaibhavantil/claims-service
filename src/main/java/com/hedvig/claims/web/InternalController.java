@@ -184,7 +184,9 @@ public class InternalController {
             payment.amount,
             payment.note,
             payment.payoutDate,
-            payment.exGratia);
+            payment.exGratia,
+            payment.type,
+            payment.claimHandlerMail);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

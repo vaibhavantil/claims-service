@@ -8,8 +8,11 @@ public class PaymentDTO extends HedvigBackofficeDTO {
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;
+  public PaymentType type;
+  public String claimHandlerMail;
 
-  public PaymentDTO() {}
+  public PaymentDTO() {
+  }
 
   public PaymentDTO(
       String paymentId,
@@ -19,7 +22,9 @@ public class PaymentDTO extends HedvigBackofficeDTO {
       Double amount,
       String note,
       LocalDateTime payoutDate,
-      Boolean exGratia) {
+      Boolean exGratia,
+      PaymentType type,
+      String claimHandlerMail) {
     this.id = paymentId;
     this.claimID = claimsId;
     this.date = registrationDate;
@@ -28,5 +33,7 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     this.note = note;
     this.payoutDate = payoutDate;
     this.exGratia = exGratia;
+    this.type = type;
+    this.claimHandlerMail = claimHandlerMail;
   }
 }
