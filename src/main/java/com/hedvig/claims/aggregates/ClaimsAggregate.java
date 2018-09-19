@@ -34,9 +34,12 @@ public class ClaimsAggregate {
     OPEN,
     CLOSED,
     REOPENED
-  };
+  }
 
-  @AggregateIdentifier public String id;
+  ;
+
+  @AggregateIdentifier
+  public String id;
 
   public String userId;
   public String audioURL;
@@ -142,6 +145,8 @@ public class ClaimsAggregate {
     pe.setNote(command.getNote());
     pe.setPayoutDate(command.getPayoutDate());
     pe.setExGratia(command.getExGratia());
+    pe.setType(command.getType());
+    pe.setMemberExperienceMail(command.getMemberExperienceMail());
     apply(pe);
   }
 
