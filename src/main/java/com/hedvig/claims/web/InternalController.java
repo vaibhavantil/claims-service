@@ -244,7 +244,7 @@ public class InternalController {
     ct1.addOptionalData(c14);
     ct1.addOptionalData(c15);
 
-    ClaimType ct2 = new ClaimType("FILE", "Brand");
+    ClaimType ct2 = new ClaimType("FIRE", "Brand");
     ct2.addRequiredData(c11);
     ct2.addRequiredData(c12);
     ct2.addRequiredData(c13);
