@@ -282,13 +282,13 @@ public class InternalController {
     ClaimType ct8 = new ClaimType("Water Damage - Bathroom", "Water Damage - Bathroom");
     ct8.addRequiredData(typeDate);
 
-    ClaimType ct9 = new ClaimType("Drulle - Mobile", "Drulle - Mobile");
+    ClaimType ct9 = new ClaimType("Travel - Accident and Health", "Travel - Accident and Health");
     ct9.addRequiredData(typeDate);
     ct9.addRequiredData(typePlace);
     ct9.addOptionalData(typePoliceReport);
     ct9.addOptionalData(typeReceipt);
    
-    ClaimType ct10 = new ClaimType("Drulle - Mobile", "Drulle - Mobile");
+    ClaimType ct10 = new ClaimType("Travel - Delayed Luggage", "Travel - Delayed Luggage");
     ct10.addRequiredData(typeDate);
     ct10.addRequiredData(typePlace);
     ct10.addOptionalData(typeTicket);
