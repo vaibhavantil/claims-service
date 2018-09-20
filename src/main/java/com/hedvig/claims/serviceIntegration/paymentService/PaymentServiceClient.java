@@ -14,5 +14,5 @@ public interface PaymentServiceClient {
   @RequestMapping(
       value = "/_/members/{memberId}/payout",
       method = POST)
-  ResponseEntity<?> registerDirectDebit(@RequestBody PayoutRequest requestBody);
+  ResponseEntity<?> executePayment(@RequestBody PayoutRequest requestBody);
 }
