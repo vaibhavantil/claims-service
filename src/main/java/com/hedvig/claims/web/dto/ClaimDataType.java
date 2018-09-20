@@ -6,7 +6,8 @@ public class ClaimDataType {
     TEXT,
     DATE,
     ASSET,
-    FILE
+    FILE,
+    TICKET
   };
 
   public DataType type;

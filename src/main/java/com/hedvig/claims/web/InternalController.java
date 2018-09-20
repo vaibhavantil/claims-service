@@ -231,36 +231,82 @@ public class InternalController {
 
     ArrayList<ClaimType> claimTypes = new ArrayList<>();
 
-    ClaimDataType c11 = new ClaimDataType(DataType.DATE, "DATE", "Datum");
-    ClaimDataType c12 = new ClaimDataType(DataType.TEXT, "PLACE", "Plats");
-    ClaimDataType c13 = new ClaimDataType(DataType.ASSET, "ITEM", "Pryl");
-    ClaimDataType c14 = new ClaimDataType(DataType.FILE, "POLICE_REPORT", "Polisanmälan");
-    ClaimDataType c15 = new ClaimDataType(DataType.FILE, "RECIEPT", "Kvitto");
+    ClaimDataType typeDate = new ClaimDataType(DataType.DATE, "DATE", "Date");
+    ClaimDataType typePlace = new ClaimDataType(DataType.TEXT, "PLACE", "Place");
+    ClaimDataType typeItem = new ClaimDataType(DataType.ASSET, "ITEM", "Item");
+    ClaimDataType typePoliceReport = new ClaimDataType(DataType.FILE, "POLICE_REPORT", "Police report");
+    ClaimDataType typeReceipt = new ClaimDataType(DataType.FILE, "RECIEPT", "Receipt");
+    ClaimDataType typeTicket = new ClaimDataType(DataType.TICKET, "TICKET", "Ticket");
 
-    ClaimType ct1 = new ClaimType("THEFT", "Stöld");
-    ct1.addRequiredData(c11);
-    ct1.addRequiredData(c12);
-    ct1.addRequiredData(c13);
-    ct1.addOptionalData(c14);
-    ct1.addOptionalData(c15);
+    ClaimType ct1 = new ClaimType("Theft - Other", "Theft - Other");
+    ct1.addRequiredData(typeDate);
+    ct1.addRequiredData(typePlace);
+    ct1.addRequiredData(typeItem);
+    ct1.addOptionalData(typePoliceReport);
+    ct1.addOptionalData(typeReceipt);
 
-    ClaimType ct2 = new ClaimType("FIRE", "Brand");
-    ct2.addRequiredData(c11);
-    ct2.addRequiredData(c12);
-    ct2.addRequiredData(c13);
-    ct2.addOptionalData(c14);
-    ct2.addOptionalData(c15);
+    ClaimType ct2 = new ClaimType("Theft - Home", "Theft - Home");
+    ct2.addRequiredData(typeDate);
+    ct2.addRequiredData(typePlace);
+    ct2.addRequiredData(typeItem);
+    ct2.addOptionalData(typePoliceReport);
+    ct2.addOptionalData(typeReceipt);
+    
+    ClaimType ct3 = new ClaimType("Theft - Bike", "Theft - Bike");
+    ct3.addRequiredData(typeDate);
+    ct3.addRequiredData(typePlace);
+    ct3.addRequiredData(typeItem);
+    ct3.addOptionalData(typePoliceReport);
+    ct3.addOptionalData(typeReceipt);
+    
+    ClaimType ct4 = new ClaimType("Assualt","Assault");
+    ct4.addRequiredData(typeDate);
+    ct4.addRequiredData(typePlace);
+    ct4.addOptionalData(typePoliceReport);
+    
+    ClaimType ct5 = new ClaimType("Drulle - Mobile", "Drulle - Mobile");
+    ct5.addRequiredData(typeDate);
+    ct5.addRequiredData(typePlace);
+    ct5.addRequiredData(typeItem);
+    ct5.addOptionalData(typePoliceReport);
+    ct5.addOptionalData(typeReceipt);
+    
+    ClaimType ct6 = new ClaimType("Drulle - Other", "Drulle - Other");
+    ct6.addRequiredData(typeDate);
+    ct6.addRequiredData(typePlace);
+    ct6.addRequiredData(typeItem);
+    ct6.addOptionalData(typePoliceReport);
+    ct6.addOptionalData(typeReceipt);
+    
+    ClaimType ct7 = new ClaimType("Water Damage - Kitchen", "Water Damage - Kitchen");
+    ct7.addRequiredData(typeDate);
 
-    ClaimType ct3 = new ClaimType("DRULLE", "Drulle");
-    ct3.addRequiredData(c11);
-    ct3.addRequiredData(c12);
-    ct3.addRequiredData(c13);
-    ct3.addOptionalData(c14);
-    ct3.addOptionalData(c15);
+    ClaimType ct8 = new ClaimType("Water Damage - Bathroom", "Water Damage - Bathroom");
+    ct8.addRequiredData(typeDate);
 
+    ClaimType ct9 = new ClaimType("Travel - Accident and Health", "Travel - Accident and Health");
+    ct9.addRequiredData(typeDate);
+    ct9.addRequiredData(typePlace);
+    ct9.addOptionalData(typePoliceReport);
+    ct9.addOptionalData(typeReceipt);
+   
+    ClaimType ct10 = new ClaimType("Travel - Delayed Luggage", "Travel - Delayed Luggage");
+    ct10.addRequiredData(typeDate);
+    ct10.addRequiredData(typePlace);
+    ct10.addOptionalData(typeTicket);
+    
     claimTypes.add(ct1);
     claimTypes.add(ct2);
     claimTypes.add(ct3);
+    claimTypes.add(ct4);
+    claimTypes.add(ct5);
+    
+    claimTypes.add(ct6);
+    claimTypes.add(ct7);
+    claimTypes.add(ct8);
+    claimTypes.add(ct9);
+    claimTypes.add(ct10);
+    
     return ResponseEntity.ok(claimTypes);
   }
 }
