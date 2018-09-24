@@ -36,8 +36,6 @@ public class ClaimsAggregate {
     REOPENED
   }
 
-  ;
-
   @AggregateIdentifier
   public String id;
 
@@ -146,7 +144,7 @@ public class ClaimsAggregate {
     pe.setPayoutDate(command.getPayoutDate());
     pe.setExGratia(command.getExGratia());
     pe.setType(command.getType());
-    pe.setClaimHandlerMail(command.getClaimHandlerMail());
+    pe.setHandlerReference(command.getHandlerReference());
     apply(pe);
   }
 
@@ -205,6 +203,8 @@ public class ClaimsAggregate {
     p.payoutDate = e.getPayoutDate();
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
+    p.type = e.getType();
+    p.handlerReference = e.getHandlerReference();
     payments.add(p);
   }
 

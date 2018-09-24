@@ -199,7 +199,7 @@ public class ClaimsEventListener {
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
     p.type = e.getType();
-    p.claimHandlerMail = e.getClaimHandlerMail();
+    p.handlerReference = e.getHandlerReference();
     claim.addPayment(p);
 
     Event ev = new Event();
@@ -207,7 +207,7 @@ public class ClaimsEventListener {
     ev.userId = e.getUserId();
     ev.text =
         "Payment added. Amount " + p.amount + " with payout date " + p.payoutDate + "initiated from"
-            + p.claimHandlerMail;
+            + p.handlerReference;
     claim.addEvent(ev);
 
     repository.save(claim);

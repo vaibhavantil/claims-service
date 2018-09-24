@@ -18,5 +18,5 @@ public class Payment {
   public LocalDateTime payoutDate;
   public Boolean exGratia;
   public PaymentType type;
-  public String claimHandlerMail;
+  public String handlerReference;
 }

@@ -45,7 +45,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     for (Payment p : c.payments) {
       payments.add(
           new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.note, p.payoutDate, p.exGratia,
-              p.type, p.claimHandlerMail));
+              p.type, p.handlerReference));
     }
     for (Note n : c.notes) {
       notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
