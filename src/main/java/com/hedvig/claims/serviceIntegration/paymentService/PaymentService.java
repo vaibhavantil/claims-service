@@ -1,10 +1,11 @@
 package com.hedvig.claims.serviceIntegration.paymentService;
 
-import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutStatus;
+import java.util.Optional;
+import java.util.UUID;
 import javax.money.MonetaryAmount;
 
 public interface PaymentService {
 
-  PayoutStatus executePayment(String memberId, MonetaryAmount amount);
+  Optional<UUID> executePayment(String memberId, MonetaryAmount amount);
 
 }

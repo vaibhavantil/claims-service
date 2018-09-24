@@ -3,8 +3,10 @@ package com.hedvig.claims.serviceIntegration.paymentService;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
+import java.util.UUID;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -12,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface PaymentServiceClient {
 
   @RequestMapping(
-      value = "/_/members/{memberId}/payout",
+      value = "/v2/_/members/{memberId}/payout",
       method = POST)
-  ResponseEntity<?> executePayment(@RequestBody PayoutRequest requestBody);
+  ResponseEntity<UUID> executePayment(@PathVariable(name = "memberId") String memberId,
+      @RequestBody PayoutRequest requestBody);
 }
