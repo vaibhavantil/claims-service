@@ -12,8 +12,14 @@ import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
+import com.hedvig.claims.events.PaymentExecutedEvent;
+import com.hedvig.claims.web.dto.PaymentType;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +31,7 @@ public class ClaimsEventListener {
 
   private static Logger log = LoggerFactory.getLogger(ClaimsEventListener.class);
   private final ClaimsRepository repository;
+  private static final String SWEDEN_TIMEZONE = "Europe/Stockholm";
 
   @Autowired
   public ClaimsEventListener(ClaimsRepository userRepo) {
@@ -206,8 +213,44 @@ public class ClaimsEventListener {
     ev.type = e.getClass().getName();
     ev.userId = e.getUserId();
     ev.text =
-        "Payment added. Amount " + p.amount + " with payout date " + p.payoutDate + "initiated from"
+        "Payment with type " + PaymentType.Manual.name() + " added. Amount " + p.amount
+            + " with payout date " + p.payoutDate + "initiated from"
             + p.handlerReference;
+    claim.addEvent(ev);
+
+    repository.save(claim);
+  }
+
+  @EventSourcingHandler
+  public void on(PaymentExecutedEvent e, @Timestamp Instant timestamp) {
+    log.info("PaymentExecutedEvent: {}" + e);
+
+    ClaimEntity claim =
+        repository
+            .findById(e.getClaimId())
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "Could not find claim with id:" + e.getClaimId()));
+    Payment p = new Payment();
+    p.id = e.getId();
+    p.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.userId = e.getMemberId();
+    p.amount = e.getAmount().getNumber().doubleValueExact();
+    p.payoutDate = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.note = e.getNote();
+    p.exGratia = e.isExGracia();
+    p.type = PaymentType.Automatic;
+    p.handlerReference = e.getHandlerReference();
+    claim.addPayment(p);
+
+    Event ev = new Event();
+    ev.type = e.getClass().getName();
+    ev.userId = e.getMemberId();
+    ev.text =
+        "Payment with type " + PaymentType.Automatic.name() + " executed. Amount " + p.amount
+            + " with payout date " + p.payoutDate
+            + "initiated from" + p.handlerReference;
     claim.addEvent(ev);
 
     repository.save(claim);

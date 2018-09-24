@@ -7,6 +7,7 @@ import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.ExecutePaymentCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
+import org.javamoney.moneta.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,6 +192,26 @@ public class InternalController {
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @RequestMapping(path = "/{memberId}/executePayment", method = RequestMethod.POST)
+  public ResponseEntity<?> executePayment(@PathVariable(name = "memberId") String memberId,
+      @RequestBody PaymentDTO payment) {
+    log.info("Execute automatic payment note:" + payment.toString());
+
+    ExecutePaymentCommand executePaymentCommand =
+        new ExecutePaymentCommand(
+            UUID.randomUUID().toString(),
+            payment.claimID,
+            memberId,
+            Money.of(payment.amount, "SEK"),
+            payment.note,
+            payment.exGratia,
+            payment.handlerReference);
+
+    commandBus.sendAndWait(executePaymentCommand);
+
+    return ResponseEntity.accepted().build();
   }
 
   @RequestMapping(path = "/updatereserve", method = RequestMethod.POST)
