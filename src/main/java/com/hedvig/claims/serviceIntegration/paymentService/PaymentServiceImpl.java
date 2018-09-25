@@ -1,6 +1,7 @@
 package com.hedvig.claims.serviceIntegration.paymentService;
 
-import java.util.Optional;
+import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutResponse;
+import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutStatus;
 import java.util.UUID;
 import javax.money.MonetaryAmount;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,21 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @Override
-  public Optional<UUID> executePayment(String memberId, MonetaryAmount amount) {
+  public PayoutResponse executePayment(String memberId, MonetaryAmount amount) {
     try {
       ResponseEntity<UUID> response = paymentServiceClient.executePayment(memberId, amount);
-      return response.getStatusCode().is2xxSuccessful() ? Optional.of(response.getBody())
-          : Optional.empty();
+
+      return response.getStatusCode().is2xxSuccessful() ? new PayoutResponse(response.getBody(),
+          PayoutStatus.INITIATED)
+          : new PayoutResponse(response.getBody(), PayoutStatus.NOTACCEPTED);
     } catch (RestClientResponseException ex) {
-      return Optional.empty();
+      if (ex.getRawStatusCode() == 404) {
+        return new PayoutResponse(null, PayoutStatus.NOTACCEPTED);
+      }
+      if (ex.getRawStatusCode() == 403) {
+        return new PayoutResponse(null, PayoutStatus.FORBIDDEN);
+      }
+      return new PayoutResponse(null, PayoutStatus.FAILED);
     }
   }
 }
