@@ -3,6 +3,8 @@ package com.hedvig.claims.aggregates;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 @Entity
@@ -17,6 +19,10 @@ public class Payment {
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;
+  @Enumerated(value = EnumType.STRING)
   public PaymentType type;
   public String handlerReference;
+  @Enumerated(value = EnumType.STRING)
+  public PayoutStatus payoutStatus;
+  public String payoutReference;
 }
