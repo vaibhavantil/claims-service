@@ -7,7 +7,7 @@ import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.ExecutePaymentCommand;
+import com.hedvig.claims.commands.AddPayoutCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
@@ -194,13 +194,13 @@ public class InternalController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @RequestMapping(path = "/{memberId}/executePayment", method = RequestMethod.POST)
-  public ResponseEntity<?> executePayment(@PathVariable(name = "memberId") String memberId,
+  @RequestMapping(path = "/{memberId}/addPayout", method = RequestMethod.POST)
+  public ResponseEntity<?> addPayout(@PathVariable(name = "memberId") String memberId,
       @RequestBody PaymentDTO payment) {
-    log.info("Execute automatic payment note:" + payment.toString());
+    log.info("add automatic payout: " + payment.toString());
 
-    ExecutePaymentCommand executePaymentCommand =
-        new ExecutePaymentCommand(
+    AddPayoutCommand addPayoutCommand =
+        new AddPayoutCommand(
             UUID.randomUUID().toString(),
             payment.claimID,
             memberId,
@@ -209,7 +209,7 @@ public class InternalController {
             payment.exGratia,
             payment.handlerReference);
 
-    commandBus.sendAndWait(executePaymentCommand);
+    commandBus.sendAndWait(addPayoutCommand);
 
     return ResponseEntity.accepted().build();
   }
