@@ -5,8 +5,10 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
+import com.hedvig.claims.commands.AddPayoutCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.ExecutePaymentCommand;
+import com.hedvig.claims.commands.FailPayoutCommand;
+import com.hedvig.claims.commands.InitiatePayoutCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
@@ -17,12 +19,15 @@ import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
-import com.hedvig.claims.events.PaymentExecutedEvent;
+import com.hedvig.claims.events.PayoutAddedEvent;
+import com.hedvig.claims.events.PayoutFailedEvent;
+import com.hedvig.claims.events.PayoutInitiatedEvent;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
@@ -54,7 +59,7 @@ public class ClaimsAggregate {
   public String type;
 
   public ArrayList<DataItem> data;
-  public ArrayList<Payment> payments;
+  public HashMap<String, Payment> payments;
   public ArrayList<Note> notes;
   public ArrayList<String> assets;
 
@@ -156,16 +161,37 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void executePayment(ExecutePaymentCommand cmd) {
+  public void executePayment(AddPayoutCommand cmd) {
     log.info("executing payment to claim {} for member {}", cmd.getClaimId(), cmd.getMemberId());
 
-    PaymentExecutedEvent e = new PaymentExecutedEvent(cmd.getId(), cmd.getClaimId(),
+    PayoutAddedEvent e = new PayoutAddedEvent(cmd.getId(), cmd.getClaimId(),
         cmd.getMemberId(), cmd.getAmount(), cmd.getNote(), cmd.isExGracia(),
         cmd.getHandlerReference());
 
     apply(e);
   }
 
+  @CommandHandler
+  public void initiatePayment(InitiatePayoutCommand cmd) {
+    log.info("successfully initiate payment to member {} for claim {}", cmd.getMemberId(),
+        cmd.getClaimId());
+
+    PayoutInitiatedEvent e = new PayoutInitiatedEvent(cmd.getId(), cmd.getClaimId(),
+        cmd.getMemberId(), cmd.getTransactionReference(), cmd.getTransactionStatus());
+
+    apply(e);
+  }
+
+  @CommandHandler
+  public void failPayment(FailPayoutCommand cmd) {
+    log.info("payment failed to be processed to member {} for claim {}", cmd.getMemberId(),
+        cmd.getClaimId());
+
+    PayoutFailedEvent e = new PayoutFailedEvent(cmd.getId(), cmd.getClaimId(), cmd.getMemberId(),
+        cmd.getTransactionStatus());
+
+    apply(e);
+  }
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler
@@ -177,7 +203,7 @@ public class ClaimsAggregate {
 
     // Init data structures
     this.notes = new ArrayList<Note>();
-    this.payments = new ArrayList<Payment>();
+    this.payments = new HashMap<>();
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
   }
@@ -223,11 +249,12 @@ public class ClaimsAggregate {
     p.exGratia = e.getExGratia();
     p.type = PaymentType.Manual;
     p.handlerReference = e.getHandlerReference();
-    payments.add(p);
+    p.payoutStatus = PayoutStatus.COMPLETED;
+    payments.put(e.getId(), p);
   }
 
   @EventSourcingHandler
-  public void on(PaymentExecutedEvent e, @Timestamp Instant timestamp) {
+  public void on(PayoutAddedEvent e, @Timestamp Instant timestamp) {
     Payment p = new Payment();
     p.id = e.getId();
     p.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
@@ -238,7 +265,39 @@ public class ClaimsAggregate {
     p.exGratia = e.isExGracia();
     p.type = PaymentType.Automatic;
     p.handlerReference = e.getHandlerReference();
-    payments.add(p);
+    p.payoutStatus = PayoutStatus.PREPARED;
+    payments.put(e.getId(), p);
+  }
+
+  @EventSourcingHandler
+  public void on(PayoutInitiatedEvent e, @Timestamp Instant timestamp) {
+    if (!payments.containsKey(e.getId())) {
+      log.error("PaymentInitiatedEvent - Cannot find payment with id {} for claim {}", e.getId(),
+          e.getClaimId());
+    } else {
+      Payment payment = payments.get(e.getId());
+
+      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.payoutReference = e.getTransactionReference().toString();
+      payment.payoutStatus = PayoutStatus.INITIATED;
+
+      payments.put(e.getId(), payment);
+    }
+  }
+
+  @EventSourcingHandler
+  public void on(PayoutFailedEvent e, @Timestamp Instant timestamp) {
+    if (!payments.containsKey(e.getId())) {
+      log.error("PayoutFailedEvent - Cannot find payment with id {} for claim {}", e.getId(),
+          e.getClaimId());
+    } else {
+      Payment payment = payments.get(e.getId());
+
+      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.payoutStatus = PayoutStatus.parseToPayoutStatus(e.getTransactionStatus());
+
+      payments.put(e.getId(), payment);
+    }
   }
 
   @EventSourcingHandler
