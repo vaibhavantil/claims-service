@@ -4,14 +4,14 @@ import java.util.UUID;
 import lombok.Value;
 
 @Value
-public class PayoutResponse {
+public class PaymentResponse {
 
-  private UUID paymentReference;
-  private PaymentStatus payoutStatus;
+  private UUID transactionReference;
+  private TransactionStatus transactionStatus;
 
-  public PayoutResponse(UUID paymentReference,
-      PaymentStatus payoutStatus) {
-    this.paymentReference = paymentReference;
-    this.payoutStatus = payoutStatus;
+  public PaymentResponse(UUID transactionReference,
+      TransactionStatus transactionStatus) {
+    this.transactionReference = transactionReference;
+    this.transactionStatus = transactionStatus;
   }
 }
