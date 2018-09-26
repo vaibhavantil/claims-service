@@ -14,7 +14,7 @@ import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Saga
-public class PaymentExecuteSaga {
+public class PayoutAddSaga {
 
   @Autowired
   transient PaymentService paymentService;

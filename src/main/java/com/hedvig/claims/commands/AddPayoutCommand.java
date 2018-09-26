@@ -5,7 +5,7 @@ import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 @Value
-public class AddAutomaticPayoutCommand {
+public class AddPayoutCommand {
 
   private String Id;
   @TargetAggregateIdentifier
