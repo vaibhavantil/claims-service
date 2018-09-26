@@ -1,6 +1,6 @@
 package com.hedvig.claims.serviceIntegration.paymentService.dto;
 
-public enum PayoutStatus {
+public enum PaymentStatus {
   NOTACCEPTED,
   FORBIDDEN,
   INITIATED,

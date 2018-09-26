@@ -7,10 +7,10 @@ import lombok.Value;
 public class PayoutResponse {
 
   private UUID paymentReference;
-  private PayoutStatus payoutStatus;
+  private PaymentStatus payoutStatus;
 
   public PayoutResponse(UUID paymentReference,
-      PayoutStatus payoutStatus) {
+      PaymentStatus payoutStatus) {
     this.paymentReference = paymentReference;
     this.payoutStatus = payoutStatus;
   }
