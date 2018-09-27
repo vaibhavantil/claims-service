@@ -1,8 +1,8 @@
 package com.hedvig.claims.sagas;
 
-import com.hedvig.claims.commands.FailPayoutCommand;
-import com.hedvig.claims.commands.InitiatePayoutCommand;
-import com.hedvig.claims.events.PayoutAddedEvent;
+import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand;
+import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
+import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
 import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
@@ -25,16 +25,16 @@ public class PayoutAddSaga {
   @StartSaga
   @SagaEventHandler(associationProperty = "memberId")
   @EndSaga
-  public void on(PayoutAddedEvent e) {
+  public void on(AutomaticPaymentAddedEvent e) {
     PaymentResponse response = paymentService.executePayment(e.getMemberId(), e.getAmount());
 
     if (response.getTransactionStatus().equals(TransactionStatus.INITIATED)) {
       commandGateway.sendAndWait(
-          new InitiatePayoutCommand(e.getId(), e.getClaimId(), e.getMemberId(),
+          new AddInitiatedAutomaticPaymentCommand(e.getId(), e.getClaimId(), e.getMemberId(),
               response.getTransactionReference(), response.getTransactionStatus()));
     } else {
       commandGateway
-          .sendAndWait(new FailPayoutCommand(e.getId(), e.getClaimId(), e.getMemberId(),
+          .sendAndWait(new AddFailedAutomaticPaymentCommand(e.getId(), e.getClaimId(), e.getMemberId(),
               response.getTransactionStatus()));
     }
   }

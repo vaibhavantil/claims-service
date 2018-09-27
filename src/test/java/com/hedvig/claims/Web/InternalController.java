@@ -5,11 +5,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import com.hedvig.claims.ClaimServiceTestConfiguration;
-import com.hedvig.claims.commands.AddPayoutCommand;
+import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.events.PayoutFailedEvent;
-import com.hedvig.claims.events.PayoutInitiatedEvent;
-import com.hedvig.claims.query.PaymentRepository;
+import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
+import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
@@ -39,8 +38,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class InternalController {
-
-  private static final String PAYOUT_ID = "567890";
 
   private static final String MEMBER_ID = "12345";
   private static final MonetaryAmount CLAIM_PAYOUT_AMOUNT = Money.of(10000, "SEK");
@@ -73,8 +70,7 @@ public class InternalController {
     this.commandGateway.sendAndWait(
         new CreateClaimCommand(CLAIM_ID, MEMBER_ID, LocalDateTime.now(), ""));
 
-    this.commandGateway.sendAndWait(new AddPayoutCommand(
-        PAYOUT_ID,
+    this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
         CLAIM_ID.toString(),
         MEMBER_ID,
         CLAIM_PAYOUT_AMOUNT,
@@ -86,7 +82,8 @@ public class InternalController {
     val events = eventStore.readEvents(CLAIM_ID).asStream().collect(Collectors.toList());
 
     assertThat(
-        events.stream().filter(e -> e.getPayload().getClass().equals(PayoutInitiatedEvent.class))
+        events.stream().filter(e -> e.getPayload().getClass().equals(
+            AutomaticPaymentInitiatedEvent.class))
             .count()).isEqualTo(1);
   }
 
@@ -102,8 +99,7 @@ public class InternalController {
     this.commandGateway.sendAndWait(
         new CreateClaimCommand(CLAIM_ID, MEMBER_ID, LocalDateTime.now(), ""));
 
-    this.commandGateway.sendAndWait(new AddPayoutCommand(
-        PAYOUT_ID,
+    this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
         CLAIM_ID.toString(),
         MEMBER_ID,
         CLAIM_PAYOUT_AMOUNT,
@@ -115,7 +111,7 @@ public class InternalController {
     val events = eventStore.readEvents(CLAIM_ID).asStream().collect(Collectors.toList());
 
     assertThat(
-        events.stream().filter(e -> e.getPayload().getClass().equals(PayoutFailedEvent.class))
+        events.stream().filter(e -> e.getPayload().getClass().equals(AutomaticPaymentFailedEvent.class))
             .count()).isEqualTo(1);
   }
 
@@ -131,8 +127,7 @@ public class InternalController {
     this.commandGateway.sendAndWait(
         new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, LocalDateTime.now(), ""));
 
-    this.commandGateway.sendAndWait(new AddPayoutCommand(
-        PAYOUT_ID,
+    this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
         CLAIM_ID.toString(),
         MEMBER_ID,
         CLAIM_PAYOUT_AMOUNT,
@@ -144,7 +139,7 @@ public class InternalController {
     val events = eventStore.readEvents(CLAIM_ID).asStream().collect(Collectors.toList());
 
     assertThat(
-        events.stream().filter(e -> e.getPayload().getClass().equals(PayoutFailedEvent.class))
+        events.stream().filter(e -> e.getPayload().getClass().equals(AutomaticPaymentFailedEvent.class))
             .count()).isEqualTo(1);
   }
 

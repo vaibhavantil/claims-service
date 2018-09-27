@@ -1,14 +1,14 @@
-package com.hedvig.claims.commands;
+package com.hedvig.claims.events;
 
 import javax.money.MonetaryAmount;
+import lombok.AllArgsConstructor;
 import lombok.Value;
-import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 @Value
-public class AddPayoutCommand {
+@AllArgsConstructor
+public class AutomaticPaymentAddedEvent {
 
   private String Id;
-  @TargetAggregateIdentifier
   private String claimId;
   private String memberId;
   private MonetaryAmount amount;

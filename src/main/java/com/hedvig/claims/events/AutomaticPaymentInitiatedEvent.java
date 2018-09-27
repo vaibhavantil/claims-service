@@ -7,7 +7,7 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor
-public class PayoutInitiatedEvent {
+public class AutomaticPaymentInitiatedEvent {
 
   private String id;
   private String claimId;

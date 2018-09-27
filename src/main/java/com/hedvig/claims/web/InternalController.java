@@ -3,11 +3,11 @@ package com.hedvig.claims.web;
 import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate;
+import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.AddPayoutCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
@@ -194,14 +194,13 @@ public class InternalController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @RequestMapping(path = "/{memberId}/addPayout", method = RequestMethod.POST)
-  public ResponseEntity<?> addPayout(@PathVariable(name = "memberId") String memberId,
+  @RequestMapping(path = "/{memberId}/addAutomaticPayment", method = RequestMethod.POST)
+  public ResponseEntity<?> addAutomaticPayment(@PathVariable(name = "memberId") String memberId,
       @RequestBody PaymentDTO payment) {
-    log.info("add automatic payout: " + payment.toString());
+    log.info("add automatic payment: {}" + payment.toString());
 
-    AddPayoutCommand addPayoutCommand =
-        new AddPayoutCommand(
-            UUID.randomUUID().toString(),
+    AddAutomaticPaymentCommand addAutomaticPaymentCommand =
+        new AddAutomaticPaymentCommand(
             payment.claimID,
             memberId,
             Money.of(payment.amount, "SEK"),
@@ -209,7 +208,7 @@ public class InternalController {
             payment.exGratia,
             payment.handlerReference);
 
-    commandBus.sendAndWait(addPayoutCommand);
+    commandBus.sendAndWait(addAutomaticPaymentCommand);
 
     return ResponseEntity.accepted().build();
   }

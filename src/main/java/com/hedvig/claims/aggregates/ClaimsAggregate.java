@@ -2,16 +2,19 @@ package com.hedvig.claims.aggregates;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
+import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
+import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand;
+import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.AddPayoutCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.FailPayoutCommand;
-import com.hedvig.claims.commands.InitiatePayoutCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
+import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
+import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
+import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
@@ -19,15 +22,13 @@ import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
-import com.hedvig.claims.events.PayoutAddedEvent;
-import com.hedvig.claims.events.PayoutFailedEvent;
-import com.hedvig.claims.events.PayoutInitiatedEvent;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
@@ -161,33 +162,46 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void executePayment(AddPayoutCommand cmd) {
-    log.info("executing payment to claim {} for member {}", cmd.getClaimId(), cmd.getMemberId());
+  public void addAutomaticPayment(AddAutomaticPaymentCommand cmd) {
+    log.info("add automatic payment to claim {} for member {}", cmd.getClaimId(),
+        cmd.getMemberId());
 
-    PayoutAddedEvent e = new PayoutAddedEvent(cmd.getId(), cmd.getClaimId(),
-        cmd.getMemberId(), cmd.getAmount(), cmd.getNote(), cmd.isExGracia(),
+    AutomaticPaymentAddedEvent e = new AutomaticPaymentAddedEvent(
+        UUID.randomUUID().toString(),
+        cmd.getClaimId(),
+        cmd.getMemberId(),
+        cmd.getAmount(),
+        cmd.getNote(),
+        cmd.isExGracia(),
         cmd.getHandlerReference());
 
     apply(e);
   }
 
   @CommandHandler
-  public void initiatePayment(InitiatePayoutCommand cmd) {
-    log.info("successfully initiate payment to member {} for claim {}", cmd.getMemberId(),
+  public void addInitiatedAutomaticPayment(AddInitiatedAutomaticPaymentCommand cmd) {
+    log.info("add initiated automatic payment to member {} for claim {}", cmd.getMemberId(),
         cmd.getClaimId());
 
-    PayoutInitiatedEvent e = new PayoutInitiatedEvent(cmd.getId(), cmd.getClaimId(),
-        cmd.getMemberId(), cmd.getTransactionReference(), cmd.getTransactionStatus());
+    AutomaticPaymentInitiatedEvent e = new AutomaticPaymentInitiatedEvent(
+        cmd.getId(),
+        cmd.getClaimId(),
+        cmd.getMemberId(),
+        cmd.getTransactionReference(),
+        cmd.getTransactionStatus());
 
     apply(e);
   }
 
   @CommandHandler
-  public void failPayment(FailPayoutCommand cmd) {
+  public void addFailedAutomaticPayment(AddFailedAutomaticPaymentCommand cmd) {
     log.info("payment failed to be processed to member {} for claim {}", cmd.getMemberId(),
         cmd.getClaimId());
 
-    PayoutFailedEvent e = new PayoutFailedEvent(cmd.getId(), cmd.getClaimId(), cmd.getMemberId(),
+    AutomaticPaymentFailedEvent e = new AutomaticPaymentFailedEvent(
+        cmd.getId(),
+        cmd.getClaimId(),
+        cmd.getMemberId(),
         cmd.getTransactionStatus());
 
     apply(e);
@@ -254,7 +268,7 @@ public class ClaimsAggregate {
   }
 
   @EventSourcingHandler
-  public void on(PayoutAddedEvent e, @Timestamp Instant timestamp) {
+  public void on(AutomaticPaymentAddedEvent e, @Timestamp Instant timestamp) {
     Payment p = new Payment();
     p.id = e.getId();
     p.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
@@ -270,9 +284,10 @@ public class ClaimsAggregate {
   }
 
   @EventSourcingHandler
-  public void on(PayoutInitiatedEvent e, @Timestamp Instant timestamp) {
+  public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
     if (!payments.containsKey(e.getId())) {
-      log.error("PaymentInitiatedEvent - Cannot find payment with id {} for claim {}", e.getId(),
+      log.error("AutomaticPaymentInitiatedEvent - Cannot find payment with id {} for claim {}",
+          e.getId(),
           e.getClaimId());
     } else {
       Payment payment = payments.get(e.getId());
@@ -286,9 +301,10 @@ public class ClaimsAggregate {
   }
 
   @EventSourcingHandler
-  public void on(PayoutFailedEvent e, @Timestamp Instant timestamp) {
+  public void on(AutomaticPaymentFailedEvent e, @Timestamp Instant timestamp) {
     if (!payments.containsKey(e.getId())) {
-      log.error("PayoutFailedEvent - Cannot find payment with id {} for claim {}", e.getId(),
+      log.error("AutomaticPaymentFailedEvent - Cannot find payment with id {} for claim {}",
+          e.getId(),
           e.getClaimId());
     } else {
       Payment payment = payments.get(e.getId());

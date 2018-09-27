@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor
-public class PayoutFailedEvent {
+public class AutomaticPaymentFailedEvent {
 
   private String id;
   private String claimId;

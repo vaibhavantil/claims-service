@@ -13,9 +13,9 @@ import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
-import com.hedvig.claims.events.PayoutAddedEvent;
-import com.hedvig.claims.events.PayoutFailedEvent;
-import com.hedvig.claims.events.PayoutInitiatedEvent;
+import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
+import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
+import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -229,7 +229,7 @@ public class ClaimsEventListener {
   }
 
   @EventSourcingHandler
-  public void on(PayoutAddedEvent e, @Timestamp Instant timestamp) {
+  public void on(AutomaticPaymentAddedEvent e, @Timestamp Instant timestamp) {
     log.info("PaymentExecutedEvent: {}" + e);
 
     ClaimEntity claim =
@@ -265,7 +265,7 @@ public class ClaimsEventListener {
   }
 
   @EventSourcingHandler
-  public void on(PayoutInitiatedEvent e, @Timestamp Instant timestamp) {
+  public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
     log.info("PaymentInitiatedEvent: {}" + e);
 
     Optional<Payment> optionalPayment = paymentRepository.findById(e.getId());
@@ -285,7 +285,7 @@ public class ClaimsEventListener {
   }
 
   @EventSourcingHandler
-  public void on(PayoutFailedEvent e, @Timestamp Instant timestamp) {
+  public void on(AutomaticPaymentFailedEvent e, @Timestamp Instant timestamp) {
     log.info("PayoutFailedEvent: {}" + e);
 
     Optional<Payment> optionalPayment = paymentRepository.findById(e.getId());
