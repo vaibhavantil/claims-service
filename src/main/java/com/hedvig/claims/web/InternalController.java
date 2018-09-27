@@ -3,6 +3,7 @@ package com.hedvig.claims.web;
 import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate;
+import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
+import org.javamoney.moneta.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +175,7 @@ public class InternalController {
 
   @RequestMapping(path = "/addpayment", method = RequestMethod.POST)
   public ResponseEntity<?> addPayment(@RequestBody PaymentDTO payment) {
-    log.info("Adding payment note:" + payment.toString());
+    log.info("Adding manual payment note:" + payment.toString());
     UUID uid = UUID.randomUUID();
     AddPaymentCommand command =
         new AddPaymentCommand(
@@ -184,10 +186,30 @@ public class InternalController {
             payment.amount,
             payment.note,
             payment.payoutDate,
-            payment.exGratia);
+            payment.exGratia,
+            payment.handlerReference);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @RequestMapping(path = "/{memberId}/addAutomaticPayment", method = RequestMethod.POST)
+  public ResponseEntity<?> addAutomaticPayment(@PathVariable(name = "memberId") String memberId,
+      @RequestBody PaymentDTO payment) {
+    log.info("add automatic payment: {}" + payment.toString());
+
+    AddAutomaticPaymentCommand addAutomaticPaymentCommand =
+        new AddAutomaticPaymentCommand(
+            payment.claimID,
+            memberId,
+            Money.of(payment.amount, "SEK"),
+            payment.note,
+            payment.exGratia,
+            payment.handlerReference);
+
+    commandBus.sendAndWait(addAutomaticPaymentCommand);
+
+    return ResponseEntity.accepted().build();
   }
 
   @RequestMapping(path = "/updatereserve", method = RequestMethod.POST)
@@ -232,8 +254,9 @@ public class InternalController {
     ClaimDataType typeDate = new ClaimDataType(DataType.DATE, "DATE", "Date");
     ClaimDataType typePlace = new ClaimDataType(DataType.TEXT, "PLACE", "Place");
     ClaimDataType typeItem = new ClaimDataType(DataType.ASSET, "ITEM", "Item");
-    ClaimDataType typePoliceReport = new ClaimDataType(DataType.FILE, "POLICE_REPORT", "Police report");
-    ClaimDataType typeReceipt = new ClaimDataType(DataType.FILE, "RECIEPT", "Receipt");
+    ClaimDataType typePoliceReport = new ClaimDataType(DataType.FILE, "POLICE_REPORT",
+        "Police report");
+    ClaimDataType typeReceipt = new ClaimDataType(DataType.FILE, "RECEIPT", "Receipt");
     ClaimDataType typeTicket = new ClaimDataType(DataType.TICKET, "TICKET", "Ticket");
 
     ClaimType ct1 = new ClaimType("Theft - Other", "Theft - Other");
@@ -249,33 +272,33 @@ public class InternalController {
     ct2.addRequiredData(typeItem);
     ct2.addOptionalData(typePoliceReport);
     ct2.addOptionalData(typeReceipt);
-    
+
     ClaimType ct3 = new ClaimType("Theft - Bike", "Theft - Bike");
     ct3.addRequiredData(typeDate);
     ct3.addRequiredData(typePlace);
     ct3.addRequiredData(typeItem);
     ct3.addOptionalData(typePoliceReport);
     ct3.addOptionalData(typeReceipt);
-    
-    ClaimType ct4 = new ClaimType("Assualt","Assault");
+
+    ClaimType ct4 = new ClaimType("Assault", "Assault");
     ct4.addRequiredData(typeDate);
     ct4.addRequiredData(typePlace);
     ct4.addOptionalData(typePoliceReport);
-    
+
     ClaimType ct5 = new ClaimType("Drulle - Mobile", "Drulle - Mobile");
     ct5.addRequiredData(typeDate);
     ct5.addRequiredData(typePlace);
     ct5.addRequiredData(typeItem);
     ct5.addOptionalData(typePoliceReport);
     ct5.addOptionalData(typeReceipt);
-    
+
     ClaimType ct6 = new ClaimType("Drulle - Other", "Drulle - Other");
     ct6.addRequiredData(typeDate);
     ct6.addRequiredData(typePlace);
     ct6.addRequiredData(typeItem);
     ct6.addOptionalData(typePoliceReport);
     ct6.addOptionalData(typeReceipt);
-    
+
     ClaimType ct7 = new ClaimType("Water Damage - Kitchen", "Water Damage - Kitchen");
     ct7.addRequiredData(typeDate);
 
@@ -287,24 +310,24 @@ public class InternalController {
     ct9.addRequiredData(typePlace);
     ct9.addOptionalData(typePoliceReport);
     ct9.addOptionalData(typeReceipt);
-   
+
     ClaimType ct10 = new ClaimType("Travel - Delayed Luggage", "Travel - Delayed Luggage");
     ct10.addRequiredData(typeDate);
     ct10.addRequiredData(typePlace);
     ct10.addOptionalData(typeTicket);
-    
+
     claimTypes.add(ct1);
     claimTypes.add(ct2);
     claimTypes.add(ct3);
     claimTypes.add(ct4);
     claimTypes.add(ct5);
-    
+
     claimTypes.add(ct6);
     claimTypes.add(ct7);
     claimTypes.add(ct8);
     claimTypes.add(ct9);
     claimTypes.add(ct10);
-    
+
     return ResponseEntity.ok(claimTypes);
   }
 }

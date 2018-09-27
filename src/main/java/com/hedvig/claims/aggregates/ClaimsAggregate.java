@@ -2,13 +2,19 @@ package com.hedvig.claims.aggregates;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
+import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
+import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand;
+import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
+import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
+import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
+import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
@@ -16,10 +22,16 @@ import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
+import com.hedvig.claims.web.dto.PaymentType;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
+import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
@@ -29,14 +41,16 @@ import org.slf4j.LoggerFactory;
 public class ClaimsAggregate {
 
   private static Logger log = LoggerFactory.getLogger(ClaimsAggregate.class);
+  private static final String SWEDEN_TIMEZONE = "Europe/Stockholm";
 
-  public static enum ClaimStates {
+  public enum ClaimStates {
     OPEN,
     CLOSED,
     REOPENED
-  };
+  }
 
-  @AggregateIdentifier public String id;
+  @AggregateIdentifier
+  public String id;
 
   public String userId;
   public String audioURL;
@@ -46,7 +60,7 @@ public class ClaimsAggregate {
   public String type;
 
   public ArrayList<DataItem> data;
-  public ArrayList<Payment> payments;
+  public HashMap<String, Payment> payments;
   public ArrayList<Note> notes;
   public ArrayList<String> assets;
 
@@ -142,9 +156,55 @@ public class ClaimsAggregate {
     pe.setNote(command.getNote());
     pe.setPayoutDate(command.getPayoutDate());
     pe.setExGratia(command.getExGratia());
+    pe.setHandlerReference(command.getHandlerReference());
     apply(pe);
   }
 
+  @CommandHandler
+  public void addAutomaticPayment(AddAutomaticPaymentCommand cmd) {
+    log.info("add automatic payment to claim {} for member {}", cmd.getClaimId(),
+        cmd.getMemberId());
+
+    AutomaticPaymentAddedEvent e = new AutomaticPaymentAddedEvent(
+        UUID.randomUUID().toString(),
+        cmd.getClaimId(),
+        cmd.getMemberId(),
+        cmd.getAmount(),
+        cmd.getNote(),
+        cmd.isExGracia(),
+        cmd.getHandlerReference());
+
+    apply(e);
+  }
+
+  @CommandHandler
+  public void addInitiatedAutomaticPayment(AddInitiatedAutomaticPaymentCommand cmd) {
+    log.info("add initiated automatic payment to member {} for claim {}", cmd.getMemberId(),
+        cmd.getClaimId());
+
+    AutomaticPaymentInitiatedEvent e = new AutomaticPaymentInitiatedEvent(
+        cmd.getId(),
+        cmd.getClaimId(),
+        cmd.getMemberId(),
+        cmd.getTransactionReference(),
+        cmd.getTransactionStatus());
+
+    apply(e);
+  }
+
+  @CommandHandler
+  public void addFailedAutomaticPayment(AddFailedAutomaticPaymentCommand cmd) {
+    log.info("payment failed to be processed to member {} for claim {}", cmd.getMemberId(),
+        cmd.getClaimId());
+
+    AutomaticPaymentFailedEvent e = new AutomaticPaymentFailedEvent(
+        cmd.getId(),
+        cmd.getClaimId(),
+        cmd.getMemberId(),
+        cmd.getTransactionStatus());
+
+    apply(e);
+  }
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler
@@ -156,7 +216,7 @@ public class ClaimsAggregate {
 
     // Init data structures
     this.notes = new ArrayList<Note>();
-    this.payments = new ArrayList<Payment>();
+    this.payments = new HashMap<>();
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
   }
@@ -200,7 +260,59 @@ public class ClaimsAggregate {
     p.payoutDate = e.getPayoutDate();
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
-    payments.add(p);
+    p.type = PaymentType.Manual;
+    p.handlerReference = e.getHandlerReference();
+    p.payoutStatus = PayoutStatus.COMPLETED;
+    payments.put(e.getId(), p);
+  }
+
+  @EventSourcingHandler
+  public void on(AutomaticPaymentAddedEvent e, @Timestamp Instant timestamp) {
+    Payment p = new Payment();
+    p.id = e.getId();
+    p.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.userId = e.getMemberId();
+    p.amount = e.getAmount().getNumber().doubleValueExact();
+    p.payoutDate = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.note = e.getNote();
+    p.exGratia = e.isExGracia();
+    p.type = PaymentType.Automatic;
+    p.handlerReference = e.getHandlerReference();
+    p.payoutStatus = PayoutStatus.PREPARED;
+    payments.put(e.getId(), p);
+  }
+
+  @EventSourcingHandler
+  public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
+    if (!payments.containsKey(e.getId())) {
+      log.error("AutomaticPaymentInitiatedEvent - Cannot find payment with id {} for claim {}",
+          e.getId(),
+          e.getClaimId());
+    } else {
+      Payment payment = payments.get(e.getId());
+
+      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.payoutReference = e.getTransactionReference().toString();
+      payment.payoutStatus = PayoutStatus.INITIATED;
+
+      payments.put(e.getId(), payment);
+    }
+  }
+
+  @EventSourcingHandler
+  public void on(AutomaticPaymentFailedEvent e, @Timestamp Instant timestamp) {
+    if (!payments.containsKey(e.getId())) {
+      log.error("AutomaticPaymentFailedEvent - Cannot find payment with id {} for claim {}",
+          e.getId(),
+          e.getClaimId());
+    } else {
+      Payment payment = payments.get(e.getId());
+
+      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.payoutStatus = PayoutStatus.parseToPayoutStatus(e.getTransactionStatus());
+
+      payments.put(e.getId(), payment);
+    }
   }
 
   @EventSourcingHandler

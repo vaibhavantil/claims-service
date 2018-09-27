@@ -1,5 +1,6 @@
 package com.hedvig.claims.commands;
 
+import com.hedvig.claims.web.dto.PaymentType;
 import java.time.LocalDateTime;
 import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
@@ -12,7 +13,8 @@ public class AddPaymentCommand {
   private static Logger log = LoggerFactory.getLogger(AddPaymentCommand.class);
 
   public String id;
-  @TargetAggregateIdentifier public String claimID;
+  @TargetAggregateIdentifier
+  public String claimID;
   public LocalDateTime date;
   public String userId;
 
@@ -20,4 +22,5 @@ public class AddPaymentCommand {
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;
+  public String handlerReference;
 }
