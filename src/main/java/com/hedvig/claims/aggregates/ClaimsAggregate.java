@@ -156,7 +156,6 @@ public class ClaimsAggregate {
     pe.setNote(command.getNote());
     pe.setPayoutDate(command.getPayoutDate());
     pe.setExGratia(command.getExGratia());
-    pe.setType(command.getType());
     pe.setHandlerReference(command.getHandlerReference());
     apply(pe);
   }

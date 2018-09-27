@@ -22,6 +22,5 @@ public class AddPaymentCommand {
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;
-  public PaymentType type;
   public String handlerReference;
 }

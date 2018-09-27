@@ -187,7 +187,6 @@ public class InternalController {
             payment.note,
             payment.payoutDate,
             payment.exGratia,
-            payment.type,
             payment.handlerReference);
 
     commandBus.sendAndWait(command);

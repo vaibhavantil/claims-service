@@ -6,6 +6,9 @@ import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 import com.hedvig.claims.aggregates.PayoutStatus;
+import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
+import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
+import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
@@ -13,9 +16,6 @@ import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
-import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
-import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
-import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -212,7 +212,7 @@ public class ClaimsEventListener {
     p.payoutDate = e.getPayoutDate();
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
-    p.type = e.getType();
+    p.type = PaymentType.Manual;
     p.handlerReference = e.getHandlerReference();
     claim.addPayment(p);
 

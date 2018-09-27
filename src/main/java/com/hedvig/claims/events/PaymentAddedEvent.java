@@ -16,6 +16,5 @@ public class PaymentAddedEvent {
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;
-  public PaymentType type = PaymentType.Manual;
   public String handlerReference;
 }
