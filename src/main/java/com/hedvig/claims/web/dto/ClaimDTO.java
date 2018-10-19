@@ -34,7 +34,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.date = c.registrationDate;
     this.audioURL = c.audioURL;
     this.userId = c.userId;
-    this.state = ClaimStates.valueOf(c.state);
+    this.state = c.state;
     this.claimID = c.id;
     this.reserve = c.reserve;
     this.type = c.type;
@@ -68,14 +68,14 @@ public class ClaimDTO extends HedvigBackofficeDTO {
   public ClaimDTO(
       String id,
       String userId,
-      String state,
+      ClaimStates state,
       Double reserve,
       String type,
       String audioURL,
       LocalDateTime registrationDate) {
     this.id = id;
     this.userId = userId;
-    this.state = ClaimStates.valueOf(state);
+    this.state = state;
     this.reserve = reserve;
     this.type = type;
     this.date = registrationDate;

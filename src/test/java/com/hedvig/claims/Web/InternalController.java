@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
+
+import com.hedvig.claims.services.ClaimsQueryService;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -56,6 +58,9 @@ public class InternalController {
 
   @MockBean
   private PaymentService paymentService;
+
+  @MockBean
+  private ClaimsQueryService claimsQueryService;
 
 
   @Test
