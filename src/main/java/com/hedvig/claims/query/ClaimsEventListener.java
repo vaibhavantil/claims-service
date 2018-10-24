@@ -53,7 +53,7 @@ public class ClaimsEventListener {
     claim.userId = e.getUserId();
     claim.registrationDate = e.getRegistrationDate();
     claim.audioURL = e.getAudioURL();
-    claim.state = ClaimsAggregate.ClaimStates.OPEN.name();
+    claim.state = ClaimsAggregate.ClaimStates.OPEN;
 
     // Init data structures
     claim.notes = new HashSet<Note>();
@@ -112,7 +112,7 @@ public class ClaimsEventListener {
     ev.userId = e.getUserId();
     ev.text = "Status updated from " + claim.state + " to " + e.getState().toString();
 
-    claim.state = e.getState().toString();
+    claim.state = e.getState();
     claim.addEvent(ev);
 
     claimRepository.save(claim);

@@ -14,6 +14,7 @@ import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
+import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.web.dto.ActiveClaimsDTO;
 import com.hedvig.claims.web.dto.ClaimDTO;
 import com.hedvig.claims.web.dto.ClaimDataType;
@@ -21,6 +22,8 @@ import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import com.hedvig.claims.web.dto.ClaimStateDTO;
 import com.hedvig.claims.web.dto.ClaimType;
 import com.hedvig.claims.web.dto.ClaimTypeDTO;
+import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO;
+import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
 import com.hedvig.claims.web.dto.DataItemDTO;
 import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
@@ -57,11 +60,13 @@ public class InternalController {
   private Logger log = LoggerFactory.getLogger(InternalController.class);
   private final ClaimsRepository claimsRepository;
   private final CommandGateway commandBus;
+  private final ClaimsQueryService claimsQueryService;
 
   @Autowired
-  public InternalController(CommandBus commandBus, ClaimsRepository repository) {
+  public InternalController(CommandBus commandBus, ClaimsRepository repository, ClaimsQueryService claimsQueryService) {
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
+    this.claimsQueryService = claimsQueryService;
   }
 
   @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
@@ -87,6 +92,13 @@ public class InternalController {
     }
 
     return ResponseEntity.ok(claims);
+  }
+
+  @RequestMapping(path = "/search", method = RequestMethod.GET)
+  public ClaimsSearchResultDTO search(ClaimsSearchRequestDTO req) {
+    log.info("Searching claims");
+    ClaimsSearchResultDTO res = claimsQueryService.search(req);
+    return res;
   }
 
   @RequestMapping(path = "/listclaims/{userId}", method = RequestMethod.GET)
@@ -120,7 +132,7 @@ public class InternalController {
   public Map<String, Long> getClaimsStatisticsByState() {
     Map<String, Long> statistics = new HashMap<>();
     for (ClaimsAggregate.ClaimStates state : ClaimsAggregate.ClaimStates.values()) {
-      statistics.put(state.name(), claimsRepository.countByState(state.name()));
+      statistics.put(state.name(), claimsRepository.countByState(state));
     }
 
     return statistics;

@@ -1,17 +1,25 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.Asset;
+import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 import java.time.LocalDateTime;
+import java.util.EnumMap;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+
+import com.hedvig.claims.util.EnumMapChecker;
+import com.hedvig.claims.web.dto.ClaimSortColumn;
+import com.hedvig.claims.web.dto.ClaimType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +32,10 @@ public class ClaimEntity {
   public String userId;
   public String audioURL;
   public LocalDateTime registrationDate;
-  public String state;
+
+  @Enumerated(EnumType.STRING)
+  public ClaimsAggregate.ClaimStates state;
+
   public String type;
   public Double reserve;
 
@@ -67,4 +78,13 @@ public class ClaimEntity {
   public void addAsset(Asset a) {
     assets.add(a);
   }
+
+  public static EnumMap<ClaimSortColumn, String> SORT_COLUMS_MAPPING = new EnumMap<ClaimSortColumn, String>(ClaimSortColumn.class) {{
+    put(ClaimSortColumn.DATE, "registrationDate");
+    put(ClaimSortColumn.TYPE, "type");
+    put(ClaimSortColumn.STATE, "state");
+    put(ClaimSortColumn.RESERVES, "reserve");
+
+    EnumMapChecker.ensureMapContainsAllEnumVals(this, ClaimSortColumn.class);
+  }};
 }
