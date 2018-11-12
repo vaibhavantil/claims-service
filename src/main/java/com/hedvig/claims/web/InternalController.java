@@ -328,6 +328,9 @@ public class InternalController {
     ct10.addRequiredData(typePlace);
     ct10.addOptionalData(typeTicket);
 
+    ClaimType ct11 = new ClaimType("Not covered", "Not covered");
+    ct11.addRequiredData(typeDate);
+
     claimTypes.add(ct1);
     claimTypes.add(ct2);
     claimTypes.add(ct3);
@@ -339,6 +342,7 @@ public class InternalController {
     claimTypes.add(ct8);
     claimTypes.add(ct9);
     claimTypes.add(ct10);
+    claimTypes.add(ct11);
 
     return ResponseEntity.ok(claimTypes);
   }
