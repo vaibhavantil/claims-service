@@ -344,6 +344,38 @@ public class InternalController {
     claimTypes.add(ct10);
     claimTypes.add(ct11);
 
+    // old claim types
+    ClaimDataType c11 = new ClaimDataType(DataType.DATE, "DATE", "Datum");
+    ClaimDataType c12 = new ClaimDataType(DataType.TEXT, "PLACE", "Plats");
+    ClaimDataType c13 = new ClaimDataType(DataType.ASSET, "ITEM", "Pryl");
+    ClaimDataType c14 = new ClaimDataType(DataType.FILE, "POLICE_REPORT", "Polisanmälan");
+    ClaimDataType c15 = new ClaimDataType(DataType.FILE, "RECIEPT", "Kvitto");
+
+    ClaimType oldCt1 = new ClaimType("THEFT", "Stöld");
+    oldCt1.addRequiredData(c11);
+    oldCt1.addRequiredData(c12);
+    oldCt1.addRequiredData(c13);
+    oldCt1.addOptionalData(c14);
+    oldCt1.addOptionalData(c15);
+
+    ClaimType oldCt2 = new ClaimType("FIRE", "Brand");
+    oldCt2.addRequiredData(c11);
+    oldCt2.addRequiredData(c12);
+    oldCt2.addRequiredData(c13);
+    oldCt2.addOptionalData(c14);
+    oldCt2.addOptionalData(c15);
+
+    ClaimType oldCt3 = new ClaimType("DRULLE", "Drulle");
+    oldCt3.addRequiredData(c11);
+    oldCt3.addRequiredData(c12);
+    oldCt3.addRequiredData(c13);
+    oldCt3.addOptionalData(c14);
+    oldCt3.addOptionalData(c15);
+
+    claimTypes.add(oldCt1);
+    claimTypes.add(oldCt2);
+    claimTypes.add(oldCt3);
+
     return ResponseEntity.ok(claimTypes);
   }
 }
