@@ -88,6 +88,15 @@ public class ClaimsAggregate {
             command.getUserId(),
             command.getRegistrationDate(),
             command.getState()));
+
+    if (command.getState() == ClaimStates.CLOSED) {
+      apply(
+        new ClaimsReserveUpdateEvent(
+          command.getClaimsId(),
+          LocalDateTime.now(),
+          command.getUserId(),
+          0.0));
+    }
   }
 
   @CommandHandler
