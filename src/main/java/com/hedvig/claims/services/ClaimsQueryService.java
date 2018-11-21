@@ -39,7 +39,7 @@ public class ClaimsQueryService {
     Page<ClaimEntity> res = claimsRepository.search(b.build());
 
     List<ClaimDTO> dtos = res.getContent().stream()
-      .map(e -> new ClaimDTO(e.id, e.userId, e.state, e.reserve, e.type, e.audioURL, e.registrationDate))
+      .map(e -> new ClaimDTO(e.id, e.userId, e.state, e.reserve, e.type, e.audioURL, e.registrationDate, e.claimSource))
       .collect(Collectors.toList());
 
     if (res.getPageable().isPaged()) {

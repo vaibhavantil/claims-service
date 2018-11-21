@@ -104,7 +104,7 @@ public class InternalController {
     ArrayList<ClaimDTO> claims = new ArrayList<>();
     for (ClaimEntity c : claimsRepository.findAll()) {
       claims.add(
-          new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate));
+          new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource));
     }
 
     return ResponseEntity.ok(claims);
@@ -126,7 +126,7 @@ public class InternalController {
         .map(
             c ->
                 new ClaimDTO(
-                    c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate))
+                    c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource))
         .collect(Collectors.toList());
   }
 

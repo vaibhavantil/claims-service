@@ -1,6 +1,7 @@
 package com.hedvig.claims.web.dto;
 
 import com.hedvig.claims.aggregates.Asset;
+import com.hedvig.claims.aggregates.ClaimSource;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
 import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
@@ -25,6 +26,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
   public ClaimStates state;
   public Double reserve;
   public String type;
+  public ClaimSource claimSource;
 
   public ClaimDTO() {
   }
@@ -38,6 +40,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.claimID = c.id;
     this.reserve = c.reserve;
     this.type = c.type;
+    this.claimSource = c.claimSource;
 
     for (Asset a : c.assets) {
       assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));
@@ -72,7 +75,8 @@ public class ClaimDTO extends HedvigBackofficeDTO {
       Double reserve,
       String type,
       String audioURL,
-      LocalDateTime registrationDate) {
+      LocalDateTime registrationDate,
+      ClaimSource claimSource) {
     this.id = id;
     this.userId = userId;
     this.state = state;
@@ -80,6 +84,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.type = type;
     this.date = registrationDate;
     this.audioURL = audioURL;
+    this.claimSource = claimSource;
   }
 
   public void addNote(NoteDTO n) {
