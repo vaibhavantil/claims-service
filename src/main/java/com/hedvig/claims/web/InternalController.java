@@ -26,6 +26,7 @@ import com.hedvig.claims.web.dto.ClaimTypeDTO;
 import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO;
 import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
 import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
+import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO;
 import com.hedvig.claims.web.dto.DataItemDTO;
 import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
@@ -94,7 +95,7 @@ public class InternalController {
         req.getMemberId(),
         req.getRegistrationDate(),
         req.getClaimSource()));
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uid));
   }
 
   @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
