@@ -1,6 +1,7 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.Asset;
+import com.hedvig.claims.aggregates.ClaimSource;
 import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
@@ -9,6 +10,7 @@ import com.hedvig.claims.aggregates.PayoutStatus;
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
 import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
 import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
+import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
@@ -22,6 +24,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Optional;
+
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -30,13 +34,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
+
 @Component
+@Slf4j
 public class ClaimsEventListener {
 
-  private static Logger log = LoggerFactory.getLogger(ClaimsEventListener.class);
   private final ClaimsRepository claimRepository;
   private final PaymentRepository paymentRepository;
-  private static final String SWEDEN_TIMEZONE = "Europe/Stockholm";
 
   @Autowired
   public ClaimsEventListener(ClaimsRepository claimRepository,
@@ -54,6 +59,7 @@ public class ClaimsEventListener {
     claim.registrationDate = e.getRegistrationDate();
     claim.audioURL = e.getAudioURL();
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
+    claim.claimSource = ClaimSource.APP;
 
     // Init data structures
     claim.notes = new HashSet<Note>();
@@ -69,6 +75,32 @@ public class ClaimsEventListener {
 
     claimRepository.save(claim);
   }
+
+  @EventHandler
+  public void on(BackofficeClaimCreatedEvent e) {
+    log.info("BackofficeClaimCreatedEvent: " + e);
+    ClaimEntity claim = new ClaimEntity();
+    claim.id = e.getId();
+    claim.userId = e.getMemberId();
+    claim.registrationDate = e.getRegistrationDate().atZone(SWEDEN_TZ).toLocalDateTime();
+    claim.state = ClaimsAggregate.ClaimStates.OPEN;
+    claim.claimSource = e.getClaimSource();
+
+    // Init data structures
+    claim.notes = new HashSet<Note>();
+    claim.payments = new HashSet<Payment>();
+    claim.assets = new HashSet<Asset>();
+    claim.events = new HashSet<Event>();
+
+    Event ev = new Event();
+    ev.type = e.getClass().getName();
+    ev.userId = e.getMemberId();
+    ev.text = "Claim created";
+    claim.addEvent(ev);
+
+    claimRepository.save(claim);
+  }
+
 
   @EventHandler
   public void on(NoteAddedEvent e) {
@@ -241,10 +273,10 @@ public class ClaimsEventListener {
                         "Could not find claim with id:" + e.getClaimId()));
     Payment p = new Payment();
     p.id = e.getId();
-    p.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.userId = e.getMemberId();
     p.amount = e.getAmount().getNumber().doubleValueExact();
-    p.payoutDate = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.note = e.getNote();
     p.exGratia = e.isExGracia();
     p.type = PaymentType.Automatic;
@@ -277,7 +309,7 @@ public class ClaimsEventListener {
       Payment payment = optionalPayment.get();
 
       payment.payoutStatus = PayoutStatus.INITIATED;
-      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
       payment.payoutReference = e.getTransactionReference().toString();
 
       paymentRepository.save(payment);
@@ -297,7 +329,7 @@ public class ClaimsEventListener {
       Payment payment = optionalPayment.get();
 
       payment.payoutStatus = PayoutStatus.parseToPayoutStatus(e.getTransactionStatus());
-      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
 
       paymentRepository.save(payment);
     }

@@ -1,5 +1,6 @@
 package com.hedvig.claims.aggregates;
 
+import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
@@ -8,6 +9,7 @@ import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
+import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
@@ -15,6 +17,7 @@ import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
 import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
 import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
+import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
@@ -25,23 +28,20 @@ import com.hedvig.claims.events.PaymentAddedEvent;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Aggregate
+@Slf4j
 public class ClaimsAggregate {
-
-  private static Logger log = LoggerFactory.getLogger(ClaimsAggregate.class);
-  private static final String SWEDEN_TIMEZONE = "Europe/Stockholm";
 
   public enum ClaimStates {
     OPEN,
@@ -58,6 +58,7 @@ public class ClaimsAggregate {
   public ClaimStates state;
   public Double reserve;
   public String type;
+  public ClaimSource claimSource;
 
   public ArrayList<DataItem> data;
   public HashMap<String, Payment> payments;
@@ -77,6 +78,17 @@ public class ClaimsAggregate {
             command.getUserId(),
             command.getRegistrationDate(),
             command.getAudioURL()));
+  }
+
+  @CommandHandler
+  public ClaimsAggregate(CreateBackofficeClaimCommand command) {
+    log.info("create claim");
+    apply(
+      new BackofficeClaimCreatedEvent(
+        command.getId(),
+        command.getMemberId(),
+        command.getRegistrationDate(),
+        command.getClaimSource()));
   }
 
   @CommandHandler
@@ -219,6 +231,22 @@ public class ClaimsAggregate {
     this.payments = new HashMap<>();
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
+    this.claimSource = ClaimSource.APP;
+  }
+
+  @EventSourcingHandler
+  public void on(BackofficeClaimCreatedEvent e) {
+    this.id = e.getId();
+    this.userId = e.getMemberId();
+    this.registrationDate = e.getRegistrationDate().atZone(SWEDEN_TZ).toLocalDateTime();
+    this.claimSource = e.getClaimSource();
+
+    // Init data structures
+    this.notes = new ArrayList<Note>();
+    this.payments = new HashMap<>();
+    this.assets = new ArrayList<String>();
+    this.data = new ArrayList<>();
+
   }
 
   @EventSourcingHandler
@@ -270,10 +298,10 @@ public class ClaimsAggregate {
   public void on(AutomaticPaymentAddedEvent e, @Timestamp Instant timestamp) {
     Payment p = new Payment();
     p.id = e.getId();
-    p.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.userId = e.getMemberId();
     p.amount = e.getAmount().getNumber().doubleValueExact();
-    p.payoutDate = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+    p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.note = e.getNote();
     p.exGratia = e.isExGracia();
     p.type = PaymentType.Automatic;
@@ -291,7 +319,7 @@ public class ClaimsAggregate {
     } else {
       Payment payment = payments.get(e.getId());
 
-      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
       payment.payoutReference = e.getTransactionReference().toString();
       payment.payoutStatus = PayoutStatus.INITIATED;
 
@@ -308,7 +336,7 @@ public class ClaimsAggregate {
     } else {
       Payment payment = payments.get(e.getId());
 
-      payment.date = LocalDateTime.ofInstant(timestamp, ZoneId.of(SWEDEN_TIMEZONE));
+      payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
       payment.payoutStatus = PayoutStatus.parseToPayoutStatus(e.getTransactionStatus());
 
       payments.put(e.getId(), payment);

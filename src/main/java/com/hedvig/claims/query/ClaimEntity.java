@@ -1,6 +1,7 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.Asset;
+import com.hedvig.claims.aggregates.ClaimSource;
 import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -35,6 +37,10 @@ public class ClaimEntity {
 
   @Enumerated(EnumType.STRING)
   public ClaimsAggregate.ClaimStates state;
+
+  @Enumerated(EnumType.STRING)
+  @Column(columnDefinition = "varchar(255) default 'APP'")
+  ClaimSource claimSource;
 
   public String type;
   public Double reserve;

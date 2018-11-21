@@ -7,6 +7,7 @@ import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
+import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
@@ -24,6 +25,7 @@ import com.hedvig.claims.web.dto.ClaimType;
 import com.hedvig.claims.web.dto.ClaimTypeDTO;
 import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO;
 import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
+import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
 import com.hedvig.claims.web.dto.DataItemDTO;
 import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
@@ -79,6 +81,19 @@ public class InternalController {
             requestData.getUserId(),
             LocalDateTime.now(),
             requestData.getAudioURL()));
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)
+  public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
+    log.info("Claim recieved!:" + req.toString());
+    UUID uid = UUID.randomUUID();
+    commandBus.sendAndWait(
+      new CreateBackofficeClaimCommand(
+        uid.toString(),
+        req.getMemberId(),
+        req.getRegistrationDate(),
+        req.getClaimSource()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
