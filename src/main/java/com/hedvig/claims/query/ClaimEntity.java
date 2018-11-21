@@ -40,7 +40,7 @@ public class ClaimEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(columnDefinition = "varchar(255) default 'APP'")
-  ClaimSource claimSource;
+  public ClaimSource claimSource;
 
   public String type;
   public Double reserve;
