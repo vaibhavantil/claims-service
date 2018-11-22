@@ -25,6 +25,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
   public ArrayList<DataItemDTO> data = new ArrayList<>();
   public ClaimStates state;
   public Double reserve;
+  public Double deductible;
   public String type;
   public ClaimSource claimSource;
 
@@ -41,6 +42,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.reserve = c.reserve;
     this.type = c.type;
     this.claimSource = c.claimSource;
+    this.deductible = c.deductible;
 
     for (Asset a : c.assets) {
       assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));
@@ -76,11 +78,13 @@ public class ClaimDTO extends HedvigBackofficeDTO {
       String type,
       String audioURL,
       LocalDateTime registrationDate,
-      ClaimSource claimSource) {
+      ClaimSource claimSource,
+      Double deductible) {
     this.id = id;
     this.userId = userId;
     this.state = state;
     this.reserve = reserve;
+    this.deductible = deductible;
     this.type = type;
     this.date = registrationDate;
     this.audioURL = audioURL;
