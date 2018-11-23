@@ -2,3 +2,15 @@ target
 **.iml
 .idea
 /src/main/resources/application-development.yml
+
+### VS Code ###
+.history
+.classpath
+.project
+.settings
+.vscode
+.sts4-cache
+.factorypath
+
+# jEnv
+.java-version

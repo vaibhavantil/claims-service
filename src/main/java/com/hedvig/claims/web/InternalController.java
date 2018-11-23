@@ -23,6 +23,7 @@ import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import com.hedvig.claims.web.dto.ClaimStateDTO;
 import com.hedvig.claims.web.dto.ClaimType;
 import com.hedvig.claims.web.dto.ClaimTypeDTO;
+import com.hedvig.claims.web.dto.ClaimsByIdsDTO;
 import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO;
 import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
 import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
@@ -56,8 +57,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.val;
+
 @RestController
-@RequestMapping({"/i/claims", "/_/claims"})
+@RequestMapping({ "/i/claims", "/_/claims" })
 public class InternalController {
 
   private Logger log = LoggerFactory.getLogger(InternalController.class);
@@ -76,12 +79,8 @@ public class InternalController {
   public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
     log.info("Claim recieved!:" + requestData.toString());
     UUID uid = UUID.randomUUID();
-    commandBus.sendAndWait(
-        new CreateClaimCommand(
-            uid.toString(),
-            requestData.getUserId(),
-            LocalDateTime.now(),
-            requestData.getAudioURL()));
+    commandBus.sendAndWait(new CreateClaimCommand(uid.toString(), requestData.getUserId(), LocalDateTime.now(),
+        requestData.getAudioURL()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -89,12 +88,8 @@ public class InternalController {
   public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
     log.info("Claim recieved!:" + req.toString());
     UUID uid = UUID.randomUUID();
-    commandBus.sendAndWait(
-      new CreateBackofficeClaimCommand(
-        uid.toString(),
-        req.getMemberId(),
-        req.getRegistrationDate(),
-        req.getClaimSource()));
+    commandBus.sendAndWait(new CreateBackofficeClaimCommand(uid.toString(), req.getMemberId(),
+        req.getRegistrationDate(), req.getClaimSource()));
     return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uid));
   }
 
@@ -103,8 +98,8 @@ public class InternalController {
     log.info("Getting all claims:");
     ArrayList<ClaimDTO> claims = new ArrayList<>();
     for (ClaimEntity c : claimsRepository.findAll()) {
-      claims.add(
-          new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource));
+      claims
+          .add(new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource));
     }
 
     return ResponseEntity.ok(claims);
@@ -120,13 +115,8 @@ public class InternalController {
   @RequestMapping(path = "/listclaims/{userId}", method = RequestMethod.GET)
   public List<ClaimDTO> getClaimsByUserId(@PathVariable String userId) {
     log.info("Getting claims for: {}", userId);
-    return claimsRepository
-        .findByUserId(userId)
-        .stream()
-        .map(
-            c ->
-                new ClaimDTO(
-                    c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource))
+    return claimsRepository.findByUserId(userId).stream().map(
+        c -> new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource))
         .collect(Collectors.toList());
   }
 
@@ -134,12 +124,8 @@ public class InternalController {
   public ActiveClaimsDTO getActiveClaims(@PathVariable String userId) {
     log.info("Getting active claim status for member: {}", userId);
 
-    Long activeClaims =
-        claimsRepository
-            .findByUserId(userId)
-            .stream()
-            .filter(c -> Objects.equals(c.state, OPEN.name()))
-            .count();
+    Long activeClaims = claimsRepository.findByUserId(userId).stream().filter(c -> Objects.equals(c.state, OPEN.name()))
+        .count();
 
     return new ActiveClaimsDTO(activeClaims.intValue());
   }
@@ -157,11 +143,8 @@ public class InternalController {
   @RequestMapping(path = "/claim", method = RequestMethod.GET)
   public ResponseEntity<ClaimDTO> getClaim(@RequestParam String claimID) {
     log.info("Getting claim with ID:" + claimID);
-    ClaimEntity claim =
-        claimsRepository
-            .findById(claimID)
-            .orElseThrow(
-                () -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
+    ClaimEntity claim = claimsRepository.findById(claimID)
+        .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
     ClaimDTO cdto = new ClaimDTO(claim);
     return ResponseEntity.ok(cdto);
   }
@@ -170,17 +153,8 @@ public class InternalController {
   public ResponseEntity<?> addDataItem(@RequestBody DataItemDTO data) {
     log.info("Adding data item:" + data.toString());
     UUID uid = UUID.randomUUID();
-    AddDataItemCommand command =
-        new AddDataItemCommand(
-            uid.toString(),
-            data.claimID,
-            LocalDateTime.now(),
-            data.userId,
-            data.type,
-            data.name,
-            data.title,
-            data.received,
-            data.value);
+    AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId,
+        data.type, data.name, data.title, data.received, data.value);
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -189,14 +163,8 @@ public class InternalController {
   public ResponseEntity<?> addNote(@RequestBody NoteDTO note) {
     log.info("Adding claim note:" + note.toString());
     UUID uid = UUID.randomUUID();
-    AddNoteCommand command =
-        new AddNoteCommand(
-            uid.toString(),
-            note.claimID,
-            LocalDateTime.now(),
-            note.text,
-            note.userId,
-            note.fileURL);
+    AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, LocalDateTime.now(), note.text,
+        note.userId, note.fileURL);
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -205,17 +173,8 @@ public class InternalController {
   public ResponseEntity<?> addPayment(@RequestBody PaymentDTO payment) {
     log.info("Adding manual payment note:" + payment.toString());
     UUID uid = UUID.randomUUID();
-    AddPaymentCommand command =
-        new AddPaymentCommand(
-            uid.toString(),
-            payment.claimID,
-            LocalDateTime.now(),
-            payment.userId,
-            payment.amount,
-            payment.note,
-            payment.payoutDate,
-            payment.exGratia,
-            payment.handlerReference);
+    AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID, LocalDateTime.now(),
+        payment.userId, payment.amount, payment.note, payment.payoutDate, payment.exGratia, payment.handlerReference);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -226,14 +185,8 @@ public class InternalController {
       @RequestBody PaymentDTO payment) {
     log.info("add automatic payment: {}" + payment.toString());
 
-    AddAutomaticPaymentCommand addAutomaticPaymentCommand =
-        new AddAutomaticPaymentCommand(
-            payment.claimID,
-            memberId,
-            Money.of(payment.amount, "SEK"),
-            payment.note,
-            payment.exGratia,
-            payment.handlerReference);
+    AddAutomaticPaymentCommand addAutomaticPaymentCommand = new AddAutomaticPaymentCommand(payment.claimID, memberId,
+        Money.of(payment.amount, "SEK"), payment.note, payment.exGratia, payment.handlerReference);
 
     commandBus.sendAndWait(addAutomaticPaymentCommand);
 
@@ -244,9 +197,8 @@ public class InternalController {
   public ResponseEntity<?> updateReserve(@RequestBody ReserveDTO reserve) {
     log.info("Updating claim reserve: " + reserve.toString());
 
-    UpdateClaimsReserveCommand command =
-        new UpdateClaimsReserveCommand(
-            reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
+    UpdateClaimsReserveCommand command = new UpdateClaimsReserveCommand(reserve.claimID, reserve.userId,
+        LocalDateTime.now(), reserve.amount);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -256,8 +208,8 @@ public class InternalController {
   public ResponseEntity<?> updateState(@RequestBody ClaimStateDTO state) {
     log.info("Updating claim reserve: " + state.toString());
 
-    UpdateClaimsStateCommand command =
-        new UpdateClaimsStateCommand(state.claimID, state.userId, LocalDateTime.now(), state.state);
+    UpdateClaimsStateCommand command = new UpdateClaimsStateCommand(state.claimID, state.userId, LocalDateTime.now(),
+        state.state);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -267,8 +219,8 @@ public class InternalController {
   public ResponseEntity<?> updateType(@RequestBody ClaimTypeDTO type) {
     log.info("Updating claim reserve: " + type.toString());
 
-    UpdateClaimTypeCommand command =
-        new UpdateClaimTypeCommand(type.claimID, type.userId, LocalDateTime.now(), type.type);
+    UpdateClaimTypeCommand command = new UpdateClaimTypeCommand(type.claimID, type.userId, LocalDateTime.now(),
+        type.type);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -282,8 +234,7 @@ public class InternalController {
     ClaimDataType typeDate = new ClaimDataType(DataType.DATE, "DATE", "Date");
     ClaimDataType typePlace = new ClaimDataType(DataType.TEXT, "PLACE", "Place");
     ClaimDataType typeItem = new ClaimDataType(DataType.ASSET, "ITEM", "Item");
-    ClaimDataType typePoliceReport = new ClaimDataType(DataType.FILE, "POLICE_REPORT",
-        "Police report");
+    ClaimDataType typePoliceReport = new ClaimDataType(DataType.FILE, "POLICE_REPORT", "Police report");
     ClaimDataType typeReceipt = new ClaimDataType(DataType.FILE, "RECEIPT", "Receipt");
     ClaimDataType typeTicket = new ClaimDataType(DataType.TICKET, "TICKET", "Ticket");
 
@@ -393,5 +344,17 @@ public class InternalController {
     claimTypes.add(oldCt3);
 
     return ResponseEntity.ok(claimTypes);
+  }
+
+  public ResponseEntity<List<ClaimDTO>> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
+    val claims = claimsRepository
+        .findAllById(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toList()));
+
+    if (claims.size() != dto.getIds().size()) {
+      log.error("Length mismatch on supplied claims and found claims: wanted {}, found {}", dto.getIds().size(), claims.size());
+      return ResponseEntity.notFound().build();
+    }
+
+    return ResponseEntity.ok(claims.stream().map(claim -> new ClaimDTO(claim)).collect(Collectors.toList()));
   }
 }
