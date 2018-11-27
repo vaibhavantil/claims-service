@@ -51,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -346,6 +347,7 @@ public class InternalController {
     return ResponseEntity.ok(claimTypes);
   }
 
+  @PostMapping("/many")
   public ResponseEntity<List<ClaimDTO>> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
     val claims = claimsRepository
         .findAllById(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toList()));
