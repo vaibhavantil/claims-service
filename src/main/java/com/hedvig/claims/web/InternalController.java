@@ -256,7 +256,7 @@ public class InternalController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @RequestMapping(path = "/updatedeductible", method = RequestMethod.POST)
+  @RequestMapping(path = "/updateDeductible", method = RequestMethod.POST)
   public ResponseEntity<?> updateReserve(@RequestBody DeductibleDTO deductible) {
     log.info("Updating claim Deductible: " + deductible.toString());
 
