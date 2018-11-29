@@ -1,5 +1,6 @@
 package com.hedvig.claims.commands;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
@@ -13,11 +14,11 @@ public class CreateClaimCommand {
 
   @TargetAggregateIdentifier public String id;
   public String userId;
-  private LocalDateTime registrationDate;
+  private Instant registrationDate;
   public String audioURL;
 
   public CreateClaimCommand(
-      String id, String userId, LocalDateTime registrationDate, String audioURL) {
+      String id, String userId, Instant registrationDate, String audioURL) {
     log.info("InitiateClaimCommand");
     this.id = id;
     this.userId = userId;

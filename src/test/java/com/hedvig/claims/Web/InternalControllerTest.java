@@ -12,7 +12,8 @@ import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
@@ -39,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ContextConfiguration(classes = ClaimServiceTestConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class InternalController {
+public class InternalControllerTest {
 
   private static final String MEMBER_ID = "12345";
   private static final MonetaryAmount CLAIM_PAYOUT_AMOUNT = Money.of(10000, "SEK");
@@ -73,7 +74,7 @@ public class InternalController {
         .willReturn(new PaymentResponse(TRANSACTION_ID, TransactionStatus.INITIATED));
 
     this.commandGateway.sendAndWait(
-        new CreateClaimCommand(CLAIM_ID, MEMBER_ID, LocalDateTime.now(), ""));
+        new CreateClaimCommand(CLAIM_ID, MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
         CLAIM_ID.toString(),
@@ -102,7 +103,7 @@ public class InternalController {
         .willReturn(new PaymentResponse(null, TransactionStatus.FAILED));
 
     this.commandGateway.sendAndWait(
-        new CreateClaimCommand(CLAIM_ID, MEMBER_ID, LocalDateTime.now(), ""));
+        new CreateClaimCommand(CLAIM_ID, MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
         CLAIM_ID.toString(),
@@ -130,7 +131,7 @@ public class InternalController {
         .willReturn(new PaymentResponse(null, TransactionStatus.FORBIDDEN));
 
     this.commandGateway.sendAndWait(
-        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, LocalDateTime.now(), ""));
+        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
         CLAIM_ID.toString(),
