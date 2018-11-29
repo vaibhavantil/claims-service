@@ -9,6 +9,7 @@ import org.dom4j.Element;
 import java.time.LocalDateTime;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
+import static com.hedvig.claims.util.TzHelper.UTC;
 
 public class ClaimCreatedEvent_v1 extends SingleEventUpcaster {
 
@@ -30,7 +31,7 @@ public class ClaimCreatedEvent_v1 extends SingleEventUpcaster {
         final Element regDate = rootElement.element("registrationDate");
 
         LocalDateTime date = LocalDateTime.parse(regDate.getText());
-        regDate.setText(date.atZone(SWEDEN_TZ).toInstant().toString());
+        regDate.setText(date.atZone(UTC).toInstant().toString());
 
         return document;
       }
