@@ -10,6 +10,7 @@ import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
+import com.hedvig.claims.commands.UpdateClaimsDeductibleCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.query.ClaimEntity;
@@ -24,6 +25,16 @@ import com.hedvig.claims.web.dto.ActiveClaimsDTO;
 import com.hedvig.claims.web.dto.ClaimDTO;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import com.hedvig.claims.web.dto.ClaimStateDTO;
 import com.hedvig.claims.web.dto.ClaimType;
 import com.hedvig.claims.web.dto.ClaimTypeDTO;
@@ -32,19 +43,12 @@ import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
 import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
 import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO;
 import com.hedvig.claims.web.dto.DataItemDTO;
+import com.hedvig.claims.web.dto.DeductibleDTO;
 import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
 import com.hedvig.claims.web.dto.ReserveDTO;
 import com.hedvig.claims.web.dto.StartClaimAudioDTO;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.val;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -117,7 +121,7 @@ public class InternalController {
     for (ClaimEntity c : claimsRepository.findAll()) {
       claims.add(
         new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-          c.claimSource));
+          c.claimSource, c.deductible));
     }
 
     return ResponseEntity.ok(claims);
@@ -140,7 +144,7 @@ public class InternalController {
         c ->
           new ClaimDTO(
             c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-            c.claimSource))
+            c.claimSource, c.deductible))
       .collect(Collectors.toList());
   }
 
@@ -308,6 +312,14 @@ public class InternalController {
         reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
 
     commandBus.sendAndWait(command);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @RequestMapping(path = "/updateDeductible", method = RequestMethod.POST)
+  public ResponseEntity<?> updateReserve(@RequestBody DeductibleDTO deductible) {
+    log.info("Updating claim Deductible: " + deductible.toString());
+
+    commandBus.sendAndWait(new UpdateClaimsDeductibleCommand(deductible.getClaimID(), deductible.getAmount()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 

@@ -21,7 +21,6 @@ import javax.persistence.OneToMany;
 
 import com.hedvig.claims.util.EnumMapChecker;
 import com.hedvig.claims.web.dto.ClaimSortColumn;
-import com.hedvig.claims.web.dto.ClaimType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +43,7 @@ public class ClaimEntity {
 
   public String type;
   public Double reserve;
+  public Double deductible;
 
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
