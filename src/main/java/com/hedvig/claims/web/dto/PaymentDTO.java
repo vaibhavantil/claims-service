@@ -56,4 +56,7 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     this.sanctionCheckSkipped = sanctionCheckSkipped;
     this.sanctionCheckSkippedReason = sanctionCheckSkippedReason;
   }
+
+  public PaymentDTO() {
+  }
 }
