@@ -15,4 +15,5 @@ public class AutomaticPaymentAddedEvent {
   private String note;
   private boolean isExGracia;
   private String handlerReference;
+  private boolean sanctionCheckSkipped;
 }
