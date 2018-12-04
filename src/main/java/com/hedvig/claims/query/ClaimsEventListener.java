@@ -13,6 +13,7 @@ import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ClaimsDeductibleUpdateEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
 import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
@@ -21,7 +22,6 @@ import com.hedvig.claims.events.PaymentAddedEvent;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -29,8 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -190,6 +188,26 @@ public class ClaimsEventListener {
     ev.text = "Reserve updated from " + claim.reserve + " to " + e.getAmount();
 
     claim.reserve = e.getAmount();
+    claim.addEvent(ev);
+
+    claimRepository.save(claim);
+  }
+
+  @EventSourcingHandler
+  public void on(ClaimsDeductibleUpdateEvent e) {
+    ClaimEntity claim =
+      claimRepository
+        .findById(e.getClaimID())
+        .orElseThrow(
+          () ->
+            new ResourceNotFoundException(
+              "Could not find claim with id:" + e.getClaimID()));
+
+    Event ev = new Event();
+    ev.type = e.getClass().getName();
+    ev.text = "Deductible updated from " + claim.deductible + " to " + e.getAmount();
+
+    claim.deductible = e.getAmount();
     claim.addEvent(ev);
 
     claimRepository.save(claim);
