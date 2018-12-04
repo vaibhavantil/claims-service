@@ -259,6 +259,30 @@ public class InternalController {
       && (memberStatus.equals(SanctionStatus.Undetermined)
       || memberStatus.equals(SanctionStatus.PartialHit))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    } else {
+      Optional<ClaimEntity> claimOptional = claimsRepository.findById(payment.claimID);
+
+      if (!claimOptional.isPresent()) {
+        return ResponseEntity.notFound().build();
+      }
+
+      if (payment.sanctionCheckSkippedReason.trim().length() < 5) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+      }
+
+      ClaimEntity claim = claimOptional.get();
+
+      UUID uid = UUID.randomUUID();
+      AddNoteCommand command =
+        new AddNoteCommand(
+          uid.toString(),
+          payment.claimID,
+          LocalDateTime.now(),
+          payment.sanctionCheckSkippedReason,
+          payment.userId,
+          claim.audioURL);
+
+      commandBus.sendAndWait(command);
     }
 
     AddAutomaticPaymentCommand addAutomaticPaymentCommand =
