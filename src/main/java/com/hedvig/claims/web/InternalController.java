@@ -251,7 +251,7 @@ public class InternalController {
     val member = memberOptional.get();
 
     SanctionStatus memberStatus = meerkat
-      .getMemberSanctionStatus(member.getFirstName() + " " + member.getLastName());
+      .getMemberSanctionStatus(String.format("%s %s", member.getFirstName(), member.getLastName()));
 
     if (memberStatus.equals(SanctionStatus.FullHit)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
