@@ -33,7 +33,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
@@ -75,11 +74,11 @@ public class ClaimsAggregate {
   public ClaimsAggregate(CreateClaimCommand command) {
     log.info("create claim");
     apply(
-        new ClaimCreatedEvent(
-            command.getId(),
-            command.getUserId(),
-            command.getRegistrationDate(),
-            command.getAudioURL()));
+      new ClaimCreatedEvent(
+        command.getId(),
+        command.getUserId(),
+        command.getRegistrationDate(),
+        command.getAudioURL()));
   }
 
   @CommandHandler
@@ -97,11 +96,11 @@ public class ClaimsAggregate {
   public void update(UpdateClaimsStateCommand command) {
     log.info("update claim state");
     apply(
-        new ClaimStatusUpdatedEvent(
-            command.getClaimsId(),
-            command.getUserId(),
-            command.getRegistrationDate(),
-            command.getState()));
+      new ClaimStatusUpdatedEvent(
+        command.getClaimsId(),
+        command.getUserId(),
+        command.getRegistrationDate(),
+        command.getState()));
 
     if (command.getState() == ClaimStates.CLOSED) {
       apply(
@@ -134,11 +133,11 @@ public class ClaimsAggregate {
   public void updateType(UpdateClaimTypeCommand command) {
     log.info("update claim type");
     apply(
-        new ClaimsTypeUpdateEvent(
-            command.getClaimsId(),
-            command.getRegistrationDate(),
-            command.getUserId(),
-            command.getType()));
+      new ClaimsTypeUpdateEvent(
+        command.getClaimsId(),
+        command.getRegistrationDate(),
+        command.getUserId(),
+        command.getType()));
   }
 
   @CommandHandler
@@ -192,16 +191,17 @@ public class ClaimsAggregate {
   @CommandHandler
   public void addAutomaticPayment(AddAutomaticPaymentCommand cmd) {
     log.info("add automatic payment to claim {} for member {}", cmd.getClaimId(),
-        cmd.getMemberId());
+      cmd.getMemberId());
 
     AutomaticPaymentAddedEvent e = new AutomaticPaymentAddedEvent(
-        UUID.randomUUID().toString(),
-        cmd.getClaimId(),
-        cmd.getMemberId(),
-        cmd.getAmount(),
-        cmd.getNote(),
-        cmd.isExGracia(),
-        cmd.getHandlerReference());
+      UUID.randomUUID().toString(),
+      cmd.getClaimId(),
+      cmd.getMemberId(),
+      cmd.getAmount(),
+      cmd.getNote(),
+      cmd.isExGracia(),
+      cmd.getHandlerReference(),
+      cmd.isSanctionCheckSkipped());
 
     apply(e);
   }
@@ -209,14 +209,14 @@ public class ClaimsAggregate {
   @CommandHandler
   public void addInitiatedAutomaticPayment(AddInitiatedAutomaticPaymentCommand cmd) {
     log.info("add initiated automatic payment to member {} for claim {}", cmd.getMemberId(),
-        cmd.getClaimId());
+      cmd.getClaimId());
 
     AutomaticPaymentInitiatedEvent e = new AutomaticPaymentInitiatedEvent(
-        cmd.getId(),
-        cmd.getClaimId(),
-        cmd.getMemberId(),
-        cmd.getTransactionReference(),
-        cmd.getTransactionStatus());
+      cmd.getId(),
+      cmd.getClaimId(),
+      cmd.getMemberId(),
+      cmd.getTransactionReference(),
+      cmd.getTransactionStatus());
 
     apply(e);
   }
@@ -224,13 +224,13 @@ public class ClaimsAggregate {
   @CommandHandler
   public void addFailedAutomaticPayment(AddFailedAutomaticPaymentCommand cmd) {
     log.info("payment failed to be processed to member {} for claim {}", cmd.getMemberId(),
-        cmd.getClaimId());
+      cmd.getClaimId());
 
     AutomaticPaymentFailedEvent e = new AutomaticPaymentFailedEvent(
-        cmd.getId(),
-        cmd.getClaimId(),
-        cmd.getMemberId(),
-        cmd.getTransactionStatus());
+      cmd.getId(),
+      cmd.getClaimId(),
+      cmd.getMemberId(),
+      cmd.getTransactionStatus());
 
     apply(e);
   }
@@ -331,8 +331,8 @@ public class ClaimsAggregate {
   public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
     if (!payments.containsKey(e.getId())) {
       log.error("AutomaticPaymentInitiatedEvent - Cannot find payment with id {} for claim {}",
-          e.getId(),
-          e.getClaimId());
+        e.getId(),
+        e.getClaimId());
     } else {
       Payment payment = payments.get(e.getId());
 
@@ -348,8 +348,8 @@ public class ClaimsAggregate {
   public void on(AutomaticPaymentFailedEvent e, @Timestamp Instant timestamp) {
     if (!payments.containsKey(e.getId())) {
       log.error("AutomaticPaymentFailedEvent - Cannot find payment with id {} for claim {}",
-          e.getId(),
-          e.getClaimId());
+        e.getId(),
+        e.getClaimId());
     } else {
       Payment payment = payments.get(e.getId());
 

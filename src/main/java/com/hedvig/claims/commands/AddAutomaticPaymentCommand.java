@@ -14,4 +14,5 @@ public class AddAutomaticPaymentCommand {
   private String note;
   private boolean isExGracia;
   private String handlerReference;
+  public boolean sanctionCheckSkipped;
 }

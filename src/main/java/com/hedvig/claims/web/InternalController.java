@@ -25,16 +25,6 @@ import com.hedvig.claims.web.dto.ActiveClaimsDTO;
 import com.hedvig.claims.web.dto.ClaimDTO;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.hedvig.claims.web.dto.ClaimStateDTO;
 import com.hedvig.claims.web.dto.ClaimType;
 import com.hedvig.claims.web.dto.ClaimTypeDTO;
@@ -48,7 +38,15 @@ import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
 import com.hedvig.claims.web.dto.ReserveDTO;
 import com.hedvig.claims.web.dto.StartClaimAudioDTO;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.val;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -296,7 +294,8 @@ public class InternalController {
         Money.of(payment.amount, "SEK"),
         payment.note,
         payment.exGratia,
-        payment.handlerReference);
+        payment.handlerReference,
+        payment.sanctionCheckSkipped);
 
     commandBus.sendAndWait(addAutomaticPaymentCommand);
 
@@ -319,7 +318,8 @@ public class InternalController {
   public ResponseEntity<?> updateReserve(@RequestBody DeductibleDTO deductible) {
     log.info("Updating claim Deductible: " + deductible.toString());
 
-    commandBus.sendAndWait(new UpdateClaimsDeductibleCommand(deductible.getClaimID(), deductible.getAmount()));
+    commandBus.sendAndWait(
+      new UpdateClaimsDeductibleCommand(deductible.getClaimID(), deductible.getAmount()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
