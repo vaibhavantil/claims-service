@@ -12,6 +12,7 @@ import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
+import com.hedvig.claims.commands.UpdateClaimsDeductibleCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
@@ -20,6 +21,7 @@ import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ClaimsDeductibleUpdateEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
 import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
@@ -115,11 +117,17 @@ public class ClaimsAggregate {
   public void updateReserve(UpdateClaimsReserveCommand command) {
     log.info("update claim reserve");
     apply(
-        new ClaimsReserveUpdateEvent(
-            command.getClaimsId(),
-            command.getRegistrationDate(),
-            command.getUserId(),
-            command.getAmount()));
+      new ClaimsReserveUpdateEvent(
+        command.getClaimsId(),
+        command.getRegistrationDate(),
+        command.getUserId(),
+        command.getAmount()));
+  }
+
+  @CommandHandler
+  public void updateDeductible(UpdateClaimsDeductibleCommand command) {
+    log.info("update claim deductible");
+    apply(new ClaimsDeductibleUpdateEvent(command.getClaimsId(), command.getAmount()));
   }
 
   @CommandHandler
