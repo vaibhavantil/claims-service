@@ -6,16 +6,6 @@ logging:
     com:
       hedvig: DEBUG
 
-hedvig:
-  kafka:
-    acks: all
-    retries: 3
-    bootstrap:
-      servers: localhost:9092
-      schema:
-        registry:
-          url: http://localhost:8081
-
 spring:
   jpa:
     generate-ddl: true
