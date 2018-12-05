@@ -400,9 +400,17 @@ public class InternalController {
     oldCt3.addOptionalData(c14);
     oldCt3.addOptionalData(c15);
 
+    ClaimType oldCt4 = new ClaimType("FILE", "Brand", true);
+    oldCt4.addRequiredData(c11);
+    oldCt4.addRequiredData(c12);
+    oldCt4.addRequiredData(c13);
+    oldCt4.addOptionalData(c14);
+    oldCt4.addOptionalData(c15);
+
     claimTypes.add(oldCt1);
     claimTypes.add(oldCt2);
     claimTypes.add(oldCt3);
+    claimTypes.add(oldCt4);
 
     return ResponseEntity.ok(claimTypes);
   }
