@@ -45,6 +45,7 @@ import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
 import com.hedvig.claims.web.dto.ReserveDTO;
 import com.hedvig.claims.web.dto.StartClaimAudioDTO;
+import java.util.stream.Stream;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -369,7 +370,7 @@ public class InternalController {
   }
 
   @PostMapping("/many")
-  public ResponseEntity<?> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
+  public ResponseEntity<Stream<ClaimDTO>> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
     val claims = claimsRepository
         .findAllById(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toList()));
 
