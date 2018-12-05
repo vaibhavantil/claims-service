@@ -348,7 +348,7 @@ public class InternalController {
   }
 
   @PostMapping("/many")
-  public ResponseEntity<List<ClaimDTO>> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
+  public ResponseEntity<?> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
     val claims = claimsRepository
         .findAllById(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toList()));
 
@@ -357,6 +357,6 @@ public class InternalController {
       return ResponseEntity.notFound().build();
     }
 
-    return ResponseEntity.ok(claims.stream().map(claim -> new ClaimDTO(claim)).collect(Collectors.toList()));
+    return ResponseEntity.ok(claims.stream().map(claim -> new ClaimDTO(claim)));
   }
 }
