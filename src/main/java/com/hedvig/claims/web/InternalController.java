@@ -51,6 +51,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.val;
+import java.time.Instant;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -94,8 +95,11 @@ public class InternalController {
     log.info("Claim recieved!:" + requestData.toString());
     UUID uid = UUID.randomUUID();
     commandBus.sendAndWait(
-      new CreateClaimCommand(uid.toString(), requestData.getUserId(), LocalDateTime.now(),
-        requestData.getAudioURL()));
+        new CreateClaimCommand(
+            uid.toString(),
+            requestData.getUserId(),
+            Instant.now(),
+            requestData.getAudioURL()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -281,8 +285,8 @@ public class InternalController {
     log.info("Updating claim reserve: " + reserve.toString());
 
     UpdateClaimsReserveCommand command =
-      new UpdateClaimsReserveCommand(
-        reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
+        new UpdateClaimsReserveCommand(
+            reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -460,7 +464,7 @@ public class InternalController {
       log.error("Length mismatch on supplied claims and found claims: wanted {}, found {}",
         dto.getIds().size(), claims.size());
       return ResponseEntity.notFound().build();
-    }
+}
 
     return ResponseEntity.ok(claims.stream().map(claim -> new ClaimDTO(claim)));
   }

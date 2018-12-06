@@ -24,8 +24,9 @@ import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.web.dto.PaymentRequestDTO;
+
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ContextConfiguration(classes = ClaimServiceTestConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class InternalController {
+public class InternalControllerTest {
 
   private static final String MEMBER_ID = "12345";
   private static final MonetaryAmount CLAIM_PAYOUT_AMOUNT = Money.of(10000, "SEK");
@@ -98,7 +99,7 @@ public class InternalController {
       .willReturn(new PaymentResponse(TRANSACTION_ID, TransactionStatus.INITIATED));
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, LocalDateTime.now(), ""));
+        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
@@ -128,7 +129,7 @@ public class InternalController {
       .willReturn(new PaymentResponse(null, TransactionStatus.FAILED));
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, LocalDateTime.now(), ""));
+        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
@@ -158,7 +159,7 @@ public class InternalController {
       .willReturn(new PaymentResponse(null, TransactionStatus.FORBIDDEN));
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, LocalDateTime.now(), ""));
+        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
@@ -233,7 +234,7 @@ public class InternalController {
      UUID CLAIM_ID = UUID.fromString("733c5cbe-f7d5-11e8-a18f-4b0bf766f99d");
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, LocalDateTime.now(), "TEST"));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), "TEST"));
 
     given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
 
@@ -262,7 +263,7 @@ public class InternalController {
     UUID CLAIM_ID = UUID.fromString("f5145de8-f7d7-11e8-a3a7-0bfc9d610820");
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, LocalDateTime.now(), "TEST"));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), "TEST"));
 
     given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
 

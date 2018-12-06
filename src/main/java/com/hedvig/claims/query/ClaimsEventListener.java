@@ -80,7 +80,7 @@ public class ClaimsEventListener {
     ClaimEntity claim = new ClaimEntity();
     claim.id = e.getId();
     claim.userId = e.getMemberId();
-    claim.registrationDate = e.getRegistrationDate().atZone(SWEDEN_TZ).toLocalDateTime();
+    claim.registrationDate = e.getRegistrationDate();
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
     claim.claimSource = e.getClaimSource();
 
