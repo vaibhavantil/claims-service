@@ -1,6 +1,7 @@
 package com.hedvig.claims.web.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class PaymentDTO extends HedvigBackofficeDTO {
 
@@ -10,6 +11,7 @@ public class PaymentDTO extends HedvigBackofficeDTO {
   public Boolean exGratia;
   public PaymentType type;
   public String handlerReference;
+  public UUID transactionId;
 
   public PaymentDTO(
     String paymentId,
@@ -21,7 +23,8 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     LocalDateTime payoutDate,
     Boolean exGratia,
     PaymentType type,
-    String handlerReference) {
+    String handlerReference,
+    UUID transactionId) {
     this.id = paymentId;
     this.claimID = claimsId;
     this.date = registrationDate;
@@ -32,5 +35,6 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     this.exGratia = exGratia;
     this.type = type;
     this.handlerReference = handlerReference;
+    this.transactionId = transactionId;
   }
 }

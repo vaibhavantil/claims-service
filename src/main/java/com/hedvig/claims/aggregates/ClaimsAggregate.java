@@ -337,7 +337,7 @@ public class ClaimsAggregate {
       Payment payment = payments.get(e.getId());
 
       payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-      payment.payoutReference = e.getTransactionReference().toString();
+      payment.payoutReference = e.getTransactionReference();
       payment.payoutStatus = PayoutStatus.INITIATED;
 
       payments.put(e.getId(), payment);

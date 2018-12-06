@@ -328,7 +328,7 @@ public class ClaimsEventListener {
 
       payment.payoutStatus = PayoutStatus.INITIATED;
       payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-      payment.payoutReference = e.getTransactionReference().toString();
+      payment.payoutReference = e.getTransactionReference();
 
       paymentRepository.save(payment);
     }
