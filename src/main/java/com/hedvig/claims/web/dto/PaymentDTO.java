@@ -10,8 +10,6 @@ public class PaymentDTO extends HedvigBackofficeDTO {
   public Boolean exGratia;
   public PaymentType type;
   public String handlerReference;
-  public boolean sanctionCheckSkipped;
-  public String sanctionCheckSkippedReason;
 
   public PaymentDTO(
     String paymentId,
@@ -34,29 +32,5 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     this.exGratia = exGratia;
     this.type = type;
     this.handlerReference = handlerReference;
-    this.sanctionCheckSkipped = false;
-    this.sanctionCheckSkippedReason = null;
-  }
-
-  public PaymentDTO(
-    String paymentId,
-    String claimsId,
-    LocalDateTime registrationDate,
-    String userId,
-    Double amount,
-    String note,
-    LocalDateTime payoutDate,
-    Boolean exGratia,
-    PaymentType type,
-    String handlerReference,
-    boolean sanctionCheckSkipped,
-    String sanctionCheckSkippedReason) {
-    this(paymentId, claimsId, registrationDate, userId, amount, note, payoutDate, exGratia, type,
-      handlerReference);
-    this.sanctionCheckSkipped = sanctionCheckSkipped;
-    this.sanctionCheckSkippedReason = sanctionCheckSkippedReason;
-  }
-
-  public PaymentDTO() {
   }
 }
