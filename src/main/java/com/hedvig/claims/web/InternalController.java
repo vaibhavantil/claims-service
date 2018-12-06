@@ -46,6 +46,7 @@ import com.hedvig.claims.web.dto.PaymentDTO;
 import com.hedvig.claims.web.dto.ReserveDTO;
 import com.hedvig.claims.web.dto.StartClaimAudioDTO;
 import java.util.stream.Stream;
+import java.time.Instant;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -66,7 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.val;
 
 @RestController
-@RequestMapping({ "/i/claims", "/_/claims" })
+@RequestMapping({"/i/claims", "/_/claims"})
 public class InternalController {
 
   private Logger log = LoggerFactory.getLogger(InternalController.class);
@@ -85,8 +86,12 @@ public class InternalController {
   public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
     log.info("Claim recieved!:" + requestData.toString());
     UUID uid = UUID.randomUUID();
-    commandBus.sendAndWait(new CreateClaimCommand(uid.toString(), requestData.getUserId(), LocalDateTime.now(),
-        requestData.getAudioURL()));
+    commandBus.sendAndWait(
+        new CreateClaimCommand(
+            uid.toString(),
+            requestData.getUserId(),
+            Instant.now(),
+            requestData.getAudioURL()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -131,7 +136,7 @@ public class InternalController {
     log.info("Getting active claim status for member: {}", userId);
 
     Long activeClaims = claimsRepository.findByUserId(userId).stream().filter(c -> Objects.equals(c.state, OPEN.name()))
-        .count();
+            .count();
 
     return new ActiveClaimsDTO(activeClaims.intValue());
   }
@@ -204,8 +209,8 @@ public class InternalController {
     log.info("Updating claim reserve: " + reserve.toString());
 
     UpdateClaimsReserveCommand command =
-      new UpdateClaimsReserveCommand(
-        reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
+        new UpdateClaimsReserveCommand(
+            reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -377,7 +382,7 @@ public class InternalController {
     if (claims.size() != dto.getIds().size()) {
       log.error("Length mismatch on supplied claims and found claims: wanted {}, found {}", dto.getIds().size(), claims.size());
       return ResponseEntity.notFound().build();
-    }
+}
 
     return ResponseEntity.ok(claims.stream().map(claim -> new ClaimDTO(claim)));
   }

@@ -6,6 +6,8 @@ import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.aggregates.DataItem;
 import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.Set;
@@ -32,7 +34,7 @@ public class ClaimEntity {
   @Id public String id;
   public String userId;
   public String audioURL;
-  public LocalDateTime registrationDate;
+  public Instant registrationDate;
 
   @Enumerated(EnumType.STRING)
   public ClaimsAggregate.ClaimStates state;

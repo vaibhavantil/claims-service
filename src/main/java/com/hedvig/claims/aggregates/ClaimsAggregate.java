@@ -56,7 +56,7 @@ public class ClaimsAggregate {
 
   public String userId;
   public String audioURL;
-  public LocalDateTime registrationDate;
+  public Instant registrationDate;
   public ClaimStates state;
   public Double reserve;
   public String type;
@@ -255,7 +255,7 @@ public class ClaimsAggregate {
   public void on(BackofficeClaimCreatedEvent e) {
     this.id = e.getId();
     this.userId = e.getMemberId();
-    this.registrationDate = e.getRegistrationDate().atZone(SWEDEN_TZ).toLocalDateTime();
+    this.registrationDate = e.getRegistrationDate();
     this.claimSource = e.getClaimSource();
 
     // Init data structures

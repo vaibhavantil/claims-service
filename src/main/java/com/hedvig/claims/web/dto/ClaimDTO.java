@@ -8,11 +8,15 @@ import com.hedvig.claims.aggregates.Note;
 import com.hedvig.claims.aggregates.Payment;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.Event;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 
 public class ClaimDTO extends HedvigBackofficeDTO {
 
@@ -34,7 +38,8 @@ public class ClaimDTO extends HedvigBackofficeDTO {
 
   public ClaimDTO(ClaimEntity c) {
     this.id = c.id;
-    this.date = c.registrationDate;
+    this.dateInstant = c.registrationDate;
+    this.date = c.registrationDate.atZone(SWEDEN_TZ).toLocalDateTime();
     this.audioURL = c.audioURL;
     this.userId = c.userId;
     this.state = c.state;
@@ -77,7 +82,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
       Double reserve,
       String type,
       String audioURL,
-      LocalDateTime registrationDate,
+      Instant registrationDate,
       ClaimSource claimSource,
       Double deductible) {
     this.id = id;
@@ -86,7 +91,8 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.reserve = reserve;
     this.deductible = deductible;
     this.type = type;
-    this.date = registrationDate;
+    this.dateInstant = registrationDate;
+    this.date = registrationDate.atZone(SWEDEN_TZ).toLocalDateTime();
     this.audioURL = audioURL;
     this.claimSource = claimSource;
   }
@@ -142,5 +148,13 @@ public class ClaimDTO extends HedvigBackofficeDTO {
 
   public void setRegistrationDate(LocalDateTime registrationDate) {
     this.date = registrationDate;
+  }
+
+  public Instant getRegistrationDateInstant() {
+    return dateInstant;
+  }
+
+  public void setRegistrationDateInstant(Instant registrationDate) {
+    this.dateInstant = registrationDate;
   }
 }

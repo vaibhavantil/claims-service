@@ -16,7 +16,10 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,8 +62,8 @@ public class ClaimsQueryServiceTest {
     init();
     ClaimsSearchResultDTO res = search(null, null, ClaimSortColumn.DATE, Sort.Direction.ASC);
     assertThat(res.getClaims().size()).isEqualTo(8);
-    assertThat(res.getClaims().get(0).getRegistrationDate()).isEqualTo(parseToLocalDateTime("27-09-2018 13:06:19"));
-    assertThat(res.getClaims().get(7).getRegistrationDate()).isEqualTo(parseToLocalDateTime("29-09-2018 17:38:26"));
+    assertThat(res.getClaims().get(0).getRegistrationDateInstant()).isEqualTo(parseToInstant("27-09-2018 13:06:19"));
+    assertThat(res.getClaims().get(7).getRegistrationDateInstant()).isEqualTo(parseToInstant("29-09-2018 17:38:26"));
   }
 
   @Test
@@ -68,8 +71,8 @@ public class ClaimsQueryServiceTest {
     init();
     ClaimsSearchResultDTO res = search(null, null, ClaimSortColumn.DATE, Sort.Direction.DESC);
     assertThat(res.getClaims().size()).isEqualTo(8);
-    assertThat(res.getClaims().get(0).getRegistrationDate()).isEqualTo(parseToLocalDateTime("29-09-2018 17:38:26"));
-    assertThat(res.getClaims().get(7).getRegistrationDate()).isEqualTo(parseToLocalDateTime("27-09-2018 13:06:19"));
+    assertThat(res.getClaims().get(0).getRegistrationDateInstant()).isEqualTo(parseToInstant("29-09-2018 17:38:26"));
+    assertThat(res.getClaims().get(7).getRegistrationDateInstant()).isEqualTo(parseToInstant("27-09-2018 13:06:19"));
   }
 
   @Test
@@ -143,7 +146,7 @@ public class ClaimsQueryServiceTest {
     ent.id = id;
     ent.userId = userId;
     ent.audioURL = "http://audio.local/rec/" + id;
-    ent.registrationDate = parseToLocalDateTime(regDate);
+    ent.registrationDate = parseToInstant(regDate);
     ent.state = state;
     ent.type = type;
     ent.reserve = reserve;
@@ -151,9 +154,9 @@ public class ClaimsQueryServiceTest {
     entityManager.persist(ent);
   }
 
-  private static LocalDateTime parseToLocalDateTime(String date) {
-    return LocalDateTime.from(dateFmt.parse(date));
+  private static Instant parseToInstant(String date) {
+    return Instant.from(dateFmt.parse(date));
   }
 
-  static final DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+  static final DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss").withZone(ZoneId.of("UTC"));
 }
