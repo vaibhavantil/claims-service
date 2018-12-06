@@ -132,7 +132,7 @@ public class InternalController {
   @RequestMapping(path = "/listclaims/{userId}", method = RequestMethod.GET)
   public List<ClaimDTO> getClaimsByUserId(@PathVariable String userId) {
     log.info("Getting claims for: {}", userId);
-    return claimsRepository.findByUserId(userId).stream().map(
+    return claimsRepository
       .findByUserId(userId)
       .stream()
       .map(
