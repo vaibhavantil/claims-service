@@ -5,4 +5,5 @@ public enum ClaimSource {
   EMAIL,
   INTERCOM,
   PHONE,
+  CHAT,
 }
