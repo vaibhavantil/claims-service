@@ -12,7 +12,6 @@ import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
-import com.hedvig.claims.commands.UpdateClaimsDeductibleCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
@@ -21,7 +20,6 @@ import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.events.ClaimsDeductibleUpdateEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
 import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
@@ -124,12 +122,6 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void updateDeductible(UpdateClaimsDeductibleCommand command) {
-    log.info("update claim deductible");
-    apply(new ClaimsDeductibleUpdateEvent(command.getClaimsId(), command.getAmount()));
-  }
-
-  @CommandHandler
   public void updateType(UpdateClaimTypeCommand command) {
     log.info("update claim type");
     apply(
@@ -181,6 +173,7 @@ public class ClaimsAggregate {
     pe.setUserId(command.getUserId());
 
     pe.setAmount(command.getAmount());
+    pe.setDeductible(command.getDeductible());
     pe.setNote(command.getNote());
     pe.setPayoutDate(command.getPayoutDate());
     pe.setExGratia(command.getExGratia());
@@ -198,6 +191,7 @@ public class ClaimsAggregate {
       cmd.getClaimId(),
       cmd.getMemberId(),
       cmd.getAmount(),
+      cmd.getDeductible(),
       cmd.getNote(),
       cmd.isExGracia(),
       cmd.getHandlerReference(),
@@ -302,6 +296,7 @@ public class ClaimsAggregate {
     p.date = e.getDate();
     p.userId = e.getUserId();
     p.amount = e.getAmount();
+    p.deductible = e.getDeductible();
     p.payoutDate = e.getPayoutDate();
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
@@ -318,6 +313,7 @@ public class ClaimsAggregate {
     p.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.userId = e.getMemberId();
     p.amount = e.getAmount().getNumber().doubleValueExact();
+    p.deductible = e.getDeductible().getNumber().doubleValueExact();
     p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.note = e.getNote();
     p.exGratia = e.isExGracia();

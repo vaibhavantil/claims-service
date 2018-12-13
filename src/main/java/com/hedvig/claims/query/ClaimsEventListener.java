@@ -15,7 +15,6 @@ import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.events.ClaimsDeductibleUpdateEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
 import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
@@ -193,26 +192,6 @@ public class ClaimsEventListener {
   }
 
   @EventSourcingHandler
-  public void on(ClaimsDeductibleUpdateEvent e) {
-    ClaimEntity claim =
-      claimRepository
-        .findById(e.getClaimID())
-        .orElseThrow(
-          () ->
-            new ResourceNotFoundException(
-              "Could not find claim with id:" + e.getClaimID()));
-
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
-    ev.text = "Deductible updated from " + claim.deductible + " to " + e.getAmount();
-
-    claim.deductible = e.getAmount();
-    claim.addEvent(ev);
-
-    claimRepository.save(claim);
-  }
-
-  @EventSourcingHandler
   public void on(DataItemAddedEvent e) {
     log.info("DattaItemAddedEvent: " + e);
     ClaimEntity claim =
@@ -258,6 +237,7 @@ public class ClaimsEventListener {
     p.date = e.getDate();
     p.userId = e.getUserId();
     p.amount = e.getAmount();
+    p.deductible = e.getDeductible();
     p.payoutDate = e.getPayoutDate();
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
@@ -292,6 +272,7 @@ public class ClaimsEventListener {
     p.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.userId = e.getMemberId();
     p.amount = e.getAmount().getNumber().doubleValueExact();
+    p.deductible = e.getDeductible().getNumber().doubleValueExact();
     p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.note = e.getNote();
     p.exGratia = e.isExGracia();

@@ -7,6 +7,7 @@ import java.util.UUID;
 public class PaymentDTO extends HedvigBackofficeDTO {
 
   public Double amount;
+  public Double deductible;
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;
@@ -21,6 +22,7 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     LocalDateTime registrationDate,
     String userId,
     Double amount,
+    Double deductible,
     String note,
     LocalDateTime payoutDate,
     Boolean exGratia,
@@ -33,6 +35,7 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     this.date = registrationDate;
     this.userId = userId;
     this.amount = amount;
+    this.deductible = deductible;
     this.note = note;
     this.payoutDate = payoutDate;
     this.exGratia = exGratia;

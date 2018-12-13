@@ -10,6 +10,7 @@ public class PaymentRequestDTO {
   UUID claimId;
   String memberId;
   MonetaryAmount amount;
+  MonetaryAmount deductible;
   String handlerReference;
   boolean sanctionCheckSkipped;
   String paymentRequestNote;

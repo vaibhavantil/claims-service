@@ -1,6 +1,5 @@
 package com.hedvig.claims.events;
 
-import com.hedvig.claims.web.dto.PaymentType;
 import java.time.LocalDateTime;
 import lombok.Data;
 
@@ -13,6 +12,7 @@ public class PaymentAddedEvent {
   public String userId;
 
   public Double amount;
+  public Double deductible;
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;

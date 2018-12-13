@@ -17,6 +17,7 @@ public class Payment {
   public String userId;
 
   public Double amount;
+  public Double deductible;
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;

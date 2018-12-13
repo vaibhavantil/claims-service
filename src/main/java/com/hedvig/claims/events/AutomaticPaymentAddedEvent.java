@@ -8,12 +8,13 @@ import lombok.Value;
 @AllArgsConstructor
 public class AutomaticPaymentAddedEvent {
 
-  private String Id;
-  private String claimId;
-  private String memberId;
-  private MonetaryAmount amount;
-  private String note;
-  private boolean isExGracia;
-  private String handlerReference;
-  private boolean sanctionCheckSkipped;
+  String Id;
+  String claimId;
+  String memberId;
+  MonetaryAmount amount;
+  MonetaryAmount deductible;
+  String note;
+  boolean isExGracia;
+  String handlerReference;
+  boolean sanctionCheckSkipped;
 }
