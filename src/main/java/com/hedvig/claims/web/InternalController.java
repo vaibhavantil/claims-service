@@ -259,7 +259,7 @@ public class InternalController {
           request.getClaimId().toString(),
           LocalDateTime.now(),
           request.getPaymentRequestNote(),
-          request.getMemberId(),
+          memberId,
           claim.audioURL);
 
       commandBus.sendAndWait(command);
@@ -268,7 +268,7 @@ public class InternalController {
     AddAutomaticPaymentCommand addAutomaticPaymentCommand =
       new AddAutomaticPaymentCommand(
         request.getClaimId().toString(),
-        request.getMemberId(),
+        memberId,
         request.getAmount(),
         request.getPaymentRequestNote(),
         request.isExGratia(),
