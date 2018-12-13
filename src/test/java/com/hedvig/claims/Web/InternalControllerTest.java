@@ -24,7 +24,6 @@ import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.web.dto.PaymentRequestDTO;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -35,7 +34,6 @@ import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.javamoney.moneta.Money;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -58,6 +56,7 @@ public class InternalControllerTest {
 
   private static final String MEMBER_ID = "12345";
   private static final MonetaryAmount CLAIM_PAYOUT_AMOUNT = Money.of(10000, "SEK");
+  private static final MonetaryAmount CLAIM_PAYOUT_DEDUCTABLE = Money.of(1500, "SEK");
   private static final String HEDVIG_HANDLER = "aristomachos@hedvig.con";
   private static final UUID TRANSACTION_ID = UUID
     .fromString("a0ac4158-c249-11e8-bdd4-83118ca7bf46");
@@ -99,12 +98,13 @@ public class InternalControllerTest {
       .willReturn(new PaymentResponse(TRANSACTION_ID, TransactionStatus.INITIATED));
 
     this.commandGateway.sendAndWait(
-        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
       MEMBER_ID,
       CLAIM_PAYOUT_AMOUNT,
+      CLAIM_PAYOUT_DEDUCTABLE,
       null,
       false,
       HEDVIG_HANDLER,
@@ -129,12 +129,13 @@ public class InternalControllerTest {
       .willReturn(new PaymentResponse(null, TransactionStatus.FAILED));
 
     this.commandGateway.sendAndWait(
-        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
       MEMBER_ID,
       CLAIM_PAYOUT_AMOUNT,
+      CLAIM_PAYOUT_DEDUCTABLE,
       null,
       false,
       HEDVIG_HANDLER,
@@ -159,12 +160,13 @@ public class InternalControllerTest {
       .willReturn(new PaymentResponse(null, TransactionStatus.FORBIDDEN));
 
     this.commandGateway.sendAndWait(
-        new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
       MEMBER_ID,
       CLAIM_PAYOUT_AMOUNT,
+      CLAIM_PAYOUT_DEDUCTABLE,
       null,
       false,
       HEDVIG_HANDLER,
@@ -231,7 +233,7 @@ public class InternalControllerTest {
   public void Should_ReturnSuccess_WhenMemberSeemsLikeTerroristButWeWantToBypassMeerkat()
     throws Exception {
 
-     UUID CLAIM_ID = UUID.fromString("733c5cbe-f7d5-11e8-a18f-4b0bf766f99d");
+    UUID CLAIM_ID = UUID.fromString("733c5cbe-f7d5-11e8-a18f-4b0bf766f99d");
 
     this.commandGateway.sendAndWait(
       new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), "TEST"));
@@ -287,7 +289,8 @@ public class InternalControllerTest {
 
   private PaymentRequestDTO makePaymentRequestDto(UUID claimId, boolean bypass,
     String reason) {
-    return new PaymentRequestDTO(claimId, "12345", Money.of(1234, "SEK"), "test@hedvig.com", bypass,
+    return new PaymentRequestDTO(claimId, "12345", Money.of(1234, "SEK"), Money.of(1500, "SEK"),
+      "test@hedvig.com", bypass,
       reason, false);
   }
 
