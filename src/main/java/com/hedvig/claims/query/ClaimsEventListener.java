@@ -223,7 +223,7 @@ public class ClaimsEventListener {
   }
 
   @EventSourcingHandler
-  public void on(PaymentAddedEvent e) {
+  public void on(PaymentAddedEvent e, @Timestamp Instant timestamp) {
     log.info("PaymentAddedEvent: " + e);
     ClaimEntity claim =
       claimRepository
@@ -238,11 +238,12 @@ public class ClaimsEventListener {
     p.userId = e.getUserId();
     p.amount = e.getAmount();
     p.deductible = e.getDeductible();
-    p.payoutDate = e.getPayoutDate();
+    p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
     p.type = PaymentType.Manual;
     p.handlerReference = e.getHandlerReference();
+    p.payoutStatus = PayoutStatus.COMPLETED;
     claim.addPayment(p);
 
     Event ev = new Event();
