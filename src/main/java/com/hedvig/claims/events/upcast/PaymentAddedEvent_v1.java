@@ -1,18 +1,16 @@
 package com.hedvig.claims.events.upcast;
 
-import com.hedvig.claims.events.ClaimCreatedEvent;
+import com.hedvig.claims.events.PaymentAddedEvent;
+import lombok.Value;
 import org.axonframework.serialization.SimpleSerializedType;
 import org.axonframework.serialization.upcasting.event.IntermediateEventRepresentation;
 import org.axonframework.serialization.upcasting.event.SingleEventUpcaster;
 import org.dom4j.Element;
 
-import java.time.LocalDateTime;
+@Value
+public class PaymentAddedEvent_v1 extends SingleEventUpcaster {
 
-import static com.hedvig.claims.util.TzHelper.UTC;
-
-public class ClaimCreatedEvent_v1 extends SingleEventUpcaster {
-
-  private static SimpleSerializedType targetType = new SimpleSerializedType(ClaimCreatedEvent.class.getTypeName(), null);
+  private static SimpleSerializedType targetType = new SimpleSerializedType(PaymentAddedEvent.class.getTypeName(), null);
 
   @Override
   protected boolean canUpcast(IntermediateEventRepresentation intermediateRepresentation) {
@@ -27,10 +25,8 @@ public class ClaimCreatedEvent_v1 extends SingleEventUpcaster {
       document -> {
         final Element rootElement = document.getRootElement();
 
-        final Element regDate = rootElement.element("registrationDate");
-
-        LocalDateTime date = LocalDateTime.parse(regDate.getText());
-        regDate.setText(date.atZone(UTC).toInstant().toString());
+        final Element regDeductible = rootElement.element("deductible");
+        regDeductible.setData((double) 1500);
 
         return document;
       }

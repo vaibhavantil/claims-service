@@ -164,20 +164,20 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void addPayment(AddPaymentCommand command) {
+  public void addPayment(AddPaymentCommand cmd) {
     log.info("adding payment to claim");
-    PaymentAddedEvent pe = new PaymentAddedEvent();
-    pe.setClaimsId(command.getClaimID());
-    pe.setDate(command.getDate());
-    pe.setId(command.getId());
-    pe.setUserId(command.getUserId());
-
-    pe.setAmount(command.getAmount());
-    pe.setDeductible(command.getDeductible());
-    pe.setNote(command.getNote());
-    pe.setPayoutDate(command.getPayoutDate());
-    pe.setExGratia(command.getExGratia());
-    pe.setHandlerReference(command.getHandlerReference());
+    PaymentAddedEvent pe = new PaymentAddedEvent(
+      cmd.getId(),
+      cmd.getClaimID(),
+      cmd.getDate(),
+      cmd.getUserId(),
+      cmd.getAmount(),
+      cmd.getDeductible(),
+      cmd.getNote(),
+      cmd.getPayoutDate(),
+      cmd.getExGratia(),
+      cmd.getHandlerReference()
+    );
     apply(pe);
   }
 
