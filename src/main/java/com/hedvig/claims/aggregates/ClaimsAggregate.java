@@ -12,7 +12,6 @@ import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
-import com.hedvig.claims.commands.UpdateClaimsDeductibleCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
@@ -21,7 +20,6 @@ import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.events.ClaimsDeductibleUpdateEvent;
 import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
 import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
@@ -33,7 +31,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
@@ -75,11 +72,11 @@ public class ClaimsAggregate {
   public ClaimsAggregate(CreateClaimCommand command) {
     log.info("create claim");
     apply(
-        new ClaimCreatedEvent(
-            command.getId(),
-            command.getUserId(),
-            command.getRegistrationDate(),
-            command.getAudioURL()));
+      new ClaimCreatedEvent(
+        command.getId(),
+        command.getUserId(),
+        command.getRegistrationDate(),
+        command.getAudioURL()));
   }
 
   @CommandHandler
@@ -97,11 +94,11 @@ public class ClaimsAggregate {
   public void update(UpdateClaimsStateCommand command) {
     log.info("update claim state");
     apply(
-        new ClaimStatusUpdatedEvent(
-            command.getClaimsId(),
-            command.getUserId(),
-            command.getRegistrationDate(),
-            command.getState()));
+      new ClaimStatusUpdatedEvent(
+        command.getClaimsId(),
+        command.getUserId(),
+        command.getRegistrationDate(),
+        command.getState()));
 
     if (command.getState() == ClaimStates.CLOSED) {
       apply(
@@ -125,20 +122,14 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void updateDeductible(UpdateClaimsDeductibleCommand command) {
-    log.info("update claim deductible");
-    apply(new ClaimsDeductibleUpdateEvent(command.getClaimsId(), command.getAmount()));
-  }
-
-  @CommandHandler
   public void updateType(UpdateClaimTypeCommand command) {
     log.info("update claim type");
     apply(
-        new ClaimsTypeUpdateEvent(
-            command.getClaimsId(),
-            command.getRegistrationDate(),
-            command.getUserId(),
-            command.getType()));
+      new ClaimsTypeUpdateEvent(
+        command.getClaimsId(),
+        command.getRegistrationDate(),
+        command.getUserId(),
+        command.getType()));
   }
 
   @CommandHandler
@@ -173,35 +164,38 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void addPayment(AddPaymentCommand command) {
+  public void addPayment(AddPaymentCommand cmd) {
     log.info("adding payment to claim");
-    PaymentAddedEvent pe = new PaymentAddedEvent();
-    pe.setClaimsId(command.getClaimID());
-    pe.setDate(command.getDate());
-    pe.setId(command.getId());
-    pe.setUserId(command.getUserId());
-
-    pe.setAmount(command.getAmount());
-    pe.setNote(command.getNote());
-    pe.setPayoutDate(command.getPayoutDate());
-    pe.setExGratia(command.getExGratia());
-    pe.setHandlerReference(command.getHandlerReference());
+    PaymentAddedEvent pe = new PaymentAddedEvent(
+      cmd.getId(),
+      cmd.getClaimID(),
+      cmd.getDate(),
+      cmd.getUserId(),
+      cmd.getAmount(),
+      cmd.getDeductible(),
+      cmd.getNote(),
+      cmd.getPayoutDate(),
+      cmd.getExGratia(),
+      cmd.getHandlerReference()
+    );
     apply(pe);
   }
 
   @CommandHandler
   public void addAutomaticPayment(AddAutomaticPaymentCommand cmd) {
     log.info("add automatic payment to claim {} for member {}", cmd.getClaimId(),
-        cmd.getMemberId());
+      cmd.getMemberId());
 
     AutomaticPaymentAddedEvent e = new AutomaticPaymentAddedEvent(
-        UUID.randomUUID().toString(),
-        cmd.getClaimId(),
-        cmd.getMemberId(),
-        cmd.getAmount(),
-        cmd.getNote(),
-        cmd.isExGracia(),
-        cmd.getHandlerReference());
+      UUID.randomUUID().toString(),
+      cmd.getClaimId(),
+      cmd.getMemberId(),
+      cmd.getAmount(),
+      cmd.getDeductible(),
+      cmd.getNote(),
+      cmd.isExGracia(),
+      cmd.getHandlerReference(),
+      cmd.isSanctionCheckSkipped());
 
     apply(e);
   }
@@ -209,14 +203,14 @@ public class ClaimsAggregate {
   @CommandHandler
   public void addInitiatedAutomaticPayment(AddInitiatedAutomaticPaymentCommand cmd) {
     log.info("add initiated automatic payment to member {} for claim {}", cmd.getMemberId(),
-        cmd.getClaimId());
+      cmd.getClaimId());
 
     AutomaticPaymentInitiatedEvent e = new AutomaticPaymentInitiatedEvent(
-        cmd.getId(),
-        cmd.getClaimId(),
-        cmd.getMemberId(),
-        cmd.getTransactionReference(),
-        cmd.getTransactionStatus());
+      cmd.getId(),
+      cmd.getClaimId(),
+      cmd.getMemberId(),
+      cmd.getTransactionReference(),
+      cmd.getTransactionStatus());
 
     apply(e);
   }
@@ -224,13 +218,13 @@ public class ClaimsAggregate {
   @CommandHandler
   public void addFailedAutomaticPayment(AddFailedAutomaticPaymentCommand cmd) {
     log.info("payment failed to be processed to member {} for claim {}", cmd.getMemberId(),
-        cmd.getClaimId());
+      cmd.getClaimId());
 
     AutomaticPaymentFailedEvent e = new AutomaticPaymentFailedEvent(
-        cmd.getId(),
-        cmd.getClaimId(),
-        cmd.getMemberId(),
-        cmd.getTransactionStatus());
+      cmd.getId(),
+      cmd.getClaimId(),
+      cmd.getMemberId(),
+      cmd.getTransactionStatus());
 
     apply(e);
   }
@@ -302,6 +296,7 @@ public class ClaimsAggregate {
     p.date = e.getDate();
     p.userId = e.getUserId();
     p.amount = e.getAmount();
+    p.deductible = e.getDeductible();
     p.payoutDate = e.getPayoutDate();
     p.note = e.getNote();
     p.exGratia = e.getExGratia();
@@ -318,6 +313,7 @@ public class ClaimsAggregate {
     p.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.userId = e.getMemberId();
     p.amount = e.getAmount().getNumber().doubleValueExact();
+    p.deductible = e.getDeductible().getNumber().doubleValueExact();
     p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
     p.note = e.getNote();
     p.exGratia = e.isExGracia();
@@ -331,13 +327,13 @@ public class ClaimsAggregate {
   public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
     if (!payments.containsKey(e.getId())) {
       log.error("AutomaticPaymentInitiatedEvent - Cannot find payment with id {} for claim {}",
-          e.getId(),
-          e.getClaimId());
+        e.getId(),
+        e.getClaimId());
     } else {
       Payment payment = payments.get(e.getId());
 
       payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-      payment.payoutReference = e.getTransactionReference().toString();
+      payment.payoutReference = e.getTransactionReference();
       payment.payoutStatus = PayoutStatus.INITIATED;
 
       payments.put(e.getId(), payment);
@@ -348,8 +344,8 @@ public class ClaimsAggregate {
   public void on(AutomaticPaymentFailedEvent e, @Timestamp Instant timestamp) {
     if (!payments.containsKey(e.getId())) {
       log.error("AutomaticPaymentFailedEvent - Cannot find payment with id {} for claim {}",
-          e.getId(),
-          e.getClaimId());
+        e.getId(),
+        e.getClaimId());
     } else {
       Payment payment = payments.get(e.getId());
 

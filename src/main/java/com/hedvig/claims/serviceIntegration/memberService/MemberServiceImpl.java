@@ -2,7 +2,6 @@ package com.hedvig.claims.serviceIntegration.memberService;
 
 
 import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
-import com.hedvig.claims.serviceIntegration.memberService.dto.SanctionStatus;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,21 +30,6 @@ public class MemberServiceImpl implements MemberService {
         return Optional.empty();
       }
       log.error("Could not find member {} , {}", memberId, ex);
-      throw ex;
-    }
-  }
-
-  @Override
-  public SanctionStatus getMemberSanctionStatus(String memberId) {
-    try {
-      ResponseEntity<SanctionStatus> response = memberServiceClient
-          .getSanctionListStatus(memberId);
-      return response.getBody();
-    } catch (RestClientResponseException ex) {
-      if (ex.getRawStatusCode() == 404) {
-        return SanctionStatus.Undetermined;
-      }
-      log.error("Could not check sanction list for member {} , {}", memberId, ex);
       throw ex;
     }
   }

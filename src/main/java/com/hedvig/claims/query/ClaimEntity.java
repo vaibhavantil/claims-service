@@ -45,7 +45,6 @@ public class ClaimEntity {
 
   public String type;
   public Double reserve;
-  public Double deductible;
 
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")

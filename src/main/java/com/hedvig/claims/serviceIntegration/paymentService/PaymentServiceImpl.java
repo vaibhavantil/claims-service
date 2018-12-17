@@ -1,9 +1,9 @@
 package com.hedvig.claims.serviceIntegration.paymentService;
 
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
+import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
 import java.util.UUID;
-import javax.money.MonetaryAmount;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
@@ -14,18 +14,18 @@ public class PaymentServiceImpl implements PaymentService {
   private PaymentServiceClient paymentServiceClient;
 
   public PaymentServiceImpl(
-      PaymentServiceClient paymentServiceClient) {
+    PaymentServiceClient paymentServiceClient) {
     this.paymentServiceClient = paymentServiceClient;
   }
 
   @Override
-  public PaymentResponse executePayment(String memberId, MonetaryAmount amount) {
+  public PaymentResponse executePayment(String memberId, PayoutRequest request) {
     try {
-      ResponseEntity<UUID> response = paymentServiceClient.executePayment(memberId, amount);
+      ResponseEntity<UUID> response = paymentServiceClient.executePayment(memberId, request);
 
       return response.getStatusCode().is2xxSuccessful() ? new PaymentResponse(response.getBody(),
-          TransactionStatus.INITIATED)
-          : new PaymentResponse(response.getBody(), TransactionStatus.NOT_ACCEPTED);
+        TransactionStatus.INITIATED)
+        : new PaymentResponse(response.getBody(), TransactionStatus.NOT_ACCEPTED);
     } catch (RestClientResponseException ex) {
       if (ex.getRawStatusCode() == 404) {
         return new PaymentResponse(null, TransactionStatus.NOT_ACCEPTED);

@@ -1,20 +1,22 @@
 package com.hedvig.claims.events;
 
-import com.hedvig.claims.web.dto.PaymentType;
 import java.time.LocalDateTime;
-import lombok.Data;
+import lombok.Value;
+import org.axonframework.serialization.Revision;
 
-@Data
+@Value
+@Revision("1.0")
 public class PaymentAddedEvent {
 
-  private String id;
-  private String claimsId;
-  public LocalDateTime date;
-  public String userId;
+  String id;
+  String claimsId;
+  LocalDateTime date;
+  String userId;
 
-  public Double amount;
-  public String note;
-  public LocalDateTime payoutDate;
-  public Boolean exGratia;
-  public String handlerReference;
+  Double amount;
+  Double deductible;
+  String note;
+  LocalDateTime payoutDate;
+  Boolean exGratia;
+  String handlerReference;
 }

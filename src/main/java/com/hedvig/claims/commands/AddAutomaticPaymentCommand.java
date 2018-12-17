@@ -8,10 +8,12 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 public class AddAutomaticPaymentCommand {
 
   @TargetAggregateIdentifier
-  private String claimId;
-  private String memberId;
-  private MonetaryAmount amount;
-  private String note;
-  private boolean isExGracia;
-  private String handlerReference;
+  String claimId;
+  String memberId;
+  MonetaryAmount amount;
+  MonetaryAmount deductible;
+  String note;
+  boolean isExGracia;
+  String handlerReference;
+  boolean sanctionCheckSkipped;
 }

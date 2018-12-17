@@ -10,27 +10,20 @@ import com.hedvig.claims.commands.AddPaymentCommand;
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
-import com.hedvig.claims.commands.UpdateClaimsDeductibleCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
+import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
+import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
+import com.hedvig.claims.serviceIntegration.memberService.MemberService;
+import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.web.dto.ActiveClaimsDTO;
 import com.hedvig.claims.web.dto.ClaimDTO;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.hedvig.claims.web.dto.ClaimStateDTO;
 import com.hedvig.claims.web.dto.ClaimType;
 import com.hedvig.claims.web.dto.ClaimTypeDTO;
@@ -40,17 +33,26 @@ import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
 import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
 import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO;
 import com.hedvig.claims.web.dto.DataItemDTO;
-import com.hedvig.claims.web.dto.DeductibleDTO;
 import com.hedvig.claims.web.dto.NoteDTO;
 import com.hedvig.claims.web.dto.PaymentDTO;
+import com.hedvig.claims.web.dto.PaymentRequestDTO;
 import com.hedvig.claims.web.dto.ReserveDTO;
 import com.hedvig.claims.web.dto.StartClaimAudioDTO;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.val;
 import java.time.Instant;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
-import org.javamoney.moneta.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +66,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.val;
-
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
 public class InternalController {
@@ -74,12 +74,18 @@ public class InternalController {
   private final ClaimsRepository claimsRepository;
   private final CommandGateway commandBus;
   private final ClaimsQueryService claimsQueryService;
+  private final Meerkat meerkat;
+  private final MemberService memberService;
 
   @Autowired
-  public InternalController(CommandBus commandBus, ClaimsRepository repository, ClaimsQueryService claimsQueryService) {
+  public InternalController(CommandBus commandBus, ClaimsRepository repository,
+    ClaimsQueryService claimsQueryService,
+    Meerkat meerkat, MemberService memberService) {
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
     this.claimsQueryService = claimsQueryService;
+    this.meerkat = meerkat;
+    this.memberService = memberService;
   }
 
   @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
@@ -100,7 +106,7 @@ public class InternalController {
     log.info("Claim recieved!:" + req.toString());
     UUID uid = UUID.randomUUID();
     commandBus.sendAndWait(new CreateBackofficeClaimCommand(uid.toString(), req.getMemberId(),
-        req.getRegistrationDate(), req.getClaimSource()));
+      req.getRegistrationDate(), req.getClaimSource()));
     return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uid));
   }
 
@@ -110,7 +116,8 @@ public class InternalController {
     ArrayList<ClaimDTO> claims = new ArrayList<>();
     for (ClaimEntity c : claimsRepository.findAll()) {
       claims.add(
-          new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource, c.deductible));
+        new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
+          c.claimSource));
     }
 
     return ResponseEntity.ok(claims);
@@ -126,17 +133,24 @@ public class InternalController {
   @RequestMapping(path = "/listclaims/{userId}", method = RequestMethod.GET)
   public List<ClaimDTO> getClaimsByUserId(@PathVariable String userId) {
     log.info("Getting claims for: {}", userId);
-    return claimsRepository.findByUserId(userId).stream().map(
-        c -> new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate, c.claimSource, c.deductible))
-        .collect(Collectors.toList());
+    return claimsRepository
+      .findByUserId(userId)
+      .stream()
+      .map(
+        c ->
+          new ClaimDTO(
+            c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
+            c.claimSource))
+      .collect(Collectors.toList());
   }
 
   @RequestMapping(path = "/activeClaims/{userId}", method = RequestMethod.GET)
   public ActiveClaimsDTO getActiveClaims(@PathVariable String userId) {
     log.info("Getting active claim status for member: {}", userId);
 
-    Long activeClaims = claimsRepository.findByUserId(userId).stream().filter(c -> Objects.equals(c.state, OPEN.name()))
-            .count();
+    Long activeClaims = claimsRepository.findByUserId(userId).stream()
+      .filter(c -> Objects.equals(c.state, OPEN.name()))
+      .count();
 
     return new ActiveClaimsDTO(activeClaims.intValue());
   }
@@ -155,7 +169,7 @@ public class InternalController {
   public ResponseEntity<ClaimDTO> getClaim(@RequestParam String claimID) {
     log.info("Getting claim with ID:" + claimID);
     ClaimEntity claim = claimsRepository.findById(claimID)
-        .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
+      .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
     ClaimDTO cdto = new ClaimDTO(claim);
     return ResponseEntity.ok(cdto);
   }
@@ -164,8 +178,9 @@ public class InternalController {
   public ResponseEntity<?> addDataItem(@RequestBody DataItemDTO data) {
     log.info("Adding data item:" + data.toString());
     UUID uid = UUID.randomUUID();
-    AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID, LocalDateTime.now(), data.userId,
-        data.type, data.name, data.title, data.received, data.value);
+    AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID,
+      LocalDateTime.now(), data.userId,
+      data.type, data.name, data.title, data.received, data.value);
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -174,8 +189,9 @@ public class InternalController {
   public ResponseEntity<?> addNote(@RequestBody NoteDTO note) {
     log.info("Adding claim note:" + note.toString());
     UUID uid = UUID.randomUUID();
-    AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, LocalDateTime.now(), note.text,
-        note.userId, note.fileURL);
+    AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, LocalDateTime.now(),
+      note.text,
+      note.userId, note.fileURL);
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -184,8 +200,10 @@ public class InternalController {
   public ResponseEntity<?> addPayment(@RequestBody PaymentDTO payment) {
     log.info("Adding manual payment note:" + payment.toString());
     UUID uid = UUID.randomUUID();
-    AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID, LocalDateTime.now(),
-        payment.userId, payment.amount, payment.note, payment.payoutDate, payment.exGratia, payment.handlerReference);
+    AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID,
+      LocalDateTime.now(),
+      payment.userId, payment.amount, payment.deductible, payment.note, payment.payoutDate, payment.exGratia,
+      payment.handlerReference);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -193,11 +211,68 @@ public class InternalController {
 
   @RequestMapping(path = "/{memberId}/addAutomaticPayment", method = RequestMethod.POST)
   public ResponseEntity<?> addAutomaticPayment(@PathVariable(name = "memberId") String memberId,
-      @RequestBody PaymentDTO payment) {
-    log.info("add automatic payment: {}" + payment.toString());
+    @RequestBody PaymentRequestDTO request) {
+    log.debug("add automatic payment: {}" + request.toString());
 
-    AddAutomaticPaymentCommand addAutomaticPaymentCommand = new AddAutomaticPaymentCommand(payment.claimID, memberId,
-        Money.of(payment.amount, "SEK"), payment.note, payment.exGratia, payment.handlerReference);
+    Optional<Member> memberOptional = memberService.getMember(memberId);
+
+    if (!memberOptional.isPresent()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    val member = memberOptional.get();
+
+    SanctionStatus memberStatus = meerkat
+      .getMemberSanctionStatus(String.format("%s %s", member.getFirstName(), member.getLastName()));
+
+    if (memberStatus.equals(SanctionStatus.FullHit)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    if (!request.isSanctionCheckSkipped()
+      && (memberStatus.equals(SanctionStatus.Undetermined)
+      || memberStatus.equals(SanctionStatus.PartialHit))) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    if (request.isSanctionCheckSkipped()) {
+      Optional<ClaimEntity> claimOptional = claimsRepository
+        .findById(request.getClaimId().toString());
+
+      if (!claimOptional.isPresent()) {
+        return ResponseEntity.notFound().build();
+      }
+
+      if (request.getPaymentRequestNote() == null
+        || request.getPaymentRequestNote().trim().length() < 5) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+      }
+
+      ClaimEntity claim = claimOptional.get();
+
+      UUID uid = UUID.randomUUID();
+      AddNoteCommand command =
+        new AddNoteCommand(
+          uid.toString(),
+          request.getClaimId().toString(),
+          LocalDateTime.now(),
+          request.getPaymentRequestNote(),
+          memberId,
+          claim.audioURL);
+
+      commandBus.sendAndWait(command);
+    }
+
+    AddAutomaticPaymentCommand addAutomaticPaymentCommand =
+      new AddAutomaticPaymentCommand(
+        request.getClaimId().toString(),
+        memberId,
+        request.getAmount(),
+        request.getDeductible(),
+        request.getPaymentRequestNote(),
+        request.isExGratia(),
+        request.getHandlerReference(),
+        request.isSanctionCheckSkipped());
 
     commandBus.sendAndWait(addAutomaticPaymentCommand);
 
@@ -216,20 +291,13 @@ public class InternalController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @RequestMapping(path = "/updateDeductible", method = RequestMethod.POST)
-  public ResponseEntity<?> updateReserve(@RequestBody DeductibleDTO deductible) {
-    log.info("Updating claim Deductible: " + deductible.toString());
-
-    commandBus.sendAndWait(new UpdateClaimsDeductibleCommand(deductible.getClaimID(), deductible.getAmount()));
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
   @RequestMapping(path = "/updatestate", method = RequestMethod.POST)
   public ResponseEntity<?> updateState(@RequestBody ClaimStateDTO state) {
     log.info("Updating claim reserve: " + state.toString());
 
-    UpdateClaimsStateCommand command = new UpdateClaimsStateCommand(state.claimID, state.userId, LocalDateTime.now(),
-        state.state);
+    UpdateClaimsStateCommand command = new UpdateClaimsStateCommand(state.claimID, state.userId,
+      LocalDateTime.now(),
+      state.state);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -239,8 +307,9 @@ public class InternalController {
   public ResponseEntity<?> updateType(@RequestBody ClaimTypeDTO type) {
     log.info("Updating claim reserve: " + type.toString());
 
-    UpdateClaimTypeCommand command = new UpdateClaimTypeCommand(type.claimID, type.userId, LocalDateTime.now(),
-        type.type);
+    UpdateClaimTypeCommand command = new UpdateClaimTypeCommand(type.claimID, type.userId,
+      LocalDateTime.now(),
+      type.type);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -254,7 +323,8 @@ public class InternalController {
     ClaimDataType typeDate = new ClaimDataType(DataType.DATE, "DATE", "Date");
     ClaimDataType typePlace = new ClaimDataType(DataType.TEXT, "PLACE", "Place");
     ClaimDataType typeItem = new ClaimDataType(DataType.ASSET, "ITEM", "Item");
-    ClaimDataType typePoliceReport = new ClaimDataType(DataType.FILE, "POLICE_REPORT", "Police report");
+    ClaimDataType typePoliceReport = new ClaimDataType(DataType.FILE, "POLICE_REPORT",
+      "Police report");
     ClaimDataType typeReceipt = new ClaimDataType(DataType.FILE, "RECEIPT", "Receipt");
     ClaimDataType typeTicket = new ClaimDataType(DataType.TICKET, "TICKET", "Ticket");
 
@@ -304,7 +374,8 @@ public class InternalController {
     ClaimType ct8 = new ClaimType("Water Damage - Bathroom", "Water Damage - Bathroom", false);
     ct8.addRequiredData(typeDate);
 
-    ClaimType ct9 = new ClaimType("Travel - Accident and Health", "Travel - Accident and Health", false);
+    ClaimType ct9 = new ClaimType("Travel - Accident and Health", "Travel - Accident and Health",
+      false);
     ct9.addRequiredData(typeDate);
     ct9.addRequiredData(typePlace);
     ct9.addOptionalData(typePoliceReport);
@@ -377,10 +448,11 @@ public class InternalController {
   @PostMapping("/many")
   public ResponseEntity<Stream<ClaimDTO>> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
     val claims = claimsRepository
-        .findAllById(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toList()));
+      .findAllById(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toList()));
 
     if (claims.size() != dto.getIds().size()) {
-      log.error("Length mismatch on supplied claims and found claims: wanted {}, found {}", dto.getIds().size(), claims.size());
+      log.error("Length mismatch on supplied claims and found claims: wanted {}, found {}",
+        dto.getIds().size(), claims.size());
       return ResponseEntity.notFound().build();
 }
 

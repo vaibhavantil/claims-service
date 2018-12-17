@@ -29,7 +29,6 @@ public class ClaimDTO extends HedvigBackofficeDTO {
   public ArrayList<DataItemDTO> data = new ArrayList<>();
   public ClaimStates state;
   public Double reserve;
-  public Double deductible;
   public String type;
   public ClaimSource claimSource;
 
@@ -47,15 +46,14 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.reserve = c.reserve;
     this.type = c.type;
     this.claimSource = c.claimSource;
-    this.deductible = c.deductible;
 
     for (Asset a : c.assets) {
       assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));
     }
     for (Payment p : c.payments) {
       payments.add(
-          new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.note, p.payoutDate, p.exGratia,
-              p.type, p.handlerReference));
+          new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.deductible, p.note, p.payoutDate, p.exGratia,
+              p.type, p.handlerReference, p.payoutReference, p.payoutStatus));
     }
     for (Note n : c.notes) {
       notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
@@ -83,13 +81,11 @@ public class ClaimDTO extends HedvigBackofficeDTO {
       String type,
       String audioURL,
       Instant registrationDate,
-      ClaimSource claimSource,
-      Double deductible) {
+      ClaimSource claimSource) {
     this.id = id;
     this.userId = userId;
     this.state = state;
     this.reserve = reserve;
-    this.deductible = deductible;
     this.type = type;
     this.dateInstant = registrationDate;
     this.date = registrationDate.atZone(SWEDEN_TZ).toLocalDateTime();

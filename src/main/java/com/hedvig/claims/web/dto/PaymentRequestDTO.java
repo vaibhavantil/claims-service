@@ -1,20 +1,18 @@
-package com.hedvig.claims.events;
+package com.hedvig.claims.web.dto;
 
+import java.util.UUID;
 import javax.money.MonetaryAmount;
-import lombok.AllArgsConstructor;
 import lombok.Value;
 
 @Value
-@AllArgsConstructor
-public class AutomaticPaymentAddedEvent {
+public class PaymentRequestDTO {
 
-  String Id;
-  String claimId;
+  UUID claimId;
   String memberId;
   MonetaryAmount amount;
   MonetaryAmount deductible;
-  String note;
-  boolean isExGracia;
   String handlerReference;
   boolean sanctionCheckSkipped;
+  String paymentRequestNote;
+  boolean exGratia;
 }

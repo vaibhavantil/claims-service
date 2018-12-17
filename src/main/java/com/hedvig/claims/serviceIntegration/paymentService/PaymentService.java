@@ -1,10 +1,10 @@
 package com.hedvig.claims.serviceIntegration.paymentService;
 
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
-import javax.money.MonetaryAmount;
+import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 
 public interface PaymentService {
 
-  PaymentResponse executePayment(String memberId, MonetaryAmount amount);
+  PaymentResponse executePayment(String memberId, PayoutRequest request);
 
 }
