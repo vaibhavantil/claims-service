@@ -31,6 +31,6 @@ public class DataItemDTO extends HedvigBackofficeDTO {
     this.name = name;
     this.title = title;
     this.received = received;
-    this.value = value;
+    this.value = type == DataType.DATE ? value.replace("Z", "") : value;
   }
 }
