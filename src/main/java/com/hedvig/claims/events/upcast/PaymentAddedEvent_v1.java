@@ -23,11 +23,7 @@ public class PaymentAddedEvent_v1 extends SingleEventUpcaster {
       new SimpleSerializedType(targetType.getName(), "1.0"),
       org.dom4j.Document.class,
       document -> {
-        final Element rootElement = document.getRootElement();
-
-        final Element regDeductible = rootElement.element("deductible");
-        regDeductible.setData((double) 1500);
-
+        document.getRootElement().addElement("deductible").setText("1500");
         return document;
       }
     );
