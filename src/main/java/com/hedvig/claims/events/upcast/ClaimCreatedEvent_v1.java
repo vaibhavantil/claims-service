@@ -1,6 +1,7 @@
 package com.hedvig.claims.events.upcast;
 
 import com.hedvig.claims.events.ClaimCreatedEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.serialization.SimpleSerializedType;
 import org.axonframework.serialization.upcasting.event.IntermediateEventRepresentation;
 import org.axonframework.serialization.upcasting.event.SingleEventUpcaster;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 import static com.hedvig.claims.util.TzHelper.UTC;
 
+@Slf4j
 public class ClaimCreatedEvent_v1 extends SingleEventUpcaster {
 
   private static SimpleSerializedType targetType = new SimpleSerializedType(ClaimCreatedEvent.class.getTypeName(), null);
@@ -29,8 +31,12 @@ public class ClaimCreatedEvent_v1 extends SingleEventUpcaster {
 
         final Element regDate = rootElement.element("registrationDate");
 
-        LocalDateTime date = LocalDateTime.parse(regDate.getText());
-        regDate.setText(date.atZone(UTC).toInstant().toString());
+        log.info("RegistrationDate: {}", regDate.getText());
+
+        if (regDate.getText() != null && !regDate.getText().isEmpty()){
+          LocalDateTime date = LocalDateTime.parse(regDate.getText());
+          regDate.setText(date.atZone(UTC).toInstant().toString());
+        }
 
         return document;
       }
