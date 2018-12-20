@@ -14,15 +14,13 @@ public class CreateClaimCommand {
 
   @TargetAggregateIdentifier public String id;
   public String userId;
-  private Instant registrationDate;
   public String audioURL;
 
   public CreateClaimCommand(
-      String id, String userId, Instant registrationDate, String audioURL) {
+      String id, String userId, String audioURL) {
     log.info("InitiateClaimCommand");
     this.id = id;
     this.userId = userId;
-    this.registrationDate = registrationDate;
     this.audioURL = audioURL;
     log.info(this.toString());
   }

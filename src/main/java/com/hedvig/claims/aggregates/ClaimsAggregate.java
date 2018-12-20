@@ -75,7 +75,6 @@ public class ClaimsAggregate {
       new ClaimCreatedEvent(
         command.getId(),
         command.getUserId(),
-        command.getRegistrationDate(),
         command.getAudioURL()));
   }
 
@@ -231,10 +230,10 @@ public class ClaimsAggregate {
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler
-  public void on(ClaimCreatedEvent e) {
+  public void on(ClaimCreatedEvent e, @Timestamp Instant timestamp) {
     this.id = e.getId();
     this.userId = e.getUserId();
-    this.registrationDate = e.getRegistrationDate();
+    this.registrationDate = timestamp;
     this.audioURL = e.getAudioURL();
 
     // Init data structures

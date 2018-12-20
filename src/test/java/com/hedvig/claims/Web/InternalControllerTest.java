@@ -98,7 +98,7 @@ public class InternalControllerTest {
       .willReturn(new PaymentResponse(TRANSACTION_ID, TransactionStatus.INITIATED));
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
@@ -129,7 +129,7 @@ public class InternalControllerTest {
       .willReturn(new PaymentResponse(null, TransactionStatus.FAILED));
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
@@ -160,7 +160,7 @@ public class InternalControllerTest {
       .willReturn(new PaymentResponse(null, TransactionStatus.FORBIDDEN));
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), ""));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, ""));
 
     this.commandGateway.sendAndWait(new AddAutomaticPaymentCommand(
       CLAIM_ID.toString(),
@@ -236,7 +236,7 @@ public class InternalControllerTest {
     UUID CLAIM_ID = UUID.fromString("733c5cbe-f7d5-11e8-a18f-4b0bf766f99d");
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), "TEST"));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, "TEST"));
 
     given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
 
@@ -265,7 +265,7 @@ public class InternalControllerTest {
     UUID CLAIM_ID = UUID.fromString("f5145de8-f7d7-11e8-a3a7-0bfc9d610820");
 
     this.commandGateway.sendAndWait(
-      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, Instant.now(), "TEST"));
+      new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, "TEST"));
 
     given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
 

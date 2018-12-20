@@ -47,12 +47,12 @@ public class ClaimsEventListener {
   }
 
   @EventHandler
-  public void on(ClaimCreatedEvent e) {
+  public void on(ClaimCreatedEvent e, @Timestamp Instant timestamp) {
     log.info("ClaimCreatedEvent: " + e);
     ClaimEntity claim = new ClaimEntity();
     claim.id = e.getId();
     claim.userId = e.getUserId();
-    claim.registrationDate = e.getRegistrationDate();
+    claim.registrationDate = timestamp;
     claim.audioURL = e.getAudioURL();
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
     claim.claimSource = ClaimSource.APP;
