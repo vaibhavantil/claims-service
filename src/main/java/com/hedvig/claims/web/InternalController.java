@@ -96,7 +96,6 @@ public class InternalController {
         new CreateClaimCommand(
             uid.toString(),
             requestData.getUserId(),
-            Instant.now(),
             requestData.getAudioURL()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

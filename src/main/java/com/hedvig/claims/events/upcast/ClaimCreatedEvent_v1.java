@@ -31,8 +31,6 @@ public class ClaimCreatedEvent_v1 extends SingleEventUpcaster {
 
         final Element regDate = rootElement.element("registrationDate");
 
-        log.info("RegistrationDate: {}", regDate.getText());
-
         if (regDate.getText() != null && !regDate.getText().isEmpty()){
           LocalDateTime date = LocalDateTime.parse(regDate.getText());
           regDate.setText(date.atZone(UTC).toInstant().toString());
