@@ -5,10 +5,11 @@ import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.serialization.Revision;
 
 @Value
-@Revision("1.0")
+@Revision("1.1")
 public class ClaimCreatedEvent {
 
-  @AggregateIdentifier private String id;
+  @AggregateIdentifier
+  private String id;
   private String userId;
   private String audioURL;
 }
