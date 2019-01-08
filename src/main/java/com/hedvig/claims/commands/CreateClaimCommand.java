@@ -1,7 +1,5 @@
 package com.hedvig.claims.commands;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
 import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.slf4j.Logger;

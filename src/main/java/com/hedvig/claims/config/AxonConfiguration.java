@@ -1,5 +1,6 @@
 package com.hedvig.claims.config;
 
+import com.hedvig.claims.events.upcast.ClaimCreatedEvent_v1;
 import com.hedvig.claims.events.upcast.PaymentAddedEvent_v1;
 import org.axonframework.common.jpa.EntityManagerProvider;
 import org.axonframework.common.transaction.TransactionManager;
@@ -30,6 +31,7 @@ public class AxonConfiguration {
   @Bean
   public EventUpcasterChain eventUpcasters(){
     return new EventUpcasterChain(
+      new ClaimCreatedEvent_v1(),
       new PaymentAddedEvent_v1()
     );
   }
