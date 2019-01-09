@@ -391,7 +391,7 @@ public class InternalController {
     ClaimType ct12 = new ClaimType("Confirmed Fraud", "Confirmed Fraud", false);
     ct12.addRequiredData(typeDate);
 
-    ClaimType ct13 = new ClaimType("Test Claim", "Test Claim", false);
+    ClaimType ct13 = new ClaimType("Test", "Test", false);
     ct13.addRequiredData(typeDate);
 
     claimTypes.add(ct1);
