@@ -402,7 +402,7 @@ public class InternalController {
     ct15.addRequiredData(typeDate);
     ct15.addRequiredData(typePlace);
 
-    ClaimType ct16 = new ClaimType("Appliance","Appliances",false);
+    ClaimType ct16 = new ClaimType("Appliance","Appliance",false);
     ct16.addRequiredData(typeDate);
     ct16.addRequiredData(typePlace);
     ct16.addRequiredData(typeItem);
