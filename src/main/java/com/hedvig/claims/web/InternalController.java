@@ -398,6 +398,15 @@ public class InternalController {
     ct14.addRequiredData(typeDate);
     ct14.addRequiredData(typePlace);
 
+    ClaimType ct15 = new ClaimType("Fire Damage", "Fire Damage", false);
+    ct15.addRequiredData(typeDate);
+    ct15.addRequiredData(typePlace);
+
+    ClaimType ct16 = new ClaimType("Appliance","Appliance",false);
+    ct16.addRequiredData(typeDate);
+    ct16.addRequiredData(typePlace);
+    ct16.addRequiredData(typeItem);
+
     claimTypes.add(ct1);
     claimTypes.add(ct2);
     claimTypes.add(ct3);
