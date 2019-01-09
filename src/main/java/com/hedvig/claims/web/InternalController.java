@@ -394,6 +394,10 @@ public class InternalController {
     ClaimType ct13 = new ClaimType("Test", "Test", false);
     ct13.addRequiredData(typeDate);
 
+    ClaimType ct14 = new ClaimType("Liability", "Liability", false);
+    ct14.addRequiredData(typeDate);
+    ct14.addRequiredData(typePlace);
+
     claimTypes.add(ct1);
     claimTypes.add(ct2);
     claimTypes.add(ct3);
@@ -408,6 +412,7 @@ public class InternalController {
     claimTypes.add(ct11);
     claimTypes.add(ct12);
     claimTypes.add(ct13);
+    claimTypes.add(ct14);
 
     // old claim types
     ClaimDataType c11 = new ClaimDataType(DataType.DATE, "DATE", "Datum");
