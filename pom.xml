@@ -109,7 +109,13 @@
     <dependency>
       <groupId>org.axonframework</groupId>
       <artifactId>axon-spring-boot-starter</artifactId>
-      <version>3.0.4</version>
+      <version>3.3.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.axonframework</groupId>
+      <artifactId>axon-core</artifactId>
+      <version>3.3.7</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
@@ -219,16 +225,15 @@
       <artifactId>jackson-module-kotlin</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.axonframework</groupId>
-      <artifactId>axon-core</artifactId>
-      <version>3.3.7</version>
-      <scope>compile</scope>
+        <groupId>io.github.microutils</groupId>
+        <artifactId>kotlin-logging</artifactId>
+        <version>1.6.22</version>
     </dependency>
-      <dependency>
-          <groupId>io.github.microutils</groupId>
-          <artifactId>kotlin-logging</artifactId>
-          <version>1.6.22</version>
-      </dependency>
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.23.1-GA</version>
+    </dependency>
 
   </dependencies>
 
