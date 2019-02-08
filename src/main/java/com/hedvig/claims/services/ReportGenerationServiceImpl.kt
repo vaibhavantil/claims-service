@@ -5,11 +5,14 @@ import com.hedvig.claims.web.dto.ReportDTO
 import org.axonframework.config.EventProcessingConfiguration
 import org.axonframework.eventhandling.TrackingEventProcessor
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import java.time.YearMonth
 
+@Service
 class ReportGenerationServiceImpl : ReportGenerationService {
 
     lateinit var reportingPeriod: YearMonth
+    @Autowired
     lateinit var reportRepository: ClaimReportRepository
 
     override fun getReportPeriod(): YearMonth {
@@ -20,7 +23,7 @@ class ReportGenerationServiceImpl : ReportGenerationService {
     lateinit var eventProcessingConfiguration: EventProcessingConfiguration
 
 
-    override fun generateReport(yearMonth: YearMonth): ReportDTO?{
+    override fun generateReport(yearMonth: YearMonth): ReportDTO? {
         reportingPeriod = yearMonth
         eventProcessingConfiguration
             .eventProcessorByProcessingGroup(PROCESSOR_GROUP, TrackingEventProcessor::class.java)
