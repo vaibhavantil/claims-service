@@ -10,7 +10,7 @@ data class AutomaticPaymentAddedEvent (
   val memberId: String,
   val amount: MonetaryAmount,
   val deductible: MonetaryAmount,
-  val note: String,
+  val note: String?,
   val isExGracia: Boolean,
   val handlerReference: String,
   val sanctionCheckSkipped: Boolean
