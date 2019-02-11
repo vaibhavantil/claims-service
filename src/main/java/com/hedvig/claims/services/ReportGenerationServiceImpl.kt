@@ -1,6 +1,5 @@
 package com.hedvig.claims.services
 
-import com.hedvig.claims.query.ClaimReportRepository
 import com.hedvig.claims.web.dto.ReportDTO
 import org.axonframework.config.EventProcessingConfiguration
 import org.axonframework.eventhandling.TrackingEventProcessor
@@ -12,8 +11,6 @@ import java.time.YearMonth
 class ReportGenerationServiceImpl : ReportGenerationService {
 
     lateinit var reportingPeriod: YearMonth
-    @Autowired
-    lateinit var reportRepository: ClaimReportRepository
 
     override fun getReportPeriod(): YearMonth {
         return reportingPeriod

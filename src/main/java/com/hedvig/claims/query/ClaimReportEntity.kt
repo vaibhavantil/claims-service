@@ -11,17 +11,19 @@ data class ClaimReportEntity(
     @Id
     val claimId: String,
     val memberId: String,
-    val dateOfLoss: LocalDate?,
-    val notificationDate: LocalDate,
-    val claimYear: Year?,
-    val descriptionOfLoss: String?,
-    val grossPaid: BigDecimal?,
-    val reserved: BigDecimal?,
-    val totalIncurred: BigDecimal?,
-    val currency: String?,
-    val claimStatus: String,
-    val claimStatusLastUpdated: LocalDate
+    var grossPaid: BigDecimal?,
+    var reserved: BigDecimal?,
+    var totalIncurred: BigDecimal?
 ) {
+
+    lateinit var dateOfLoss: LocalDate
+    lateinit var notificationDate: LocalDate
+    lateinit var claimYear: Year
+    lateinit var descriptionOfLoss: String
+    lateinit var currency: String
+    lateinit var claimStatus: String
+    lateinit var claimStatusLastUpdated: LocalDate
+
     constructor(
         claimId: String,
         memberId: String,
@@ -33,14 +35,12 @@ data class ClaimReportEntity(
                 claimId,
                 memberId,
                 null,
-                notificationDate,
                 null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                claimStatus,
-                claimStatusLastUpdated
-            )
+                null
+            ) {
+        this.notificationDate = notificationDate
+        this.claimStatus = claimStatus
+        this.claimStatusLastUpdated = claimStatusLastUpdated
+    }
+
 }
