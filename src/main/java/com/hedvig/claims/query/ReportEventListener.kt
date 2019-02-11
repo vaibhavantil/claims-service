@@ -90,6 +90,18 @@ class ReportEventListener {
     }
 
     @EventHandler
+    fun on(e: DataItemAddedEvent, @Timestamp timestamp: Instant, replayStatus: ReplayStatus) {
+        if (replayStatus.isReplay && isBeforePeriod(reportGenerationService.getReportPeriod(), timestamp)) {
+            val claim: ClaimReportEntity = getClaimReportEntity(e.claimsId)
+
+            if (e.name == DATE) {
+                claim.dateOfLoss =
+                    LocalDateTime.ofInstant(Instant.parse(e.value), ZoneId.of("Europe/Stockholm")).toLocalDate()
+            }
+        }
+    }
+
+    @EventHandler
     fun on(e: PaymentAddedEvent, @Timestamp timestamp: Instant, replayStatus: ReplayStatus) {
         if (replayStatus.isReplay && isBeforePeriod(reportGenerationService.getReportPeriod(), timestamp)) {
             val claim: ClaimReportEntity = getClaimReportEntity(e.claimsId)
@@ -132,5 +144,6 @@ class ReportEventListener {
 
     companion object {
         private val logger = KotlinLogging.logger {}
+        const val DATE: String = "DATE"
     }
 }
