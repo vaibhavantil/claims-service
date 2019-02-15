@@ -28,7 +28,7 @@ public class PayoutAddSaga {
   @EndSaga
   public void on(AutomaticPaymentAddedEvent e) {
     PaymentResponse response = paymentService.executePayment(e.getMemberId(),
-      new PayoutRequest(e.getAmount(), e.getSanctionCheckSkipped()));
+      new PayoutRequest(e.getAmount(), e.isSanctionCheckSkipped()));
 
     if (response.getTransactionStatus().equals(TransactionStatus.INITIATED)) {
       commandGateway.sendAndWait(
