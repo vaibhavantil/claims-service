@@ -17,11 +17,10 @@ public class ClaimReportEntity {
   private String claimId;
   private String memberId;
   private BigDecimal grossPaid;
-  private BigDecimal resevered;
-  private BigDecimal totalIncurred;
+  private BigDecimal reserved;
   private LocalDate dateOfLoss;
   private LocalDate notificationDate;
-  private Year claimYear;
+  private Integer claimYear;
   private String descriptionOfLoss;
   private String currency;
   private String claimStatus;

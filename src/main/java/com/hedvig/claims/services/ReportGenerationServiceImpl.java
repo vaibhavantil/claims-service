@@ -1,5 +1,7 @@
 package com.hedvig.claims.services;
 
+import com.hedvig.claims.query.ClaimReportRepository;
+import com.hedvig.claims.web.dto.ClaimReportDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessor;
@@ -7,12 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportGenerationServiceImpl implements ReportGenerationService {
 
   private YearMonth reportingPeriod;
   private static String REPORTING_PROCESSOR_GROUP = "report";
+  @Autowired
+  private ClaimReportRepository claimReportRepository;
 
   @Autowired
   private EventProcessingConfiguration eventProcessingConfiguration;
@@ -32,6 +38,16 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
         trackingEventProcessor.start();
       });
 
-    return null;
+
+    //let the events to be replayed - WIP
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    
+    List<ClaimReportDTO> reportStream = claimReportRepository.findAll().stream().map(ClaimReportDTO::fromClaimReportEntity).collect(Collectors.toList());
+
+    return new ReportDTO(reportStream);
   }
 }

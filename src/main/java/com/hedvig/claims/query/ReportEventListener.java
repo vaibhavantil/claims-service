@@ -3,6 +3,7 @@ package com.hedvig.claims.query;
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.services.ReportGenerationService;
 import lombok.extern.slf4j.Slf4j;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ReplayStatus;
 import org.axonframework.eventhandling.ResetHandler;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
+@ProcessingGroup("report")
 public class ReportEventListener {
 
   private ClaimReportRepository claimReportRepository;
@@ -24,6 +26,7 @@ public class ReportEventListener {
   private EventStore eventStore;
   private static String DATE = "DATE";
   private static String Z = "Z";
+  private static String SEK = "SEK";
 
 
   public ReportEventListener(ClaimReportRepository claimReportRepository, ReportGenerationService reportGenerationService, EventStore eventStore) {
@@ -90,7 +93,8 @@ public class ReportEventListener {
     if (replayStatus.isReplay() && isBeforePeriod(reportGenerationService.getReportPeriod(), timestamp)) {
       ClaimReportEntity claim = getClaimReportEntity(e.claimID);
 
-      claim.setResevered(BigDecimal.valueOf(e.amount));
+      claim.setReserved(BigDecimal.valueOf(e.amount));
+      claim.setCurrency(SEK);
       claimReportRepository.save(claim);
     }
   }
@@ -101,10 +105,15 @@ public class ReportEventListener {
       ClaimReportEntity claim = getClaimReportEntity(e.getClaimsId());
       if (e.getName().equalsIgnoreCase(DATE)) {
         if (e.getValue().toUpperCase().contains(Z)) {
-          claim.setDateOfLoss(LocalDateTime.ofInstant(Instant.parse(e.getValue()), ZoneId.of("Europe/Stockholm")).toLocalDate()
-          );
+          LocalDate dateOfLoss = LocalDateTime.ofInstant(Instant.parse(e.getValue()), ZoneId.of("Europe/Stockholm")).toLocalDate();
+          claim.setDateOfLoss(dateOfLoss);
+          claim.setClaimYear(dateOfLoss.getYear());
+          claimReportRepository.save(claim);
         } else {
-          claim.setDateOfLoss(LocalDateTime.parse(e.getValue()).toLocalDate());
+          LocalDate dateOfLoss = LocalDateTime.parse(e.getValue()).toLocalDate();
+          claim.setDateOfLoss(dateOfLoss);
+          claim.setClaimYear(dateOfLoss.getYear());
+          claimReportRepository.save(claim);
         }
       }
     }
@@ -121,6 +130,7 @@ public class ReportEventListener {
         .filter(x -> x.getId().equalsIgnoreCase(e.getId())).findFirst();
 
       if (optionalAutomaticPaymentAddedEvent.isPresent()) {
+        claim.setCurrency(SEK);
         claim.setGrossPaid((claim.getGrossPaid() == null ? BigDecimal.ZERO : claim.getGrossPaid())
           .add(BigDecimal.valueOf(optionalAutomaticPaymentAddedEvent.get().getAmount().getNumber().doubleValueExact())));
         claimReportRepository.save(claim);
