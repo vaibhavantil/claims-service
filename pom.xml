@@ -211,8 +211,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.0</version>
-
+        <version>3.8.0</version>
         <executions>
           <execution>
             <id>default-compile</id>
@@ -234,9 +233,6 @@
             <goals> <goal>testCompile</goal> </goals>
           </execution>
         </executions>
-        <configuration>
-          <release>8</release>
-        </configuration>
       </plugin>
     </plugins>
 
