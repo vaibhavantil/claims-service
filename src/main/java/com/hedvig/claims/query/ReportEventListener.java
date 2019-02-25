@@ -8,7 +8,6 @@ import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ReplayStatus;
 import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
-import org.axonframework.eventsourcing.DomainEventMessage;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.springframework.stereotype.Component;
 
@@ -125,8 +124,8 @@ public class ReportEventListener {
       ClaimReportEntity claim = getClaimReportEntity(e.getClaimId());
 
       Optional<AutomaticPaymentAddedEvent> optionalAutomaticPaymentAddedEvent = eventStore.readEvents(e.getClaimId()).asStream()
-        .filter(x -> ((DomainEventMessage) x).getPayloadType().getTypeName().equalsIgnoreCase(AutomaticPaymentAddedEvent.class.getTypeName()))
-        .map(x -> (AutomaticPaymentAddedEvent) ((DomainEventMessage) x).getPayload())
+        .filter(x -> x.getPayloadType().getTypeName().equalsIgnoreCase(AutomaticPaymentAddedEvent.class.getTypeName()))
+        .map(x -> (AutomaticPaymentAddedEvent) x.getPayload())
         .filter(x -> x.getId().equalsIgnoreCase(e.getId())).findFirst();
 
       if (optionalAutomaticPaymentAddedEvent.isPresent()) {
