@@ -1,37 +1,24 @@
 package com.hedvig.claims.query;
 
-import com.hedvig.claims.aggregates.Asset;
-import com.hedvig.claims.aggregates.ClaimSource;
-import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.aggregates.DataItem;
-import com.hedvig.claims.aggregates.Note;
-import com.hedvig.claims.aggregates.Payment;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.EnumMap;
-import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-
+import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.util.EnumMapChecker;
 import com.hedvig.claims.web.dto.ClaimSortColumn;
+import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.*;
+import java.time.Instant;
+import java.util.EnumMap;
+import java.util.Set;
 
 @Entity
 public class ClaimEntity {
 
   private static Logger log = LoggerFactory.getLogger(ClaimEntity.class);
 
-  @Id public String id;
+  @Id
+  public String id;
   public String userId;
   public String audioURL;
   public Instant registrationDate;
@@ -65,6 +52,9 @@ public class ClaimEntity {
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
   public Set<Payment> payments;
+
+  @Column(columnDefinition = "BOOLEAN NOT NULL DEFAULT FALSE")
+  public boolean coveringEmployee;
 
   public void addDataItem(DataItem d) {
     data.add(d);
