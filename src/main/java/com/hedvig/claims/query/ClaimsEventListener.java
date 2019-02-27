@@ -357,7 +357,7 @@ public class ClaimsEventListener {
   }
 
   @EventHandler
-  public void on(EmployeeClaimSetEvent e) {
+  public void on(EmployeeClaimStatusUpdatedEvent e) {
     Optional<ClaimEntity> optionalClaim = claimRepository.findById(e.getClaimId());
     if (!optionalClaim.isPresent()) {
       log.error("EmployeeClaimSetEvent - Cannot find the claim");

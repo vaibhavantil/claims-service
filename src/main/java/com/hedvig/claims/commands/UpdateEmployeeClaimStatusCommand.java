@@ -4,7 +4,7 @@ import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 @Value
-public class SetEmployeeClaimCommand {
+public class UpdateEmployeeClaimStatusCommand {
   @TargetAggregateIdentifier
   private String claimId;
   private boolean isCoveringEmployee;

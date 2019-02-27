@@ -212,8 +212,8 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void on(SetEmployeeClaimCommand cmd) {
-    apply(new EmployeeClaimSetEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
+  public void on(UpdateEmployeeClaimStatusCommand cmd) {
+    apply(new EmployeeClaimStatusUpdatedEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
   }
 
   // ----------------- Event sourcing --------------------- //
@@ -359,7 +359,7 @@ public class ClaimsAggregate {
   }
 
   @EventSourcingHandler
-  public void on(EmployeeClaimSetEvent e) {
+  public void on(EmployeeClaimStatusUpdatedEvent e) {
     this.isCoveringEmployee = e.isCoveringEmployee();
   }
 

@@ -3,7 +3,7 @@ package com.hedvig.claims.events;
 import lombok.Value;
 
 @Value
-public class EmployeeClaimSetEvent {
+public class EmployeeClaimStatusUpdatedEvent {
   private String claimId;
   private boolean isCoveringEmployee;
 }

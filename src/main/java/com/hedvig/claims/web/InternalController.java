@@ -450,7 +450,7 @@ public class InternalController {
     if (!claim.isPresent()) {
       return ResponseEntity.badRequest().build();
     }
-    commandBus.sendAndWait(new SetEmployeeClaimCommand(dto.getClaimId(), dto.isCoveringEmployee()));
+    commandBus.sendAndWait(new UpdateEmployeeClaimStatusCommand(dto.getClaimId(), dto.isCoveringEmployee()));
     return ResponseEntity.accepted().build();
   }
 }
