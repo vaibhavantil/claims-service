@@ -1,17 +1,7 @@
 package com.hedvig.claims.web;
 
-import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
-
 import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
-import com.hedvig.claims.commands.AddDataItemCommand;
-import com.hedvig.claims.commands.AddNoteCommand;
-import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
-import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.UpdateClaimTypeCommand;
-import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
-import com.hedvig.claims.commands.UpdateClaimsStateCommand;
+import com.hedvig.claims.commands.*;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
@@ -20,36 +10,9 @@ import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
 import com.hedvig.claims.serviceIntegration.memberService.MemberService;
 import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
 import com.hedvig.claims.services.ClaimsQueryService;
-import com.hedvig.claims.web.dto.ActiveClaimsDTO;
-import com.hedvig.claims.web.dto.ClaimDTO;
-import com.hedvig.claims.web.dto.ClaimDataType;
+import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
-import com.hedvig.claims.web.dto.ClaimStateDTO;
-import com.hedvig.claims.web.dto.ClaimType;
-import com.hedvig.claims.web.dto.ClaimTypeDTO;
-import com.hedvig.claims.web.dto.ClaimsByIdsDTO;
-import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO;
-import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
-import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
-import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO;
-import com.hedvig.claims.web.dto.DataItemDTO;
-import com.hedvig.claims.web.dto.NoteDTO;
-import com.hedvig.claims.web.dto.PaymentDTO;
-import com.hedvig.claims.web.dto.PaymentRequestDTO;
-import com.hedvig.claims.web.dto.ReserveDTO;
-import com.hedvig.claims.web.dto.StartClaimAudioDTO;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.val;
-import java.time.Instant;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -58,13 +21,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
 
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
@@ -79,8 +43,8 @@ public class InternalController {
 
   @Autowired
   public InternalController(CommandBus commandBus, ClaimsRepository repository,
-    ClaimsQueryService claimsQueryService,
-    Meerkat meerkat, MemberService memberService) {
+                            ClaimsQueryService claimsQueryService,
+                            Meerkat meerkat, MemberService memberService) {
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
     this.claimsQueryService = claimsQueryService;
@@ -93,10 +57,10 @@ public class InternalController {
     log.info("Claim recieved!:" + requestData.toString());
     UUID uid = UUID.randomUUID();
     commandBus.sendAndWait(
-        new CreateClaimCommand(
-            uid.toString(),
-            requestData.getUserId(),
-            requestData.getAudioURL()));
+      new CreateClaimCommand(
+        uid.toString(),
+        requestData.getUserId(),
+        requestData.getAudioURL()));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -116,7 +80,7 @@ public class InternalController {
     for (ClaimEntity c : claimsRepository.findAll()) {
       claims.add(
         new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-          c.claimSource));
+          c.claimSource, c.coveringEmployee));
     }
 
     return ResponseEntity.ok(claims);
@@ -139,7 +103,7 @@ public class InternalController {
         c ->
           new ClaimDTO(
             c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-            c.claimSource))
+            c.claimSource, c.coveringEmployee))
       .collect(Collectors.toList());
   }
 
@@ -210,7 +174,7 @@ public class InternalController {
 
   @RequestMapping(path = "/{memberId}/addAutomaticPayment", method = RequestMethod.POST)
   public ResponseEntity<?> addAutomaticPayment(@PathVariable(name = "memberId") String memberId,
-    @RequestBody PaymentRequestDTO request) {
+                                               @RequestBody PaymentRequestDTO request) {
     log.debug("add automatic payment: {}" + request.toString());
 
     Optional<Member> memberOptional = memberService.getMember(memberId);
@@ -283,8 +247,8 @@ public class InternalController {
     log.info("Updating claim reserve: " + reserve.toString());
 
     UpdateClaimsReserveCommand command =
-        new UpdateClaimsReserveCommand(
-            reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
+      new UpdateClaimsReserveCommand(
+        reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
 
     commandBus.sendAndWait(command);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -402,7 +366,7 @@ public class InternalController {
     ct15.addRequiredData(typeDate);
     ct15.addRequiredData(typePlace);
 
-    ClaimType ct16 = new ClaimType("Appliance","Appliance",false);
+    ClaimType ct16 = new ClaimType("Appliance", "Appliance", false);
     ct16.addRequiredData(typeDate);
     ct16.addRequiredData(typePlace);
     ct16.addRequiredData(typeItem);
@@ -475,8 +439,18 @@ public class InternalController {
       log.error("Length mismatch on supplied claims and found claims: wanted {}, found {}",
         dto.getIds().size(), claims.size());
       return ResponseEntity.notFound().build();
-}
+    }
 
     return ResponseEntity.ok(claims.stream().map(claim -> new ClaimDTO(claim)));
+  }
+
+  @PostMapping("/employee")
+  public ResponseEntity<?> markClaimAsEmployee(@RequestBody EmployeeClaimRequestDTO dto) {
+    Optional<ClaimEntity> claim = claimsRepository.findById(dto.getClaimId());
+    if (!claim.isPresent()) {
+      return ResponseEntity.badRequest().build();
+    }
+    commandBus.sendAndWait(new UpdateEmployeeClaimStatusCommand(dto.getClaimId(), dto.isCoveringEmployee()));
+    return ResponseEntity.accepted().build();
   }
 }

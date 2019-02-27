@@ -1,42 +1,23 @@
 package com.hedvig.claims.aggregates;
 
-import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
-import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
-
-import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
-import com.hedvig.claims.commands.AddDataItemCommand;
-import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand;
-import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
-import com.hedvig.claims.commands.AddNoteCommand;
-import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
-import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.UpdateClaimTypeCommand;
-import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
-import com.hedvig.claims.commands.UpdateClaimsStateCommand;
-import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
-import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
-import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
-import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
-import com.hedvig.claims.events.ClaimCreatedEvent;
-import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
-import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
-import com.hedvig.claims.events.DataItemAddedEvent;
-import com.hedvig.claims.events.NoteAddedEvent;
-import com.hedvig.claims.events.PaymentAddedEvent;
+import com.hedvig.claims.commands.*;
+import com.hedvig.claims.events.*;
 import com.hedvig.claims.web.dto.PaymentType;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
+
+import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @Aggregate
 @Slf4j
@@ -63,6 +44,8 @@ public class ClaimsAggregate {
   public HashMap<String, Payment> payments;
   public ArrayList<Note> notes;
   public ArrayList<String> assets;
+
+  public boolean isCoveringEmployee;
 
   public ClaimsAggregate() {
     log.info("Instansiating ClaimsAggregate");
@@ -227,6 +210,12 @@ public class ClaimsAggregate {
 
     apply(e);
   }
+
+  @CommandHandler
+  public void on(UpdateEmployeeClaimStatusCommand cmd) {
+    apply(new EmployeeClaimStatusUpdatedEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
+  }
+
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler
@@ -242,6 +231,8 @@ public class ClaimsAggregate {
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
     this.claimSource = ClaimSource.APP;
+
+    this.isCoveringEmployee = false;
   }
 
   @EventSourcingHandler
@@ -257,6 +248,7 @@ public class ClaimsAggregate {
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
 
+    this.isCoveringEmployee = false;
   }
 
   @EventSourcingHandler
@@ -365,4 +357,10 @@ public class ClaimsAggregate {
     n.date = e.getDate();
     notes.add(n);
   }
+
+  @EventSourcingHandler
+  public void on(EmployeeClaimStatusUpdatedEvent e) {
+    this.isCoveringEmployee = e.isCoveringEmployee();
+  }
+
 }
