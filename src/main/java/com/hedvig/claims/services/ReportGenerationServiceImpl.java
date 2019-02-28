@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ReportGenerationServiceImpl implements ReportGenerationService {
@@ -46,7 +47,7 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
       e.printStackTrace();
     }
     
-    List<ClaimReportDTO> reportStream = claimReportRepository.findAll().stream().map(ClaimReportDTO::fromClaimReportEntity).collect(Collectors.toList());
+    Stream<ClaimReportDTO> reportStream = claimReportRepository.findAll().stream().map(ClaimReportDTO::fromClaimReportEntity);
 
     return new ReportDTO(reportStream);
   }

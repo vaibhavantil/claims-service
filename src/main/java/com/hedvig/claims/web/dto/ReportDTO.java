@@ -7,5 +7,5 @@ import java.util.stream.Stream;
 
 @Value
 public class ReportDTO {
-  private List<ClaimReportDTO> claims;
+  private Stream<ClaimReportDTO> claims;
 }

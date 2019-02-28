@@ -26,6 +26,7 @@ public class ClaimReportDTO {
   private MonetaryAmount totalIncurred;
   private String claimStatus;
   private LocalDate claimStatusLastUpdated;
+  private boolean coveringEmployee;
 
   public static ClaimReportDTO fromClaimReportEntity(ClaimReportEntity e) {
     return new ClaimReportDTO(
@@ -36,9 +37,10 @@ public class ClaimReportDTO {
       Year.of(e.getClaimYear() == null ? Year.now().getValue() : e.getClaimYear()),
       e.getDescriptionOfLoss(),
       Money.of(e.getGrossPaid() == null ? BigDecimal.ZERO : e.getGrossPaid(), e.getCurrency() == null ? "SEK" : e.getCurrency()),
-      Money.of(e.getReserved() == null ? BigDecimal.ZERO: e.getReserved(), e.getCurrency() == null ? "SEK": e.getCurrency()),
-      Money.of((e.getGrossPaid() == null ? BigDecimal.ZERO : e.getGrossPaid()).subtract(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved()), e.getCurrency() == null ? "SEK": e.getCurrency()),
+      Money.of(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved(), e.getCurrency() == null ? "SEK" : e.getCurrency()),
+      Money.of((e.getGrossPaid() == null ? BigDecimal.ZERO : e.getGrossPaid()).subtract(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved()), e.getCurrency() == null ? "SEK" : e.getCurrency()),
       e.getClaimStatus(),
-      e.getClaimStatusLastUpdated());
+      e.getClaimStatusLastUpdated(),
+      e.isCoveringEmployee());
   }
 }

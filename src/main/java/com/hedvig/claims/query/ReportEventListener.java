@@ -43,7 +43,8 @@ public class ReportEventListener {
           e.getUserId(),
           timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
           "OPEN",
-          timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate()
+          timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
+          false
         )
       );
     }
@@ -58,7 +59,8 @@ public class ReportEventListener {
           e.getMemberId(),
           e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
           "OPEN",
-          e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate()
+          e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
+          false
         )
       );
     }
@@ -134,6 +136,15 @@ public class ReportEventListener {
           .add(BigDecimal.valueOf(optionalAutomaticPaymentAddedEvent.get().getAmount().getNumber().doubleValueExact())));
         claimReportRepository.save(claim);
       }
+    }
+  }
+
+  @EventHandler
+  public void on(EmployeeClaimStatusUpdatedEvent e, @Timestamp Instant timestamp, ReplayStatus replayStatus) {
+    if (replayStatus.isReplay() && isBeforePeriod(reportGenerationService.getReportPeriod(), timestamp)) {
+      ClaimReportEntity claim = getClaimReportEntity(e.getClaimId());
+      claim.setCoveringEmployee(e.isCoveringEmployee());
+      claimReportRepository.save(claim);
     }
   }
 
