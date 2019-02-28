@@ -117,6 +117,9 @@ public class ReportEventListener {
           claim.setClaimYear(dateOfLoss.getYear());
           claimReportRepository.save(claim);
         }
+      } else {
+        claim.setDateOfLoss(claim.getNotificationDate());
+        claimReportRepository.save(claim);
       }
     }
   }
