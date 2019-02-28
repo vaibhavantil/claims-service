@@ -1,11 +1,7 @@
 package com.hedvig.claims.web.dto;
 
-import com.hedvig.claims.aggregates.Asset;
-import com.hedvig.claims.aggregates.ClaimSource;
+import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
-import com.hedvig.claims.aggregates.DataItem;
-import com.hedvig.claims.aggregates.Note;
-import com.hedvig.claims.aggregates.Payment;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.Event;
 
@@ -31,6 +27,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
   public Double reserve;
   public String type;
   public ClaimSource claimSource;
+  public boolean coveringEmployee;
 
   public ClaimDTO() {
   }
@@ -46,42 +43,44 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.reserve = c.reserve;
     this.type = c.type;
     this.claimSource = c.claimSource;
+    this.coveringEmployee = c.coveringEmployee;
 
     for (Asset a : c.assets) {
       assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));
     }
     for (Payment p : c.payments) {
       payments.add(
-          new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.deductible, p.note, p.payoutDate, p.exGratia,
-              p.type, p.handlerReference, p.payoutReference, p.payoutStatus));
+        new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.deductible, p.note, p.payoutDate, p.exGratia,
+          p.type, p.handlerReference, p.payoutReference, p.payoutStatus));
     }
     for (Note n : c.notes) {
       notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
     }
 
     events =
-        c.events
-            .stream()
-            .sorted(Comparator.comparing((Event event) -> event.date).reversed())
-            .map(e -> new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type))
-            .collect(Collectors.toList());
+      c.events
+        .stream()
+        .sorted(Comparator.comparing((Event event) -> event.date).reversed())
+        .map(e -> new EventDTO(e.id, c.id, e.date, e.userId, e.text, e.type))
+        .collect(Collectors.toList());
 
     for (DataItem d : c.data) {
       data.add(
-          new DataItemDTO(
-              d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.received, d.value));
+        new DataItemDTO(
+          d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.received, d.value));
     }
   }
 
   public ClaimDTO(
-      String id,
-      String userId,
-      ClaimStates state,
-      Double reserve,
-      String type,
-      String audioURL,
-      Instant registrationDate,
-      ClaimSource claimSource) {
+    String id,
+    String userId,
+    ClaimStates state,
+    Double reserve,
+    String type,
+    String audioURL,
+    Instant registrationDate,
+    ClaimSource claimSource,
+    boolean coveringEmployee) {
     this.id = id;
     this.userId = userId;
     this.state = state;
@@ -91,6 +90,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.date = registrationDate.atZone(SWEDEN_TZ).toLocalDateTime();
     this.audioURL = audioURL;
     this.claimSource = claimSource;
+    this.coveringEmployee = coveringEmployee;
   }
 
   public void addNote(NoteDTO n) {
@@ -99,19 +99,19 @@ public class ClaimDTO extends HedvigBackofficeDTO {
 
   public String toString() {
     return "\nid:"
-        + this.id
-        + "\n"
-        + "userId:"
-        + this.userId
-        + "\n"
-        + "registrationDate:"
-        + this.date
-        + "\n"
-        + "state:"
-        + this.state.toString()
-        + "\n"
-        + "audioURL:"
-        + this.audioURL;
+      + this.id
+      + "\n"
+      + "userId:"
+      + this.userId
+      + "\n"
+      + "registrationDate:"
+      + this.date
+      + "\n"
+      + "state:"
+      + this.state.toString()
+      + "\n"
+      + "audioURL:"
+      + this.audioURL;
   }
 
   public String getId() {

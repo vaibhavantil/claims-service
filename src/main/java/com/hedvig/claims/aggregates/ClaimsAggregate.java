@@ -45,6 +45,8 @@ public class ClaimsAggregate {
   public ArrayList<Note> notes;
   public ArrayList<String> assets;
 
+  public boolean isCoveringEmployee;
+
   public ClaimsAggregate() {
     log.info("Instansiating ClaimsAggregate");
   }
@@ -207,6 +209,12 @@ public class ClaimsAggregate {
 
     apply(e);
   }
+
+  @CommandHandler
+  public void on(UpdateEmployeeClaimStatusCommand cmd) {
+    apply(new EmployeeClaimStatusUpdatedEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
+  }
+
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler
@@ -222,6 +230,8 @@ public class ClaimsAggregate {
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
     this.claimSource = ClaimSource.APP;
+
+    this.isCoveringEmployee = false;
   }
 
   @EventSourcingHandler
@@ -237,6 +247,7 @@ public class ClaimsAggregate {
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
 
+    this.isCoveringEmployee = false;
   }
 
   @EventSourcingHandler
@@ -345,4 +356,10 @@ public class ClaimsAggregate {
     n.date = e.getDate();
     notes.add(n);
   }
+
+  @EventSourcingHandler
+  public void on(EmployeeClaimStatusUpdatedEvent e) {
+    this.isCoveringEmployee = e.isCoveringEmployee();
+  }
+
 }

@@ -1,36 +1,21 @@
 package com.hedvig.claims.query;
 
-import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
-
-import com.hedvig.claims.aggregates.Asset;
-import com.hedvig.claims.aggregates.ClaimSource;
-import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.aggregates.DataItem;
-import com.hedvig.claims.aggregates.Note;
-import com.hedvig.claims.aggregates.Payment;
-import com.hedvig.claims.aggregates.PayoutStatus;
-import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
-import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
-import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
-import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
-import com.hedvig.claims.events.ClaimCreatedEvent;
-import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
-import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
-import com.hedvig.claims.events.DataItemAddedEvent;
-import com.hedvig.claims.events.NoteAddedEvent;
-import com.hedvig.claims.events.PaymentAddedEvent;
+import com.hedvig.claims.aggregates.*;
+import com.hedvig.claims.events.*;
 import com.hedvig.claims.web.dto.PaymentType;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Optional;
+
+import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 
 @Component
 @Slf4j
@@ -41,7 +26,7 @@ public class ClaimsEventListener {
 
   @Autowired
   public ClaimsEventListener(ClaimsRepository claimRepository,
-    PaymentRepository paymentRepository) {
+                             PaymentRepository paymentRepository) {
     this.claimRepository = claimRepository;
     this.paymentRepository = paymentRepository;
   }
@@ -56,6 +41,7 @@ public class ClaimsEventListener {
     claim.audioURL = e.getAudioURL();
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
     claim.claimSource = ClaimSource.APP;
+    claim.coveringEmployee = false;
 
     // Init data structures
     claim.notes = new HashSet<Note>();
@@ -81,6 +67,7 @@ public class ClaimsEventListener {
     claim.registrationDate = e.getRegistrationDate();
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
     claim.claimSource = e.getClaimSource();
+    claim.coveringEmployee = false;
 
     // Init data structures
     claim.notes = new HashSet<Note>();
@@ -287,7 +274,7 @@ public class ClaimsEventListener {
     ev.userId = e.getMemberId();
     ev.text = String.format(
       "An automatic payment (%s) was executed. The amount is %s \nThe payment was initiated by %s on %s",
-      p.id,p.amount.toString(), p.handlerReference, p.payoutDate.toString());
+      p.id, p.amount.toString(), p.handlerReference, p.payoutDate.toString());
     claim.addEvent(ev);
 
     claimRepository.save(claim);
@@ -368,4 +355,24 @@ public class ClaimsEventListener {
 
     }
   }
+
+  @EventHandler
+  public void on(EmployeeClaimStatusUpdatedEvent e) {
+    Optional<ClaimEntity> optionalClaim = claimRepository.findById(e.getClaimId());
+    if (!optionalClaim.isPresent()) {
+      log.error("EmployeeClaimSetEvent - Cannot find the claim");
+    } else {
+      ClaimEntity claim = optionalClaim.get();
+      claim.coveringEmployee = e.isCoveringEmployee();
+
+      Event ev = new Event();
+      ev.type = e.getClass().getName();
+      ev.userId = claim.userId;
+      ev.text = e.isCoveringEmployee() ? "Claim marked as an employee's claim" : "Claim was marked as a regular claim";
+      claim.addEvent(ev);
+
+      claimRepository.save(claim);
+    }
+  }
+
 }
