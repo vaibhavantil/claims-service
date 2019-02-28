@@ -38,7 +38,7 @@ public class ClaimReportDTO {
       e.getDescriptionOfLoss(),
       Money.of(e.getGrossPaid() == null ? BigDecimal.ZERO : e.getGrossPaid(), e.getCurrency() == null ? "SEK" : e.getCurrency()),
       Money.of(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved(), e.getCurrency() == null ? "SEK" : e.getCurrency()),
-      Money.of((e.getGrossPaid() == null ? BigDecimal.ZERO : e.getGrossPaid()).subtract(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved()), e.getCurrency() == null ? "SEK" : e.getCurrency()),
+      Money.of((e.getGrossPaid() == null ? BigDecimal.ZERO : e.getGrossPaid()).add(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved()), e.getCurrency() == null ? "SEK" : e.getCurrency()),
       e.getClaimStatus(),
       e.getClaimStatusLastUpdated(),
       e.isCoveringEmployee());

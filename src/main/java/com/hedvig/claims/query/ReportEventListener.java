@@ -2,6 +2,7 @@ package com.hedvig.claims.query;
 
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.services.ReportGenerationService;
+import com.hedvig.claims.web.dto.ClaimDataType;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -104,7 +105,7 @@ public class ReportEventListener {
   public void on(DataItemAddedEvent e, @Timestamp Instant timestamp, ReplayStatus replayStatus) {
     if (replayStatus.isReplay() && isBeforePeriod(reportGenerationService.getReportPeriod(), timestamp)) {
       ClaimReportEntity claim = getClaimReportEntity(e.getClaimsId());
-      if (e.getName().equalsIgnoreCase(DATE)) {
+      if (e.getType().equals(ClaimDataType.DataType.DATE)) {
         if (e.getValue().toUpperCase().contains(Z)) {
           LocalDate dateOfLoss = LocalDateTime.ofInstant(Instant.parse(e.getValue()), ZoneId.of("Europe/Stockholm")).toLocalDate();
           claim.setDateOfLoss(dateOfLoss);
