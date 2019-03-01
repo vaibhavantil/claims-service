@@ -27,10 +27,11 @@ public class ClaimReportEntity {
   private LocalDate claimStatusLastUpdated;
   private boolean coveringEmployee;
 
-  public ClaimReportEntity(String claimId, String memberId, LocalDate notificationDate, String claimStatus, LocalDate claimStatusLastUpdated, boolean coveringEmployee) {
+  public ClaimReportEntity(String claimId, String memberId, LocalDate notificationDate, LocalDate dateOfLoss, String claimStatus, LocalDate claimStatusLastUpdated, boolean coveringEmployee) {
     this.claimId = claimId;
     this.memberId = memberId;
     this.notificationDate = notificationDate;
+    this.dateOfLoss = dateOfLoss;
     this.claimStatus = claimStatus;
     this.claimStatusLastUpdated = claimStatusLastUpdated;
     this.coveringEmployee = coveringEmployee;
