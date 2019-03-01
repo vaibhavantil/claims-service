@@ -117,18 +117,17 @@ public class ClaimsAggregate {
   @CommandHandler
   public void addDataItem(AddDataItemCommand command) {
     log.info("adding data item to claim");
-    DataItemAddedEvent ne = new DataItemAddedEvent();
-    ne.setClaimsId(command.getClaimID());
-    ne.setDate(command.getDate());
-    ne.setId(command.getId());
-    ne.setUserId(command.getUserId());
-
-    ne.setName(command.getName());
-    ne.setReceived(command.getReceived());
-    ne.setTitle(command.getTitle());
-    ne.setType(command.getType());
-    ne.setValue(command.getValue());
-
+    DataItemAddedEvent ne = new DataItemAddedEvent(
+      command.getId(),
+      command.getClaimID(),
+      command.getDate(),
+      command.getUserId(),
+      command.getType(),
+      command.getName(),
+      command.getTitle(),
+      command.getReceived(),
+      command.getValue()
+    );
     apply(ne);
   }
 

@@ -1,8 +1,9 @@
 package com.hedvig.claims.events;
 
-import javax.money.MonetaryAmount;
 import lombok.AllArgsConstructor;
 import lombok.Value;
+
+import javax.money.MonetaryAmount;
 
 @Value
 @AllArgsConstructor

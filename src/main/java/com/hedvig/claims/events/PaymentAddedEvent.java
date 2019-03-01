@@ -1,8 +1,9 @@
 package com.hedvig.claims.events;
 
-import java.time.LocalDateTime;
 import lombok.Value;
 import org.axonframework.serialization.Revision;
+
+import java.time.LocalDateTime;
 
 @Value
 @Revision("1.0")
