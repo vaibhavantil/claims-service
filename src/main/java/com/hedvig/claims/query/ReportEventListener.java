@@ -127,6 +127,19 @@ public class ReportEventListener {
   }
 
   @EventHandler
+  public void on(PaymentAddedEvent e, @Timestamp Instant timestamp, ReplayStatus replayStatus){
+    if (replayStatus.isReplay() && isBeforePeriod(reportGenerationService.getReportPeriod(), timestamp)) {
+      ClaimReportEntity claim = getClaimReportEntity(e.getClaimsId());
+
+        claim.setCurrency(SEK);
+
+        claim.setGrossPaid((claim.getGrossPaid() == null ? BigDecimal.ZERO : claim.getGrossPaid())
+          .add(BigDecimal.valueOf(e.getAmount())));
+        claimReportRepository.save(claim);
+    }
+  }
+
+  @EventHandler
   public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp, ReplayStatus replayStatus) {
     if (replayStatus.isReplay() && isBeforePeriod(reportGenerationService.getReportPeriod(), timestamp)) {
       ClaimReportEntity claim = getClaimReportEntity(e.getClaimId());
