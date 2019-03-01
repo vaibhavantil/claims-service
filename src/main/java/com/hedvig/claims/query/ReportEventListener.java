@@ -43,6 +43,7 @@ public class ReportEventListener {
           e.getId(),
           e.getUserId(),
           timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
+          timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
           "OPEN",
           timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
           false
@@ -58,6 +59,7 @@ public class ReportEventListener {
         new ClaimReportEntity(
           e.getId(),
           e.getMemberId(),
+          e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
           e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
           "OPEN",
           e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
