@@ -128,7 +128,7 @@ public class ReportEventListenerTest {
   }
 
   private ClaimReportEntity makeClaimReporEntity() {
-    return new ClaimReportEntity(CLAIM_ID, MEMBER_ID, LocalDate.now(), "OPEN", LocalDate.now(), false);
+    return new ClaimReportEntity(CLAIM_ID, MEMBER_ID, LocalDate.now(), LocalDate.now(),"OPEN", LocalDate.now(), false);
   }
 
   private DomainEventStream makeStream() {
