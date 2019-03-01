@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -31,6 +29,14 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   public ReportDTO generateReport(YearMonth yearMonth) {
     this.reportingPeriod = yearMonth;
 
+    Stream<ClaimReportDTO> reportStream = claimReportRepository.findAll().stream().map(ClaimReportDTO::fromClaimReportEntity);
+
+    return new ReportDTO(reportStream);
+  }
+
+  public void replay(YearMonth yearMonth) {
+    this.reportingPeriod = yearMonth;
+
     eventProcessingConfiguration
       .eventProcessorByProcessingGroup(REPORTING_PROCESSOR_GROUP, TrackingEventProcessor.class)
       .ifPresent(trackingEventProcessor -> {
@@ -38,17 +44,5 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
         trackingEventProcessor.resetTokens();
         trackingEventProcessor.start();
       });
-
-
-    //let the events to be replayed - WIP
-    try {
-      Thread.sleep(5000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-
-    Stream<ClaimReportDTO> reportStream = claimReportRepository.findAll().stream().map(ClaimReportDTO::fromClaimReportEntity);
-
-    return new ReportDTO(reportStream);
   }
 }
