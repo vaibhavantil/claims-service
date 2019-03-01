@@ -3,6 +3,8 @@ package com.hedvig.claims.config;
 import com.hedvig.claims.events.upcast.ClaimCreatedEvent_v1;
 import com.hedvig.claims.events.upcast.PaymentAddedEvent_v1;
 import org.axonframework.config.EventProcessingConfiguration;
+import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
+import org.axonframework.messaging.StreamableMessageSource;
 import org.axonframework.serialization.upcasting.event.EventUpcasterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +23,8 @@ public class AxonConfiguration {
   @Autowired
   public void configure(EventProcessingConfiguration config) {
     config.usingTrackingProcessors();
+    config.registerSubscribingEventProcessor("com.hedvig.claims.query");
   }
+
 
 }

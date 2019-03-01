@@ -42,11 +42,11 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
 
     //let the events to be replayed - WIP
     try {
-      Thread.sleep(1000);
+      Thread.sleep(5000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    
+
     Stream<ClaimReportDTO> reportStream = claimReportRepository.findAll().stream().map(ClaimReportDTO::fromClaimReportEntity);
 
     return new ReportDTO(reportStream);
