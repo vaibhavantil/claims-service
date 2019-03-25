@@ -29,4 +29,15 @@ public class ReportController {
     return ResponseEntity.accepted().build();
   }
 
+  @GetMapping("/generate/mi")
+  public ResponseEntity<?> generateMiReport(@RequestParam YearMonth untilPeriod){
+
+    // GrossClaimsPaid per Type per UW
+    // GrossClaimReserve per type per wu
+    // NumberOfClosedClaims per type per uw
+    // TotalNumberOfClaims per type per uw
+
+    return ResponseEntity.ok().build();
+  }
+
 }

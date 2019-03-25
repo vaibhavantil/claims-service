@@ -6,8 +6,10 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -28,6 +30,7 @@ public class ClaimReportEntity {
   private boolean coveringEmployee;
 
   public ClaimReportEntity(String claimId, String memberId, LocalDate notificationDate, LocalDate dateOfLoss, String claimStatus, LocalDate claimStatusLastUpdated, boolean coveringEmployee) {
+
     this.claimId = claimId;
     this.memberId = memberId;
     this.notificationDate = notificationDate;
@@ -36,4 +39,5 @@ public class ClaimReportEntity {
     this.claimStatusLastUpdated = claimStatusLastUpdated;
     this.coveringEmployee = coveringEmployee;
   }
+
 }
