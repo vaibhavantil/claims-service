@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+
 @Component
 @Slf4j
 @ProcessingGroup("liveReporting")
@@ -109,7 +110,7 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(DataItemAddedEvent e, @Timestamp Instant timestamp) {
-    log.info("Data item added to claim {}", e.getId());
+    log.info("Data item added to claim {}", e.getClaimsId());
 
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
@@ -134,7 +135,7 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(PaymentAddedEvent e, @Timestamp Instant timestamp) {
-    log.info("Payment added for claim", e.getId());
+    log.info("Payment added for claim {}", e.getClaimsId());
 
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
@@ -148,7 +149,7 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
-    log.info("Automatic payment initiated for claim {}", e.getId());
+    log.info("Automatic payment initiated for claim {}", e.getClaimId());
 
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
