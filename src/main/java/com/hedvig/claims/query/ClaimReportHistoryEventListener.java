@@ -39,6 +39,7 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(ClaimCreatedEvent e, @Timestamp Instant timestamp) {
+    log.info("Claim {} created", e.getId());
     claimReportHistoryRepository.save(
       new ClaimReportHistoryEntity(
         e.getId(),
@@ -54,6 +55,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(BackofficeClaimCreatedEvent e, @Timestamp Instant timestamp) {
+    log.info("Claim {} created from backoffice", e.getId());
+
     claimReportHistoryRepository.save(
       new ClaimReportHistoryEntity(
         e.getId(),
@@ -70,6 +73,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(ClaimStatusUpdatedEvent e, @Timestamp Instant timestamp) {
+    log.info("Claim {} status updated, changed to {} ", e.getClaimsId(), e.getState());
+
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
 
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
@@ -81,6 +86,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(ClaimsTypeUpdateEvent e, @Timestamp Instant timestamp) {
+    log.info("Claim {} type updated to {}", e.getClaimID(), e.getType());
+
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.claimID, timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
 
@@ -90,6 +97,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(ClaimsReserveUpdateEvent e, @Timestamp Instant timestamp) {
+    log.info("Claim {} reserve updated to {}", e.getClaimID(), e.getAmount());
+
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.claimID, timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
 
@@ -100,6 +109,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(DataItemAddedEvent e, @Timestamp Instant timestamp) {
+    log.info("Data item added to claim {}", e.getId());
+
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
 
@@ -123,6 +134,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(PaymentAddedEvent e, @Timestamp Instant timestamp) {
+    log.info("Payment added for claim", e.getId());
+
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
 
@@ -135,6 +148,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
+    log.info("Automatic payment initiated for claim {}", e.getId());
+
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
 
@@ -155,6 +170,8 @@ public class ClaimReportHistoryEventListener {
 
   @EventHandler
   public void on(EmployeeClaimStatusUpdatedEvent e, @Timestamp Instant timestamp) {
+    log.info("Employee claim status updated for claim {}", e.getClaimId());
+
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
 
