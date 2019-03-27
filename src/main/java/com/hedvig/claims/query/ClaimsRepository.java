@@ -20,4 +20,7 @@ public interface ClaimsRepository extends JpaRepository<ClaimEntity, String> {
 
   @Query("SELECT c FROM ClaimEntity c")
   Page<ClaimEntity> search(Pageable p);
+
+  @Query("SELECT * from ClaimEntity c where type = :type")
+  List<ClaimEntity> findByType(String type);
 }

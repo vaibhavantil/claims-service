@@ -1,7 +1,9 @@
 package com.hedvig.claims.services;
 
+import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimReportHistoryRepository;
 import com.hedvig.claims.query.ClaimReportRepository;
+import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.web.dto.ClaimReportDTO;
 import com.hedvig.claims.web.dto.MiReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
@@ -20,20 +22,24 @@ import java.util.stream.Stream;
 public class ReportGenerationServiceImpl implements ReportGenerationService {
 
   private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
+  public static final String TEST = "Test";
   private YearMonth reportingPeriod;
   private static String REPORTING_PROCESSOR_GROUP = "report";
 
   private ClaimReportRepository claimReportRepository;
   private EventProcessingConfiguration eventProcessingConfiguration;
   private ClaimReportHistoryRepository claimReportHistoryRepository;
+  private ClaimsRepository claimsRepository;
 
   @Autowired
   public ReportGenerationServiceImpl(EventProcessingConfiguration eventProcessingConfiguration,
                                      ClaimReportRepository claimReportRepository,
-                                     ClaimReportHistoryRepository claimReportHistoryRepository) {
+                                     ClaimReportHistoryRepository claimReportHistoryRepository,
+                                     ClaimsRepository claimsRepository) {
     this.eventProcessingConfiguration = eventProcessingConfiguration;
     this.claimReportRepository = claimReportRepository;
     this.claimReportHistoryRepository = claimReportHistoryRepository;
+    this.claimsRepository = claimsRepository;
   }
 
   public YearMonth getReportPeriod() {
@@ -61,12 +67,17 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   }
 
   public List<MiReportClaimHistoryDTO> generateMiReport(YearMonth until) {
+    List<ClaimEntity> testClaims = claimsRepository.findByType(TEST);
+
+    List<String> excludedClaimIds = testClaims.stream().map(x -> x.id).collect(Collectors.toList());
+
     return this.claimReportHistoryRepository.findAll().stream()
+      .filter(historyEntity -> !excludedClaimIds.contains(historyEntity.getClaimId()))
       .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           until
             .atEndOfMonth()
-            .atTime(23,59,59,999_999_999)
+            .atTime(23, 59, 59, 999_999_999)
             .atZone(ZoneId.of(EUROPE_STOCKHOLM))
             .toInstant()
         )
