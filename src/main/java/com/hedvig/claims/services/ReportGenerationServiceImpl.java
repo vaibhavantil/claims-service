@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 @Service
 public class ReportGenerationServiceImpl implements ReportGenerationService {
 
+  private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
   private YearMonth reportingPeriod;
   private static String REPORTING_PROCESSOR_GROUP = "report";
 
@@ -61,12 +62,12 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
 
   public List<MiReportClaimHistoryDTO> generateMiReport(YearMonth until) {
     return this.claimReportHistoryRepository.findAll().stream()
-      .filter(h -> !h.getTimeOfKnowledge()
+      .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           until
             .atEndOfMonth()
             .atTime(23,59,59,999_999_999)
-            .atZone(ZoneId.of("Europe/Stockholm"))
+            .atZone(ZoneId.of(EUROPE_STOCKHOLM))
             .toInstant()
         )
       )

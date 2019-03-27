@@ -1,40 +1,39 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.events.*;
-import com.hedvig.claims.services.ReportGenerationService;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
-import org.axonframework.eventhandling.ReplayStatus;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-
 
 @Component
 @Slf4j
 @ProcessingGroup("liveReporting")
 public class ClaimReportHistoryEventListener {
 
+  private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
+  private static final String OPEN = "OPEN";
   private ClaimReportHistoryRepository claimReportHistoryRepository;
-  private ReportGenerationService reportGenerationService;
   private EventStore eventStore;
   private static String DATE = "DATE";
   private static String Z = "Z";
   private static String SEK = "SEK";
 
 
-  public ClaimReportHistoryEventListener(ClaimReportHistoryRepository claimReportHistoryRepository, ReportGenerationService reportGenerationService, EventStore eventStore) {
+  public ClaimReportHistoryEventListener(ClaimReportHistoryRepository claimReportHistoryRepository, EventStore eventStore) {
     this.claimReportHistoryRepository = claimReportHistoryRepository;
-    this.reportGenerationService = reportGenerationService;
     this.eventStore = eventStore;
   }
 
@@ -44,9 +43,9 @@ public class ClaimReportHistoryEventListener {
       new ClaimReportHistoryEntity(
         e.getId(),
         e.getUserId(),
-        timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
-        timestamp.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
-        "OPEN",
+        timestamp.atZone(ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate(),
+        timestamp.atZone(ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate(),
+        OPEN,
         false,
         timestamp
       )
@@ -59,9 +58,9 @@ public class ClaimReportHistoryEventListener {
       new ClaimReportHistoryEntity(
         e.getId(),
         e.getMemberId(),
-        e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
-        e.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate(),
-        "OPEN",
+        e.getRegistrationDate().atZone(ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate(),
+        e.getRegistrationDate().atZone(ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate(),
+        OPEN,
         false,
         timestamp
       )
@@ -106,7 +105,7 @@ public class ClaimReportHistoryEventListener {
 
     if (e.getType().equals(ClaimDataType.DataType.DATE)) {
       if (e.getValue().toUpperCase().contains(Z)) {
-        LocalDate dateOfLoss = LocalDateTime.ofInstant(Instant.parse(e.getValue()), ZoneId.of("Europe/Stockholm")).toLocalDate();
+        LocalDate dateOfLoss = LocalDateTime.ofInstant(Instant.parse(e.getValue()), ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate();
         updatedClaimHistoryEntry.setDateOfLoss(dateOfLoss);
         updatedClaimHistoryEntry.setClaimYear(dateOfLoss.getYear());
         claimReportHistoryRepository.save(updatedClaimHistoryEntry);
@@ -139,10 +138,12 @@ public class ClaimReportHistoryEventListener {
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
 
-    Optional<AutomaticPaymentAddedEvent> optionalAutomaticPaymentAddedEvent = eventStore.readEvents(e.getClaimId()).asStream()
-      .filter(x -> x.getPayloadType().getTypeName().equalsIgnoreCase(AutomaticPaymentAddedEvent.class.getTypeName()))
-      .map(x -> (AutomaticPaymentAddedEvent) x.getPayload())
-      .filter(x -> x.getId().equalsIgnoreCase(e.getId())).findFirst();
+    Optional<AutomaticPaymentAddedEvent> optionalAutomaticPaymentAddedEvent = eventStore
+      .readEvents(e.getClaimId()).asStream()
+      .filter(domainEventMessage -> domainEventMessage.getPayloadType().getTypeName().equalsIgnoreCase(AutomaticPaymentAddedEvent.class.getTypeName()))
+      .map(event -> (AutomaticPaymentAddedEvent) event.getPayload())
+      .filter(event -> event.getId().equalsIgnoreCase(e.getId()))
+      .findFirst();
 
     if (optionalAutomaticPaymentAddedEvent.isPresent()) {
       updatedClaimHistoryEntry.setCurrency(SEK);
@@ -169,9 +170,10 @@ public class ClaimReportHistoryEventListener {
       .max(Comparator.comparing(ClaimReportHistoryEntity::getTimeOfKnowledge));
 
     if (!claimReportHistoryEntityMaybe.isPresent()) {
-      log.error("Claim $claimId cannot be found in the claimReportHistoryRepository.");
-      throw new RuntimeException("Claim $claimId cannot be found in the claimReportHistoryRepository");
+      log.error("Claim {} cannot be found in the claimReportHistoryRepository.", claimId);
+      throw new RuntimeException("Claim cannot be found in the claimReportHistoryRepository");
     }
+
     return claimReportHistoryEntityMaybe.get();
   }
 }
