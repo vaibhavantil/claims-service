@@ -26,6 +26,7 @@ public class ClaimReportHistoryEventListener {
 
   private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
   private static final String OPEN = "OPEN";
+  public static final String CLOSED = "CLOSED";
   private ClaimReportHistoryRepository claimReportHistoryRepository;
   private EventStore eventStore;
   private static String DATE = "DATE";
@@ -127,7 +128,7 @@ public class ClaimReportHistoryEventListener {
         updatedClaimHistoryEntry.setClaimYear(dateOfLoss.getYear());
         claimReportHistoryRepository.save(updatedClaimHistoryEntry);
       }
-    } else {
+    } else if (updatedClaimHistoryEntry.getDateOfLoss() != null) {
       updatedClaimHistoryEntry.setDateOfLoss(recentClaimHistoryEntry.getNotificationDate());
       claimReportHistoryRepository.save(updatedClaimHistoryEntry);
     }
@@ -192,6 +193,11 @@ public class ClaimReportHistoryEventListener {
       throw new RuntimeException("Claim cannot be found in the claimReportHistoryRepository");
     }
 
-    return claimReportHistoryEntityMaybe.get();
+    ClaimReportHistoryEntity claimReportHistoryEntity = claimReportHistoryEntityMaybe.get();
+    if (claimReportHistoryEntity.getClaimStatus().equalsIgnoreCase(CLOSED)) {
+      claimReportHistoryEntity.setReserved(BigDecimal.ZERO);
+    }
+
+    return claimReportHistoryEntity;
   }
 }

@@ -23,6 +23,7 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
 
   private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
   public static final String TEST = "Test";
+  public static final String NOT_COVERED = "Not covered";
   private YearMonth reportingPeriod;
   private static String REPORTING_PROCESSOR_GROUP = "report";
 
@@ -100,7 +101,13 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   public List<MiReportClaimHistoryDTO> generateMiReport(YearMonth until) {
     List<ClaimEntity> testClaims = claimsRepository.findByType(TEST);
 
-    List<String> excludedClaimIds = testClaims.stream().map(x -> x.id).collect(Collectors.toList());
+    List<ClaimEntity> notCoveredClaims = claimsRepository.findByType(NOT_COVERED);
+
+    List<String> excludedNotCoveredClaims = notCoveredClaims.stream().map(claimEntity -> claimEntity.id).collect(Collectors.toList());
+
+    List<String> excludedClaimIds = testClaims.stream().map(claimEntity -> claimEntity.id).collect(Collectors.toList());
+
+    excludedClaimIds.addAll(excludedNotCoveredClaims);
 
     return this.claimReportHistoryRepository.findAll().stream()
       .filter(historyEntity -> !excludedClaimIds.contains(historyEntity.getClaimId()))
