@@ -1,9 +1,6 @@
 package com.hedvig.claims.services;
 
-import com.hedvig.claims.query.ClaimEntity;
-import com.hedvig.claims.query.ClaimReportHistoryRepository;
-import com.hedvig.claims.query.ClaimReportRepository;
-import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.query.*;
 import com.hedvig.claims.web.dto.ClaimReportDTO;
 import com.hedvig.claims.web.dto.MiReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
@@ -14,7 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.util.AbstractMap;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,7 +49,38 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   public ReportDTO generateReport(YearMonth yearMonth) {
     this.reportingPeriod = yearMonth;
 
-    Stream<ClaimReportDTO> reportStream = claimReportRepository.findAll().stream().map(ClaimReportDTO::fromClaimReportEntity);
+    final List<ClaimEntity> testClaims = claimsRepository.findByType(TEST);
+
+    final List<String> excludedClaimIds = testClaims.stream()
+      .map(claimEntity -> claimEntity.id)
+      .collect(Collectors.toList());
+
+    final Map<String, List<ClaimReportHistoryEntity>> claimHistoryEntities = claimReportHistoryRepository.findAll().stream()
+      .filter(historyEntity -> !excludedClaimIds.contains(historyEntity.getClaimId()))
+      .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
+        .isAfter(
+          yearMonth
+            .atEndOfMonth()
+            .atTime(23, 59, 59, 999_999_999)
+            .atZone(ZoneId.of(EUROPE_STOCKHOLM))
+            .toInstant()
+        )
+      )
+      .collect(Collectors.groupingBy(ClaimReportHistoryEntity::getClaimId));
+
+    final Map<String, ClaimReportHistoryEntity> latestClaimByIds = claimHistoryEntities.entrySet().stream()
+      .map(
+        entrySet -> new AbstractMap.SimpleEntry<>(
+          entrySet.getKey(),
+          entrySet.getValue().stream()
+            .max(Comparator.comparing(ClaimReportHistoryEntity::getTimeOfKnowledge)).get()
+        )
+      )
+      .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+
+
+    final Stream<ClaimReportDTO> reportStream = latestClaimByIds.values().stream()
+      .map(ClaimReportDTO::fromClaimReportHistoryEntity);
 
     return new ReportDTO(reportStream);
   }
