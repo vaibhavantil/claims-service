@@ -33,7 +33,7 @@ public class ClaimReportHistoryEventListener {
   private static String DATE = "DATE";
   private static String Z = "Z";
   private static String SEK = "SEK";
-  private final Set<String> EX_GRACIA_CORRECTION_CLAIM_IDS = Set.of(
+  private final Set<String> EX_GRACIA_TO_INCLUDE_ALWAYS  = Set.of(
     "71f3cf43-c4b2-488a-8b9f-74d8c4ceed79"
   );
 
@@ -142,7 +142,7 @@ public class ClaimReportHistoryEventListener {
 
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
-    if (!e.getExGratia() || EX_GRACIA_CORRECTION_CLAIM_IDS.contains(e.getClaimsId())) {
+    if (!e.getExGratia() || EX_GRACIA_TO_INCLUDE_ALWAYS.contains(e.getClaimsId())) {
       updatedClaimHistoryEntry.setCurrency(SEK);
       updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
         .add(BigDecimal.valueOf(e.getAmount())));
@@ -168,7 +168,7 @@ public class ClaimReportHistoryEventListener {
     if (optionalAutomaticPaymentAddedEvent.isPresent()) {
       AutomaticPaymentAddedEvent automaticPaymentAddedEvent = optionalAutomaticPaymentAddedEvent.get();
 
-      if (!automaticPaymentAddedEvent.isExGracia() || EX_GRACIA_CORRECTION_CLAIM_IDS.contains(e.getClaimId())) {
+      if (!automaticPaymentAddedEvent.isExGracia() || EX_GRACIA_TO_INCLUDE_ALWAYS.contains(e.getClaimId())) {
         updatedClaimHistoryEntry.setCurrency(SEK);
         updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
           .add(BigDecimal.valueOf(automaticPaymentAddedEvent.getAmount().getNumber().doubleValueExact())));
