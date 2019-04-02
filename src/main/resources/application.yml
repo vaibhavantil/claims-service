@@ -25,3 +25,6 @@ spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
+
+
+spring.main.allow-bean-definition-overriding: true
