@@ -29,7 +29,14 @@ public class ClaimReportHistoryEntity {
   private boolean coveringEmployee;
   private Instant timeOfKnowledge;
 
-  public ClaimReportHistoryEntity(String claimId, String memberId, LocalDate notificationDate, LocalDate dateOfLoss, String claimStatus, boolean coveringEmployee, Instant timeOfKnowledge) {
+  public ClaimReportHistoryEntity(
+    String claimId,
+    String memberId,
+    LocalDate notificationDate,
+    LocalDate dateOfLoss,
+    String claimStatus,
+    boolean coveringEmployee,
+    Instant timeOfKnowledge) {
     this.setClaimHistoryId(UUID.randomUUID());
     this.claimId = claimId;
     this.memberId = memberId;
@@ -40,7 +47,7 @@ public class ClaimReportHistoryEntity {
     this.timeOfKnowledge = timeOfKnowledge;
   }
 
-  public static ClaimReportHistoryEntity copy(ClaimReportHistoryEntity old, Instant timeOfKnowledge){
+  public static ClaimReportHistoryEntity copy(ClaimReportHistoryEntity old, Instant timeOfKnowledge) {
     return new ClaimReportHistoryEntity(
       UUID.randomUUID(),
       old.getClaimId(),
