@@ -25,6 +25,4 @@ public class AxonConfiguration {
     config.usingTrackingProcessors();
     config.registerSubscribingEventProcessor("com.hedvig.claims.query");
   }
-
-
 }

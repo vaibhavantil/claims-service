@@ -1,6 +1,7 @@
 package com.hedvig.claims.web.dto;
 
 import com.hedvig.claims.query.ClaimReportEntity;
+import com.hedvig.claims.query.ClaimReportHistoryEntity;
 import lombok.Value;
 import org.javamoney.moneta.Money;
 
@@ -25,10 +26,9 @@ public class ClaimReportDTO {
   private MonetaryAmount reserved;
   private MonetaryAmount totalIncurred;
   private String claimStatus;
-  private LocalDate claimStatusLastUpdated;
   private boolean coveringEmployee;
 
-  public static ClaimReportDTO fromClaimReportEntity(ClaimReportEntity e) {
+  public static ClaimReportDTO fromClaimReportHistoryEntity(ClaimReportHistoryEntity e) {
     return new ClaimReportDTO(
       e.getClaimId(),
       e.getMemberId(),
@@ -40,7 +40,6 @@ public class ClaimReportDTO {
       Money.of(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved(), e.getCurrency() == null ? "SEK" : e.getCurrency()),
       Money.of((e.getGrossPaid() == null ? BigDecimal.ZERO : e.getGrossPaid()).add(e.getReserved() == null ? BigDecimal.ZERO : e.getReserved()), e.getCurrency() == null ? "SEK" : e.getCurrency()),
       e.getClaimStatus(),
-      e.getClaimStatusLastUpdated(),
       e.isCoveringEmployee());
   }
 }
