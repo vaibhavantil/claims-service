@@ -1,6 +1,10 @@
 package com.hedvig.claims.services;
 
-import com.hedvig.claims.query.*;
+import com.hedvig.claims.query.ClaimReportHistoryEntity;
+import com.hedvig.claims.query.ClaimReportHistoryRepository;
+import com.hedvig.claims.query.ClaimReportRepository;
+import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.web.dto.BDXReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ClaimReportDTO;
 import com.hedvig.claims.web.dto.MiReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
@@ -50,14 +54,8 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   public ReportDTO generateReport(YearMonth yearMonth) {
     this.reportingPeriod = yearMonth;
 
-    final List<ClaimEntity> testClaims = claimsRepository.findByType(TEST);
-
-    final List<String> excludedClaimIds = testClaims.stream()
-      .map(claimEntity -> claimEntity.id)
-      .collect(Collectors.toList());
-
     final Map<String, List<ClaimReportHistoryEntity>> claimHistoryEntities = claimReportHistoryRepository.findAll().stream()
-      .filter(historyEntity -> !excludedClaimIds.contains(historyEntity.getClaimId()))
+      .filter(historyEntity -> !fetchCurrentClaimsByType().contains(historyEntity.getClaimId()))
       .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           yearMonth
@@ -99,18 +97,8 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   }
 
   public List<MiReportClaimHistoryDTO> generateMiReport(YearMonth until) {
-    List<ClaimEntity> testClaims = claimsRepository.findByType(TEST);
-
-    List<ClaimEntity> notCoveredClaims = claimsRepository.findByType(NOT_COVERED);
-
-    List<String> excludedNotCoveredClaims = notCoveredClaims.stream().map(claimEntity -> claimEntity.id).collect(Collectors.toList());
-
-    List<String> excludedClaimIds = testClaims.stream().map(claimEntity -> claimEntity.id).collect(Collectors.toList());
-
-    excludedClaimIds.addAll(excludedNotCoveredClaims);
-
     return this.claimReportHistoryRepository.findAll().stream()
-      .filter(historyEntity -> !excludedClaimIds.contains(historyEntity.getClaimId()))
+      .filter(historyEntity -> !fetchCurrentClaimsByType().contains(historyEntity.getClaimId()))
       .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           until
@@ -121,6 +109,41 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
         )
       )
       .map(MiReportClaimHistoryDTO::from)
+      .collect(Collectors.toList());
+  }
+
+  public List<BDXReportClaimHistoryDTO> generateBDXReport(YearMonth month) {
+    Map<String, List<ClaimReportHistoryEntity>> claimsByClaimId = claimReportHistoryRepository
+      .findByTimeOfKnowledge(month.atDay(1).atTime(23, 59, 59, 999_999_999)
+        .atZone(ZoneId.of(EUROPE_STOCKHOLM))
+        .toInstant(), month.atEndOfMonth()
+      .atTime(23, 59, 59, 999_999_999)
+      .atZone(ZoneId.of(EUROPE_STOCKHOLM))
+      .toInstant())
+      .stream()
+      .filter(claimReportHistoryEntity -> !fetchCurrentClaimsByType().contains(claimReportHistoryEntity.getClaimId()))
+      .collect(Collectors.groupingBy(ClaimReportHistoryEntity::getClaimId));
+
+    Map<String, ClaimReportHistoryEntity> latestClaimsById = claimsByClaimId.entrySet().stream()
+      .map(
+        entrySet -> new AbstractMap.SimpleEntry<>(
+          entrySet.getKey(),
+          entrySet.getValue().stream()
+            .max(Comparator.comparing(ClaimReportHistoryEntity::getTimeOfKnowledge))
+            .get()
+        )
+      )
+      .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+
+    return latestClaimsById.values().stream()
+      .map(BDXReportClaimHistoryDTO::from)
+      .collect(Collectors.toList());
+  }
+
+  private List<String> fetchCurrentClaimsByType() {
+    return claimsRepository.findByType(TEST)
+      .stream()
+      .map(claimEntity -> claimEntity.id)
       .collect(Collectors.toList());
   }
 }
