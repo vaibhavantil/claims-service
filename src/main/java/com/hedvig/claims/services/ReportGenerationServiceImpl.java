@@ -114,7 +114,7 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
 
   public List<BDXReportClaimHistoryDTO> generateBDXReport(YearMonth month) {
     Map<String, List<ClaimReportHistoryEntity>> claimsByClaimId = claimReportHistoryRepository
-      .findByTimeOfKnowledge(month.atDay(1).atTime(23, 59, 59, 999_999_999)
+      .findByTimeOfKnowledge(month.atDay(1).atTime(0, 0, 0, 0)
         .atZone(ZoneId.of(EUROPE_STOCKHOLM))
         .toInstant(), month.atEndOfMonth()
       .atTime(23, 59, 59, 999_999_999)
