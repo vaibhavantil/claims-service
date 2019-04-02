@@ -27,7 +27,7 @@ public class ClaimReportHistoryEventListener {
 
   private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
   private static final String OPEN = "OPEN";
-  public static final String CLOSED = "CLOSED";
+  private static final String CLOSED = "CLOSED";
   private ClaimReportHistoryRepository claimReportHistoryRepository;
   private EventStore eventStore;
   private static String DATE = "DATE";
@@ -122,18 +122,16 @@ public class ClaimReportHistoryEventListener {
 
     if (e.getType().equals(ClaimDataType.DataType.DATE)) {
       if (e.getValue().toUpperCase().contains(Z)) {
-        LocalDate dateOfLoss = LocalDateTime.ofInstant(Instant.parse(e.getValue()), ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate();
-        updatedClaimHistoryEntry.setDateOfLoss(dateOfLoss);
-        updatedClaimHistoryEntry.setClaimYear(dateOfLoss.getYear());
-        claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+        LocalDate dateOfLoss = LocalDateTime
+          .ofInstant(Instant.parse(e.getValue()), ZoneId.of(EUROPE_STOCKHOLM))
+          .toLocalDate();
+        updateDateOfLoss(updatedClaimHistoryEntry, dateOfLoss);
       } else {
-        LocalDate dateOfLoss = LocalDateTime.parse(e.getValue()).toLocalDate();
-        updatedClaimHistoryEntry.setDateOfLoss(dateOfLoss);
-        updatedClaimHistoryEntry.setClaimYear(dateOfLoss.getYear());
-        claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+        updateDateOfLoss(updatedClaimHistoryEntry, LocalDateTime.parse(e.getValue()).toLocalDate());
       }
+      claimReportHistoryRepository.save(updatedClaimHistoryEntry);
     } else if (updatedClaimHistoryEntry.getDateOfLoss() != null) {
-      updatedClaimHistoryEntry.setDateOfLoss(recentClaimHistoryEntry.getNotificationDate());
+      updateDateOfLoss(updatedClaimHistoryEntry, recentClaimHistoryEntry.getNotificationDate());
       claimReportHistoryRepository.save(updatedClaimHistoryEntry);
     }
   }
@@ -195,7 +193,7 @@ public class ClaimReportHistoryEventListener {
     List<ClaimReportHistoryEntity> listOfClaims = claimReportHistoryRepository.findByClaimId(claimId);
 
     Optional<ClaimReportHistoryEntity> claimReportHistoryEntityMaybe = listOfClaims.stream()
-      .filter(x -> !x.getTimeOfKnowledge().isAfter(timeOfKnowledge))
+      .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge().isAfter(timeOfKnowledge))
       .max(Comparator.comparing(ClaimReportHistoryEntity::getTimeOfKnowledge));
 
     if (!claimReportHistoryEntityMaybe.isPresent()) {
@@ -209,5 +207,10 @@ public class ClaimReportHistoryEventListener {
     }
 
     return claimReportHistoryEntity;
+  }
+
+  private void updateDateOfLoss(ClaimReportHistoryEntity updatedClaimHistoryEntry, LocalDate dateOfLoss) {
+    updatedClaimHistoryEntry.setDateOfLoss(dateOfLoss);
+    updatedClaimHistoryEntry.setClaimYear(dateOfLoss.getYear());
   }
 }
