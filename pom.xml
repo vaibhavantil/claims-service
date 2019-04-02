@@ -244,6 +244,10 @@
             <goals> <goal>testCompile</goal> </goals>
           </execution>
         </executions>
+          <configuration>
+              <source>9</source>
+              <target>9</target>
+          </configuration>
       </plugin>
     </plugins>
 

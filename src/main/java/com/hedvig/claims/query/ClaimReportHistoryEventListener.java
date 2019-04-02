@@ -17,6 +17,7 @@ import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Component
@@ -32,6 +33,9 @@ public class ClaimReportHistoryEventListener {
   private static String DATE = "DATE";
   private static String Z = "Z";
   private static String SEK = "SEK";
+  private final Set<String> EX_GRACIA_CORRECTION_CLAIM_IDS = Set.of(
+    "71f3cf43-c4b2-488a-8b9f-74d8c4ceed79"
+  );
 
 
   public ClaimReportHistoryEventListener(ClaimReportHistoryRepository claimReportHistoryRepository, EventStore eventStore) {
@@ -140,12 +144,13 @@ public class ClaimReportHistoryEventListener {
 
     ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
     ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    if (!e.getExGratia() || EX_GRACIA_CORRECTION_CLAIM_IDS.contains(e.getClaimsId())) {
+      updatedClaimHistoryEntry.setCurrency(SEK);
+      updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
+        .add(BigDecimal.valueOf(e.getAmount())));
 
-    updatedClaimHistoryEntry.setCurrency(SEK);
-
-    updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
-      .add(BigDecimal.valueOf(e.getAmount())));
-    claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+      claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+    }
   }
 
   @EventHandler
@@ -163,10 +168,15 @@ public class ClaimReportHistoryEventListener {
       .findFirst();
 
     if (optionalAutomaticPaymentAddedEvent.isPresent()) {
-      updatedClaimHistoryEntry.setCurrency(SEK);
-      updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
-        .add(BigDecimal.valueOf(optionalAutomaticPaymentAddedEvent.get().getAmount().getNumber().doubleValueExact())));
-      claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+      AutomaticPaymentAddedEvent automaticPaymentAddedEvent = optionalAutomaticPaymentAddedEvent.get();
+
+      if (!automaticPaymentAddedEvent.isExGracia() || EX_GRACIA_CORRECTION_CLAIM_IDS.contains(e.getClaimId())) {
+        updatedClaimHistoryEntry.setCurrency(SEK);
+        updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
+          .add(BigDecimal.valueOf(automaticPaymentAddedEvent.getAmount().getNumber().doubleValueExact())));
+
+        claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+      }
     }
   }
 
