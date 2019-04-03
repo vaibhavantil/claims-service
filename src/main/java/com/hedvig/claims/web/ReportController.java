@@ -1,8 +1,7 @@
 package com.hedvig.claims.web;
 
 import com.hedvig.claims.services.ReportGenerationService;
-import com.hedvig.claims.web.dto.BDXReportClaimHistoryDTO;
-import com.hedvig.claims.web.dto.MiReportClaimHistoryDTO;
+import com.hedvig.claims.web.dto.ReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +35,8 @@ public class ReportController {
     return ResponseEntity.accepted().build();
   }
 
-  @GetMapping("/generate/mi")
-  public ResponseEntity<List<MiReportClaimHistoryDTO>> generateMiReport(@RequestParam YearMonth until) {
-    return ResponseEntity.ok(reportGenerationService.generateMiReport(until));
+  @GetMapping("/generate/claimsHistory")
+  public ResponseEntity<List<ReportClaimHistoryDTO>> generateClaimsHistory(@RequestParam YearMonth until) {
+    return ResponseEntity.ok(reportGenerationService.generateClaimsReport(until));
   }
-
-  @GetMapping("/generate/bdx")
-  public ResponseEntity<List<BDXReportClaimHistoryDTO>> generateBDXReport(@RequestParam YearMonth month) {
-    return ResponseEntity.ok(reportGenerationService.generateBDXReport(month));
-  }
-
 }
