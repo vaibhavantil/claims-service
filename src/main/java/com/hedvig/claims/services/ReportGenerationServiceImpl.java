@@ -1,9 +1,13 @@
 package com.hedvig.claims.services;
 
-import com.hedvig.claims.query.*;
+import com.hedvig.claims.query.ClaimReportHistoryEntity;
+import com.hedvig.claims.query.ClaimReportHistoryRepository;
+import com.hedvig.claims.query.ClaimReportRepository;
+import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.web.dto.ClaimReportDTO;
-import com.hedvig.claims.web.dto.MiReportClaimHistoryDTO;
+import com.hedvig.claims.web.dto.ReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
+import lombok.val;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,14 +54,8 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   public ReportDTO generateReport(YearMonth yearMonth) {
     this.reportingPeriod = yearMonth;
 
-    final List<ClaimEntity> testClaims = claimsRepository.findByType(TEST);
-
-    final List<String> excludedClaimIds = testClaims.stream()
-      .map(claimEntity -> claimEntity.id)
-      .collect(Collectors.toList());
-
     final Map<String, List<ClaimReportHistoryEntity>> claimHistoryEntities = claimReportHistoryRepository.findAll().stream()
-      .filter(historyEntity -> !excludedClaimIds.contains(historyEntity.getClaimId()))
+      .filter(historyEntity -> !fetchCurrentTestClaims().contains(historyEntity.getClaimId()))
       .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           yearMonth
@@ -98,19 +96,12 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
       });
   }
 
-  public List<MiReportClaimHistoryDTO> generateMiReport(YearMonth until) {
-    List<ClaimEntity> testClaims = claimsRepository.findByType(TEST);
+  public List<ReportClaimHistoryDTO> generateClaimsReport(YearMonth until) {
 
-    List<ClaimEntity> notCoveredClaims = claimsRepository.findByType(NOT_COVERED);
-
-    List<String> excludedNotCoveredClaims = notCoveredClaims.stream().map(claimEntity -> claimEntity.id).collect(Collectors.toList());
-
-    List<String> excludedClaimIds = testClaims.stream().map(claimEntity -> claimEntity.id).collect(Collectors.toList());
-
-    excludedClaimIds.addAll(excludedNotCoveredClaims);
+    List<String> testClaims = fetchCurrentTestClaims();
 
     return this.claimReportHistoryRepository.findAll().stream()
-      .filter(historyEntity -> !excludedClaimIds.contains(historyEntity.getClaimId()))
+      .filter(historyEntity -> !testClaims.contains(historyEntity.getClaimId()))
       .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           until
@@ -120,7 +111,14 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
             .toInstant()
         )
       )
-      .map(MiReportClaimHistoryDTO::from)
+      .map(ReportClaimHistoryDTO::from)
+      .collect(Collectors.toList());
+  }
+
+  private List<String> fetchCurrentTestClaims() {
+    return claimsRepository.findByType(TEST)
+      .stream()
+      .map(claimEntity -> claimEntity.id)
       .collect(Collectors.toList());
   }
 }

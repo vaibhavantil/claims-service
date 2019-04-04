@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Value
-public class MiReportClaimHistoryDTO {
+public class ReportClaimHistoryDTO {
   private UUID historyId;
   private String claimId;
   private String memberId;
@@ -19,8 +19,8 @@ public class MiReportClaimHistoryDTO {
   private String claimStatus;
   private Instant timeOfKnowledge;
 
-  public static MiReportClaimHistoryDTO from(ClaimReportHistoryEntity e) {
-    return new MiReportClaimHistoryDTO(
+  public static ReportClaimHistoryDTO from(ClaimReportHistoryEntity e) {
+    return new ReportClaimHistoryDTO(
       e.getClaimHistoryId(),
       e.getClaimId(),
       e.getMemberId(),
