@@ -7,6 +7,7 @@ import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.web.dto.ClaimReportDTO;
 import com.hedvig.claims.web.dto.ReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
+import lombok.val;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,8 +97,11 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   }
 
   public List<ReportClaimHistoryDTO> generateClaimsReport(YearMonth until) {
+
+    List<String> testClaims = fetchCurrentTestClaims();
+
     return this.claimReportHistoryRepository.findAll().stream()
-      .filter(historyEntity -> !fetchCurrentTestClaims().contains(historyEntity.getClaimId()))
+      .filter(historyEntity -> !testClaims.contains(historyEntity.getClaimId()))
       .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           until
