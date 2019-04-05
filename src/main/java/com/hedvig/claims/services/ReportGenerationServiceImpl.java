@@ -54,8 +54,9 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   public ReportDTO generateReport(YearMonth yearMonth) {
     this.reportingPeriod = yearMonth;
 
+    final List<String> testClaimIds = fetchCurrentTestClaims();
     final Map<String, List<ClaimReportHistoryEntity>> claimHistoryEntities = claimReportHistoryRepository.findAll().stream()
-      .filter(historyEntity -> !fetchCurrentTestClaims().contains(historyEntity.getClaimId()))
+      .filter(historyEntity -> !testClaimIds.contains(historyEntity.getClaimId()))
       .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge()
         .isAfter(
           yearMonth
