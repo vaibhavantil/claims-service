@@ -24,13 +24,11 @@ import java.util.Set;
 @Slf4j
 @ProcessingGroup("liveReporting")
 public class ClaimReportHistoryEventListener {
-
   private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
   private static final String OPEN = "OPEN";
   private static final String CLOSED = "CLOSED";
   private ClaimReportHistoryRepository claimReportHistoryRepository;
   private EventStore eventStore;
-  private static String DATE = "DATE";
   private static String Z = "Z";
   private static String SEK = "SEK";
   private final Set<String> EX_GRACIA_TO_INCLUDE_ALWAYS  = Set.of(
