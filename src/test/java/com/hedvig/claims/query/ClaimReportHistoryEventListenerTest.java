@@ -103,40 +103,6 @@ public class ClaimReportHistoryEventListenerTest {
   }
 
   @Test
-  public void updatesClaimStatusAndSetsReserveToZeroWhenIsAlreadyClosed() {
-    final ClaimStatusUpdatedEvent e = new ClaimStatusUpdatedEvent(
-      randomUUID().toString(),
-      "123",
-      A_DAY.atZone(ZoneId.of("UTC")).toLocalDateTime(),
-      ClaimsAggregate.ClaimStates.REOPENED
-    );
-
-    final List<ClaimReportHistoryEntity> existingEntities = List.of(
-      new ClaimReportHistoryEntity(
-        e.getClaimsId(),
-        e.getUserId(),
-        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
-        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
-        ClaimsAggregate.ClaimStates.CLOSED.toString(),
-        false,
-        NOW.minusSeconds(3600 * 24)
-      )
-    );
-    when(repository.findByClaimId(e.getClaimsId())).thenReturn(existingEntities);
-
-    listener.on(e, NOW);
-
-    final ArgumentCaptor<ClaimReportHistoryEntity> saveCaptor = ArgumentCaptor.forClass(ClaimReportHistoryEntity.class);
-    verify(repository).save(saveCaptor.capture());
-    final ClaimReportHistoryEntity savedResult = saveCaptor.getValue();
-
-    assertThat(savedResult.getClaimId()).isEqualTo(e.getClaimsId());
-    assertThat(savedResult.getTimeOfKnowledge()).isEqualTo(NOW);
-    assertThat(savedResult.getClaimStatus()).isEqualTo(ClaimsAggregate.ClaimStates.REOPENED.toString());
-    assertThat(savedResult.getReserved()).isEqualTo(BigDecimal.ZERO);
-  }
-
-  @Test
   public void updatesReserves() {
     final ClaimsReserveUpdateEvent e = new ClaimsReserveUpdateEvent(
       randomUUID().toString(),

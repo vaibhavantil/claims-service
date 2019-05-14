@@ -182,8 +182,9 @@ public class ClaimReportHistoryEventListener {
   private ClaimReportHistoryEntity copyLatestClaimHistoryEntity(String claimId, Instant timeOfKnowledge) {
     List<ClaimReportHistoryEntity> listOfClaims = claimReportHistoryRepository.findByClaimId(claimId);
 
+    Instant timeOfKnowledgeWithRaceConditionWiggleRoom = timeOfKnowledge.plusMillis(500);
     Optional<ClaimReportHistoryEntity> claimReportHistoryEntityMaybe = listOfClaims.stream()
-      .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge().isAfter(timeOfKnowledge))
+      .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge().isAfter(timeOfKnowledgeWithRaceConditionWiggleRoom))
       .max(Comparator.comparing(ClaimReportHistoryEntity::getTimeOfKnowledge));
 
     if (!claimReportHistoryEntityMaybe.isPresent()) {
@@ -191,12 +192,7 @@ public class ClaimReportHistoryEventListener {
       throw new RuntimeException("Claim cannot be found in the claimReportHistoryRepository");
     }
 
-    ClaimReportHistoryEntity claimReportHistoryEntity = ClaimReportHistoryEntity.copy(claimReportHistoryEntityMaybe.get(), timeOfKnowledge);
-    if (claimReportHistoryEntity.getClaimStatus().equalsIgnoreCase(CLOSED)) {
-      claimReportHistoryEntity.setReserved(BigDecimal.ZERO);
-    }
-
-    return claimReportHistoryEntity;
+    return ClaimReportHistoryEntity.copy(claimReportHistoryEntityMaybe.get(), timeOfKnowledge);
   }
 
   private void updateDateOfLoss(ClaimReportHistoryEntity updatedClaimHistoryEntry, LocalDate dateOfLoss) {
