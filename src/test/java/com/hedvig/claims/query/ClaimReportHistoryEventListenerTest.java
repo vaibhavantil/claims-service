@@ -5,6 +5,7 @@ import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,7 +102,6 @@ public class ClaimReportHistoryEventListenerTest {
     assertThat(savedResult.getReserved()).isEqualTo(BigDecimal.TEN);
   }
 
-
   @Test
   public void updatesClaimStatusAndSetsReserveToZeroWhenIsAlreadyClosed() {
     final ClaimStatusUpdatedEvent e = new ClaimStatusUpdatedEvent(
@@ -134,5 +134,71 @@ public class ClaimReportHistoryEventListenerTest {
     assertThat(savedResult.getTimeOfKnowledge()).isEqualTo(NOW);
     assertThat(savedResult.getClaimStatus()).isEqualTo(ClaimsAggregate.ClaimStates.REOPENED.toString());
     assertThat(savedResult.getReserved()).isEqualTo(BigDecimal.ZERO);
+  }
+
+  @Test
+  public void updatesReserves() {
+    final ClaimsReserveUpdateEvent e = new ClaimsReserveUpdateEvent(
+      randomUUID().toString(),
+      A_DAY.atZone(ZoneId.of("UTC")).toLocalDateTime(),
+      "123",
+      42d
+    );
+
+    final List<ClaimReportHistoryEntity> existingEntities = List.of(
+      new ClaimReportHistoryEntity(
+        e.getClaimID(),
+        e.getUserId(),
+        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
+        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
+        ClaimsAggregate.ClaimStates.OPEN.toString(),
+        false,
+        NOW.minusSeconds(3600 * 24)
+      )
+    );
+    when(repository.findByClaimId(e.getClaimID())).thenReturn(existingEntities);
+
+    listener.on(e, NOW);
+
+    final ArgumentCaptor<ClaimReportHistoryEntity> saveCaptor = ArgumentCaptor.forClass(ClaimReportHistoryEntity.class);
+    verify(repository).save(saveCaptor.capture());
+    final ClaimReportHistoryEntity savedResult = saveCaptor.getValue();
+
+    assertThat(savedResult.getClaimId()).isEqualTo(e.getClaimID());
+    assertThat(savedResult.getTimeOfKnowledge()).isEqualTo(NOW);
+    assertThat(savedResult.getReserved()).isEqualTo(BigDecimal.valueOf(42d));
+  }
+
+  @Test
+  public void doesNotCopyReservesWhenClaimIsClosed() {
+    final ClaimsReserveUpdateEvent e = new ClaimsReserveUpdateEvent(
+      randomUUID().toString(),
+      A_DAY.atZone(ZoneId.of("UTC")).toLocalDateTime(),
+      "123",
+      42d
+    );
+
+    final List<ClaimReportHistoryEntity> existingEntities = List.of(
+      new ClaimReportHistoryEntity(
+        e.getClaimID(),
+        e.getUserId(),
+        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
+        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
+        ClaimsAggregate.ClaimStates.CLOSED.toString(),
+        false,
+        NOW.minusSeconds(3600 * 24)
+      )
+    );
+    when(repository.findByClaimId(e.getClaimID())).thenReturn(existingEntities);
+
+    listener.on(e, NOW);
+
+    final ArgumentCaptor<ClaimReportHistoryEntity> saveCaptor = ArgumentCaptor.forClass(ClaimReportHistoryEntity.class);
+    verify(repository).save(saveCaptor.capture());
+    final ClaimReportHistoryEntity savedResult = saveCaptor.getValue();
+
+    assertThat(savedResult.getClaimId()).isEqualTo(e.getClaimID());
+    assertThat(savedResult.getTimeOfKnowledge()).isEqualTo(NOW);
+    assertThat(savedResult.getReserved()).isEqualTo(BigDecimal.valueOf(42d));
   }
 }

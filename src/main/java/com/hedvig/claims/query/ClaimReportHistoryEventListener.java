@@ -79,58 +79,53 @@ public class ClaimReportHistoryEventListener {
   public void on(ClaimStatusUpdatedEvent e, @Timestamp Instant timestamp) {
     log.info("Claim {} status updated, changed to {} ", e.getClaimsId(), e.getState());
 
-    ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimsId(), timestamp);
 
-    ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    claimHistoryEntry.setClaimStatus(e.getState().toString());
 
-    updatedClaimHistoryEntry.setClaimStatus(e.getState().toString());
-
-    claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+    claimReportHistoryRepository.save(claimHistoryEntry);
   }
 
   @EventHandler
   public void on(ClaimsTypeUpdateEvent e, @Timestamp Instant timestamp) {
     log.info("Claim {} type updated to {}", e.getClaimID(), e.getType());
 
-    ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.claimID, timestamp);
-    ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.claimID, timestamp);
 
-    updatedClaimHistoryEntry.setDescriptionOfLoss(e.getType());
-    claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+    claimHistoryEntry.setDescriptionOfLoss(e.getType());
+    claimReportHistoryRepository.save(claimHistoryEntry);
   }
 
   @EventHandler
   public void on(ClaimsReserveUpdateEvent e, @Timestamp Instant timestamp) {
     log.info("Claim {} reserve updated to {}", e.getClaimID(), e.getAmount());
 
-    ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.claimID, timestamp);
-    ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimID(), timestamp);
 
-    updatedClaimHistoryEntry.setReserved(BigDecimal.valueOf(e.amount));
-    updatedClaimHistoryEntry.setCurrency(SEK);
-    claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+    claimHistoryEntry.setReserved(BigDecimal.valueOf(e.amount));
+    claimHistoryEntry.setCurrency(SEK);
+    claimReportHistoryRepository.save(claimHistoryEntry);
   }
 
   @EventHandler
   public void on(DataItemAddedEvent e, @Timestamp Instant timestamp) {
     log.info("Data item added to claim {}", e.getClaimsId());
 
-    ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
-    ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimsId(), timestamp);
 
     if (e.getType().equals(ClaimDataType.DataType.DATE)) {
       if (e.getValue().toUpperCase().contains(Z)) {
         LocalDate dateOfLoss = LocalDateTime
           .ofInstant(Instant.parse(e.getValue()), ZoneId.of(EUROPE_STOCKHOLM))
           .toLocalDate();
-        updateDateOfLoss(updatedClaimHistoryEntry, dateOfLoss);
+        updateDateOfLoss(claimHistoryEntry, dateOfLoss);
       } else {
-        updateDateOfLoss(updatedClaimHistoryEntry, LocalDateTime.parse(e.getValue()).toLocalDate());
+        updateDateOfLoss(claimHistoryEntry, LocalDateTime.parse(e.getValue()).toLocalDate());
       }
-      claimReportHistoryRepository.save(updatedClaimHistoryEntry);
-    } else if (updatedClaimHistoryEntry.getDateOfLoss() != null) {
-      updateDateOfLoss(updatedClaimHistoryEntry, recentClaimHistoryEntry.getNotificationDate());
-      claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+      claimReportHistoryRepository.save(claimHistoryEntry);
+    } else if (claimHistoryEntry.getDateOfLoss() != null) {
+      updateDateOfLoss(claimHistoryEntry, claimHistoryEntry.getNotificationDate());
+      claimReportHistoryRepository.save(claimHistoryEntry);
     }
   }
 
@@ -138,14 +133,13 @@ public class ClaimReportHistoryEventListener {
   public void on(PaymentAddedEvent e, @Timestamp Instant timestamp) {
     log.info("Payment added for claim {}", e.getClaimsId());
 
-    ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimsId(), timestamp);
-    ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimsId(), timestamp);
     if (!e.getExGratia() || EX_GRACIA_TO_INCLUDE_ALWAYS.contains(e.getClaimsId())) {
-      updatedClaimHistoryEntry.setCurrency(SEK);
-      updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
+      claimHistoryEntry.setCurrency(SEK);
+      claimHistoryEntry.setGrossPaid((claimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : claimHistoryEntry.getGrossPaid())
         .add(BigDecimal.valueOf(e.getAmount())));
 
-      claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+      claimReportHistoryRepository.save(claimHistoryEntry);
     }
   }
 
@@ -153,8 +147,7 @@ public class ClaimReportHistoryEventListener {
   public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
     log.info("Automatic payment initiated for claim {}", e.getClaimId());
 
-    ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimId(), timestamp);
-    ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimId(), timestamp);
 
     Optional<AutomaticPaymentAddedEvent> optionalAutomaticPaymentAddedEvent = eventStore
       .readEvents(e.getClaimId()).asStream()
@@ -167,11 +160,11 @@ public class ClaimReportHistoryEventListener {
       AutomaticPaymentAddedEvent automaticPaymentAddedEvent = optionalAutomaticPaymentAddedEvent.get();
 
       if (!automaticPaymentAddedEvent.isExGracia() || EX_GRACIA_TO_INCLUDE_ALWAYS.contains(e.getClaimId())) {
-        updatedClaimHistoryEntry.setCurrency(SEK);
-        updatedClaimHistoryEntry.setGrossPaid((updatedClaimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : updatedClaimHistoryEntry.getGrossPaid())
+        claimHistoryEntry.setCurrency(SEK);
+        claimHistoryEntry.setGrossPaid((claimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : claimHistoryEntry.getGrossPaid())
           .add(BigDecimal.valueOf(automaticPaymentAddedEvent.getAmount().getNumber().doubleValueExact())));
 
-        claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+        claimReportHistoryRepository.save(claimHistoryEntry);
       }
     }
   }
@@ -180,14 +173,13 @@ public class ClaimReportHistoryEventListener {
   public void on(EmployeeClaimStatusUpdatedEvent e, @Timestamp Instant timestamp) {
     log.info("Employee claim status updated for claim {}", e.getClaimId());
 
-    ClaimReportHistoryEntity recentClaimHistoryEntry = getClaimReportHistoryEntity(e.getClaimId(), timestamp);
-    ClaimReportHistoryEntity updatedClaimHistoryEntry = ClaimReportHistoryEntity.copy(recentClaimHistoryEntry, timestamp);
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimId(), timestamp);
 
-    updatedClaimHistoryEntry.setCoveringEmployee(e.isCoveringEmployee());
-    claimReportHistoryRepository.save(updatedClaimHistoryEntry);
+    claimHistoryEntry.setCoveringEmployee(e.isCoveringEmployee());
+    claimReportHistoryRepository.save(claimHistoryEntry);
   }
 
-  private ClaimReportHistoryEntity getClaimReportHistoryEntity(String claimId, Instant timeOfKnowledge) {
+  private ClaimReportHistoryEntity copyLatestClaimHistoryEntity(String claimId, Instant timeOfKnowledge) {
     List<ClaimReportHistoryEntity> listOfClaims = claimReportHistoryRepository.findByClaimId(claimId);
 
     Optional<ClaimReportHistoryEntity> claimReportHistoryEntityMaybe = listOfClaims.stream()
@@ -199,7 +191,7 @@ public class ClaimReportHistoryEventListener {
       throw new RuntimeException("Claim cannot be found in the claimReportHistoryRepository");
     }
 
-    ClaimReportHistoryEntity claimReportHistoryEntity = claimReportHistoryEntityMaybe.get();
+    ClaimReportHistoryEntity claimReportHistoryEntity = ClaimReportHistoryEntity.copy(claimReportHistoryEntityMaybe.get(), timeOfKnowledge);
     if (claimReportHistoryEntity.getClaimStatus().equalsIgnoreCase(CLOSED)) {
       claimReportHistoryEntity.setReserved(BigDecimal.ZERO);
     }
