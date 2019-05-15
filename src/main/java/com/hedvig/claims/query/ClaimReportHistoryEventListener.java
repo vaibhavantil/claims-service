@@ -5,6 +5,7 @@ import com.hedvig.claims.web.dto.ClaimDataType;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.springframework.stereotype.Component;
@@ -104,6 +105,9 @@ public class ClaimReportHistoryEventListener {
 
     claimHistoryEntry.setReserved(BigDecimal.valueOf(e.amount));
     claimHistoryEntry.setCurrency(SEK);
+
+    final Instant timeOfKnowledgeAdjustedForRaceCondition = claimHistoryEntry.getTimeOfKnowledge().plusMillis(1);
+    claimHistoryEntry.setTimeOfKnowledge(timeOfKnowledgeAdjustedForRaceCondition); // Until we meet again, missing-reserves-bug
     claimReportHistoryRepository.save(claimHistoryEntry);
   }
 
@@ -177,6 +181,12 @@ public class ClaimReportHistoryEventListener {
 
     claimHistoryEntry.setCoveringEmployee(e.isCoveringEmployee());
     claimReportHistoryRepository.save(claimHistoryEntry);
+  }
+
+  @ResetHandler
+  public void onReset() {
+    log.warn("Deleting all claim report history entities");
+    claimReportHistoryRepository.deleteAll();
   }
 
   private ClaimReportHistoryEntity copyLatestClaimHistoryEntity(String claimId, Instant timeOfKnowledge) {

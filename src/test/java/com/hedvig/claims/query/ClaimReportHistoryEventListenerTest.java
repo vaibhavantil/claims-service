@@ -131,40 +131,7 @@ public class ClaimReportHistoryEventListenerTest {
     final ClaimReportHistoryEntity savedResult = saveCaptor.getValue();
 
     assertThat(savedResult.getClaimId()).isEqualTo(e.getClaimID());
-    assertThat(savedResult.getTimeOfKnowledge()).isEqualTo(NOW);
-    assertThat(savedResult.getReserved()).isEqualTo(BigDecimal.valueOf(42d));
-  }
-
-  @Test
-  public void doesNotCopyReservesWhenClaimIsClosed() {
-    final ClaimsReserveUpdateEvent e = new ClaimsReserveUpdateEvent(
-      randomUUID().toString(),
-      A_DAY.atZone(ZoneId.of("UTC")).toLocalDateTime(),
-      "123",
-      42d
-    );
-
-    final List<ClaimReportHistoryEntity> existingEntities = List.of(
-      new ClaimReportHistoryEntity(
-        e.getClaimID(),
-        e.getUserId(),
-        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
-        NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
-        ClaimsAggregate.ClaimStates.CLOSED.toString(),
-        false,
-        NOW.minusSeconds(3600 * 24)
-      )
-    );
-    when(repository.findByClaimId(e.getClaimID())).thenReturn(existingEntities);
-
-    listener.on(e, NOW);
-
-    final ArgumentCaptor<ClaimReportHistoryEntity> saveCaptor = ArgumentCaptor.forClass(ClaimReportHistoryEntity.class);
-    verify(repository).save(saveCaptor.capture());
-    final ClaimReportHistoryEntity savedResult = saveCaptor.getValue();
-
-    assertThat(savedResult.getClaimId()).isEqualTo(e.getClaimID());
-    assertThat(savedResult.getTimeOfKnowledge()).isEqualTo(NOW);
+    assertThat(savedResult.getTimeOfKnowledge()).isEqualTo(NOW.plusMillis(1));
     assertThat(savedResult.getReserved()).isEqualTo(BigDecimal.valueOf(42d));
   }
 }

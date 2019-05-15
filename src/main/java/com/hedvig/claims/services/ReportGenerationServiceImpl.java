@@ -2,12 +2,10 @@ package com.hedvig.claims.services;
 
 import com.hedvig.claims.query.ClaimReportHistoryEntity;
 import com.hedvig.claims.query.ClaimReportHistoryRepository;
-import com.hedvig.claims.query.ClaimReportRepository;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.web.dto.ClaimReportDTO;
 import com.hedvig.claims.web.dto.ReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
-import lombok.val;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,32 +26,22 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
   private static final String EUROPE_STOCKHOLM = "Europe/Stockholm";
   public static final String TEST = "Test";
   public static final String NOT_COVERED = "Not covered";
-  private YearMonth reportingPeriod;
-  private static String REPORTING_PROCESSOR_GROUP = "report";
+  private static String REPORTING_PROCESSOR_GROUP = "liveReporting";
 
-  private ClaimReportRepository claimReportRepository;
   private EventProcessingConfiguration eventProcessingConfiguration;
   private ClaimReportHistoryRepository claimReportHistoryRepository;
   private ClaimsRepository claimsRepository;
 
   @Autowired
   public ReportGenerationServiceImpl(EventProcessingConfiguration eventProcessingConfiguration,
-                                     ClaimReportRepository claimReportRepository,
                                      ClaimReportHistoryRepository claimReportHistoryRepository,
                                      ClaimsRepository claimsRepository) {
     this.eventProcessingConfiguration = eventProcessingConfiguration;
-    this.claimReportRepository = claimReportRepository;
     this.claimReportHistoryRepository = claimReportHistoryRepository;
     this.claimsRepository = claimsRepository;
   }
 
-  public YearMonth getReportPeriod() {
-    return this.reportingPeriod;
-  }
-
   public ReportDTO generateReport(YearMonth yearMonth) {
-    this.reportingPeriod = yearMonth;
-
     final List<String> testClaimIds = fetchCurrentTestClaims();
     final Map<String, List<ClaimReportHistoryEntity>> claimHistoryEntities = claimReportHistoryRepository.findAll().stream()
       .filter(historyEntity -> !testClaimIds.contains(historyEntity.getClaimId()))
@@ -85,9 +73,7 @@ public class ReportGenerationServiceImpl implements ReportGenerationService {
     return new ReportDTO(reportStream);
   }
 
-  public void replay(YearMonth yearMonth) {
-    this.reportingPeriod = yearMonth;
-
+  public void replay() {
     eventProcessingConfiguration
       .eventProcessorByProcessingGroup(REPORTING_PROCESSOR_GROUP, TrackingEventProcessor.class)
       .ifPresent(trackingEventProcessor -> {

@@ -1,6 +1,5 @@
 package com.hedvig.claims.services;
 
-import com.hedvig.claims.web.dto.BDXReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportClaimHistoryDTO;
 import com.hedvig.claims.web.dto.ReportDTO;
 
@@ -11,9 +10,7 @@ public interface ReportGenerationService {
 
   ReportDTO generateReport(YearMonth yearMonth);
 
-  YearMonth getReportPeriod();
-
-  void replay(YearMonth yearMonth);
+  void replay();
 
   List<ReportClaimHistoryDTO> generateClaimsReport(YearMonth until);
 }
