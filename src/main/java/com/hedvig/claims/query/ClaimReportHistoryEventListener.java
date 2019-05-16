@@ -192,9 +192,8 @@ public class ClaimReportHistoryEventListener {
   private ClaimReportHistoryEntity copyLatestClaimHistoryEntity(String claimId, Instant timeOfKnowledge) {
     List<ClaimReportHistoryEntity> listOfClaims = claimReportHistoryRepository.findByClaimId(claimId);
 
-    Instant timeOfKnowledgeWithRaceConditionWiggleRoom = timeOfKnowledge.plusMillis(500);
     Optional<ClaimReportHistoryEntity> claimReportHistoryEntityMaybe = listOfClaims.stream()
-      .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge().isAfter(timeOfKnowledgeWithRaceConditionWiggleRoom))
+      .filter(claimReportHistoryEntity -> !claimReportHistoryEntity.getTimeOfKnowledge().isAfter(timeOfKnowledge))
       .max(Comparator.comparing(ClaimReportHistoryEntity::getTimeOfKnowledge));
 
     if (!claimReportHistoryEntityMaybe.isPresent()) {
