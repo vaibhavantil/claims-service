@@ -28,9 +28,8 @@ public class ReportController {
   }
 
   @PutMapping("/replay")
-  public ResponseEntity<ReportDTO> replay(@RequestParam YearMonth yearMonth) {
-
-    reportGenerationService.replay(yearMonth);
+  public ResponseEntity<ReportDTO> replay() {
+    reportGenerationService.replay();
 
     return ResponseEntity.accepted().build();
   }

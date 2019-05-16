@@ -1,6 +1,5 @@
 package com.hedvig.claims.web.dto;
 
-import com.hedvig.claims.query.ClaimReportEntity;
 import com.hedvig.claims.query.ClaimReportHistoryEntity;
 import lombok.Value;
 import org.javamoney.moneta.Money;
