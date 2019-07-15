@@ -24,5 +24,8 @@ public class AxonConfiguration {
   public void configure(EventProcessingConfiguration config) {
     config.usingTrackingProcessors();
     config.registerSubscribingEventProcessor("com.hedvig.claims.query");
+
+  //@TODO: Add head token for ticket
+
   }
 }
