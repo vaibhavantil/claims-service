@@ -15,6 +15,7 @@ import java.time.LocalTime;
 //TODO("MAKE THIS A TICKET DTO - GIVE ENOUGH INFO TO CREATE A TICKET")
 @Value
 public class TicketDto {
+  private String memberId;
   private String createdBy;
   private String assignedTo;
   @Min(0)
