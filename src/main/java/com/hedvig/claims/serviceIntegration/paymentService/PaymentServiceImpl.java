@@ -4,6 +4,8 @@ import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
