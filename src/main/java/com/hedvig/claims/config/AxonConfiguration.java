@@ -9,6 +9,7 @@ import org.axonframework.serialization.upcasting.event.EventUpcasterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class AxonConfiguration {
@@ -24,10 +25,17 @@ public class AxonConfiguration {
   public void configure(EventProcessingConfiguration config) {
     config.usingTrackingProcessors();
     config.registerSubscribingEventProcessor("com.hedvig.claims.query");
+  }
 
+  @Autowired
+  @Profile("TicketService")
+  public void configureTicketServiceListener(EventProcessingConfiguration config) {
     config.registerTrackingEventProcessor(
       "TicketService",
-        x -> TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+      x -> TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
         .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
   }
+
+
+
 }
