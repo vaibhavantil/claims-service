@@ -6,9 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-//TODO("Change URL!!!!!")
 @FeignClient(value = "ticket-service", url = "${hedvig.ticket-service.url:ticket-service}")
-//@FeignClient(value = "ticket-service", url = "${tickets.baseUrl}")
 
 public interface TicketServiceClient {
 
