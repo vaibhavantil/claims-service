@@ -19,11 +19,9 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
   }
 
   @Override
-  public void createNewTicket (String claimId, TicketDto claim ) {
+  public void createNewTicket (TicketDto ticket ) {
     try {
-      ResponseEntity response = ticketServiceclient.createNewTicket(
-        claimId, claim
-      ) ;
+      ResponseEntity response = ticketServiceclient.createNewTicket( ticket ) ;
 
     } catch (RestClientResponseException e ){
         log.info("Error when posting a 'Create New Ticket' request to ticket-service:" + e);
