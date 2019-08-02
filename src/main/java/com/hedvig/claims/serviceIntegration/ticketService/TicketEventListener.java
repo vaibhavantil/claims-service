@@ -39,7 +39,7 @@ public class TicketEventListener {
       "claims-service@hedvig.com",
       "Unassigned",
       event.getId(),
-      0.0f, //The priority is automatically handled in Ticket-Service
+      null, //The priority is automatically handled in Ticket-Service
       TicketType.CLAIM,
       null,
       null,

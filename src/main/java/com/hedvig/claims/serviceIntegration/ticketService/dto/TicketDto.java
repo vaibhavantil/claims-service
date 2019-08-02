@@ -18,7 +18,7 @@ public class TicketDto {
   private String referenceId;
   @Min(0)
   @Max(1)
-  private float priority;
+  private Float priority;
   private TicketType type;
   private LocalDate remindNotificationDate;
   private LocalTime remindNotificationTime;
