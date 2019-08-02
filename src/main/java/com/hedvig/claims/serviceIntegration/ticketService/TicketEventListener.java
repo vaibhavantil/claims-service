@@ -36,7 +36,7 @@ public class TicketEventListener {
 
     TicketDto ticket = new TicketDto (
       event.getUserId(),
-      "claims-service@hedvig.com",
+      "claims-service",
       "Unassigned",
       event.getId(),
       null, //The priority is automatically handled in Ticket-Service
