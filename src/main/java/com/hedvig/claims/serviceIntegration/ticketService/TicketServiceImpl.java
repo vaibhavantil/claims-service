@@ -1,6 +1,6 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
-import com.hedvig.claims.serviceIntegration.ticketService.dto.TicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateTicketDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
   }
 
   @Override
-  public void createNewTicket (TicketDto ticket ) {
+  public void createNewTicket (CreateTicketDto ticket ) {
     try {
       ResponseEntity response = ticketServiceclient.createNewTicket( ticket ) ;
 

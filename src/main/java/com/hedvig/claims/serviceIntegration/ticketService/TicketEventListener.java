@@ -1,7 +1,7 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
 import com.hedvig.claims.events.ClaimCreatedEvent;
-import com.hedvig.claims.serviceIntegration.ticketService.dto.TicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateTicketDto;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
@@ -34,7 +34,7 @@ public class TicketEventListener {
 
     String description = sb.toString();
 
-    TicketDto ticket = new TicketDto (
+    CreateTicketDto ticket = new CreateTicketDto(
       event.getUserId(),
       "claims-service",
       "Unassigned",

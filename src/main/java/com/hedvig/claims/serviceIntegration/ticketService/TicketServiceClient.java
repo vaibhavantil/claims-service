@@ -1,6 +1,6 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
-import com.hedvig.claims.serviceIntegration.ticketService.dto.TicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateTicketDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.*;
 public interface TicketServiceClient {
 
   @PostMapping( value="/_/tickets/new/")
-    ResponseEntity<String> createNewTicket (@RequestBody TicketDto ticket ) ;
+    ResponseEntity<String> createNewTicket (@RequestBody CreateTicketDto ticket ) ;
 
 }

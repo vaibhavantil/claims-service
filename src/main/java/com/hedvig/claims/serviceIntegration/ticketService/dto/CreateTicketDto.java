@@ -8,10 +8,8 @@ import javax.validation.constraints.Min;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-
-
 @Value
-public class TicketDto {
+public class CreateTicketDto {
   private String memberId;
   private String createdBy;
   private String assignedTo;
