@@ -1,7 +1,7 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
 import com.hedvig.claims.events.ClaimCreatedEvent;
-import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateTicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
@@ -34,20 +34,13 @@ public class TicketEventListener {
 
     String description = sb.toString();
 
-    CreateTicketDto ticket = new CreateTicketDto(
-      event.getUserId(),
-      "claims-service",
-      "Unassigned",
+    ClaimToTicketDto claimToTicket = new ClaimToTicketDto(
       event.getId(),
-      null, //The priority is automatically handled in Ticket-Service
-      TicketType.CLAIM,
-      null,
-      null,
-      "",
-      description,
-      TicketStatus.WAITING
+      event.getUserId(),
+      description
     ) ;
-    ticketService.createNewTicket(ticket);
+
+    ticketService.createNewTicket(claimToTicket);
   }
 }
 

@@ -1,6 +1,6 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
-import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateTicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +19,9 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
   }
 
   @Override
-  public void createNewTicket (CreateTicketDto ticket ) {
+  public void createNewTicket (ClaimToTicketDto claimToTicket ) {
     try {
-      ResponseEntity response = ticketServiceclient.createNewTicket( ticket ) ;
+      ResponseEntity response = ticketServiceclient.createNewTicket( claimToTicket ) ;
 
     } catch (RestClientResponseException e ){
         log.info("Error when posting a 'Create New Ticket' request to ticket-service:" + e);
