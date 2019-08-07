@@ -35,9 +35,10 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
       case CLOSED: {
         client.closeClaim(claimId, userId);
       } break;
-      case REOPENED:{
+      case REOPENED:
+      case OPEN:
         client.reopenClaim(claimId, userId);
-      } break;
+        break;
       default: {
         log.info("[Ticket-Service integration]: Got unexpected claim status, we do not handle this status yet: " + status.toString());
       } break;
