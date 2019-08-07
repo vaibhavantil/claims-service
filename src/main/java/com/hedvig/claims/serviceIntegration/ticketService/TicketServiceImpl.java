@@ -31,10 +31,16 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
 
   @Override
   public void updateClaimTicket(ClaimsAggregate.ClaimStates status, String userId, String claimId) {
-    if (status == ClaimsAggregate.ClaimStates.CLOSED) {
-      client.closeClaim(claimId, userId);
-    } else if (status == ClaimsAggregate.ClaimStates.REOPENED) {
-      client.reopenClaim(claimId, userId);
+    switch  (status){
+      case CLOSED: {
+        client.closeClaim(claimId, userId);
+      } break;
+      case REOPENED:{
+        client.reopenClaim(claimId, userId);
+      } break;
+      default: {
+        log.info("Got unexpected claim status, we do not handle: {status} yet!");
+      } break;
     }
   }
 }

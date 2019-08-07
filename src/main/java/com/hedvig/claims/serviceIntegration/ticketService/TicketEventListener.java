@@ -1,6 +1,5 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
-import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
