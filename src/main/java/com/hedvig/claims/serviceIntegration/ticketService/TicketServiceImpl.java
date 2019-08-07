@@ -31,7 +31,6 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
 
   @Override
   public void updateClaimTicket(ClaimsAggregate.ClaimStates status, String userId, String claimId) {
-    log.info("[DEBUG]: inside updateClaimTicket " + status.toString() + " " + userId );
     switch  (status){
       case CLOSED: {
         client.closeClaim(claimId, userId);
@@ -40,7 +39,7 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
         client.reopenClaim(claimId, userId);
       } break;
       default: {
-        log.info("[Ticket-Service integration]: Got unexpected claim status, we do not handle: {status} yet!");
+        log.info("[Ticket-Service integration]: Got unexpected claim status, we do not handle this status yet: " + status.toString());
       } break;
     }
   }
