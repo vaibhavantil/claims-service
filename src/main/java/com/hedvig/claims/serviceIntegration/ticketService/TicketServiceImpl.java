@@ -31,6 +31,7 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
 
   @Override
   public void updateClaimTicket(ClaimsAggregate.ClaimStates status, String userId, String claimId) {
+    log.info("[DEBUG]: inside updateClaimTicket " + status.toString() + " " + userId );
     switch  (status){
       case CLOSED: {
         client.closeClaim(claimId, userId);
