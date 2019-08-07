@@ -48,7 +48,7 @@ public class ClaimsAggregate {
   public boolean isCoveringEmployee;
 
   public ClaimsAggregate() {
-    log.info("Instansiating ClaimsAggregate");
+    log.info("Instantiate ClaimsAggregate");
   }
 
   @CommandHandler
@@ -78,7 +78,7 @@ public class ClaimsAggregate {
     apply(
       new ClaimStatusUpdatedEvent(
         command.getClaimsId(),
-        command.getUserId(),
+        this.userId,
         command.getRegistrationDate(),
         command.getState()));
 
@@ -87,7 +87,7 @@ public class ClaimsAggregate {
         new ClaimsReserveUpdateEvent(
           command.getClaimsId(),
           LocalDateTime.now(),
-          command.getUserId(),
+          this.userId,
           0.0));
     }
   }
@@ -110,7 +110,7 @@ public class ClaimsAggregate {
       new ClaimsTypeUpdateEvent(
         command.getClaimsId(),
         command.getRegistrationDate(),
-        command.getUserId(),
+        this.userId,
         command.getType()));
   }
 
@@ -121,7 +121,7 @@ public class ClaimsAggregate {
       command.getId(),
       command.getClaimID(),
       command.getDate(),
-      command.getUserId(),
+      this.userId,
       command.getType(),
       command.getName(),
       command.getTitle(),
@@ -140,7 +140,7 @@ public class ClaimsAggregate {
     ne.setFileURL(command.getFileURL());
     ne.setId(command.getId());
     ne.setText(command.getText());
-    ne.setUserId(command.getUserId());
+    ne.setUserId(this.userId);
     apply(ne);
   }
 
@@ -151,7 +151,7 @@ public class ClaimsAggregate {
       cmd.getId(),
       cmd.getClaimID(),
       cmd.getDate(),
-      cmd.getUserId(),
+      this.userId,
       cmd.getAmount(),
       cmd.getDeductible(),
       cmd.getNote(),
@@ -170,7 +170,7 @@ public class ClaimsAggregate {
     AutomaticPaymentAddedEvent e = new AutomaticPaymentAddedEvent(
       UUID.randomUUID().toString(),
       cmd.getClaimId(),
-      cmd.getMemberId(),
+      this.userId,
       cmd.getAmount(),
       cmd.getDeductible(),
       cmd.getNote(),
@@ -189,7 +189,7 @@ public class ClaimsAggregate {
     AutomaticPaymentInitiatedEvent e = new AutomaticPaymentInitiatedEvent(
       cmd.getId(),
       cmd.getClaimId(),
-      cmd.getMemberId(),
+      this.userId,
       cmd.getTransactionReference(),
       cmd.getTransactionStatus());
 
@@ -204,7 +204,7 @@ public class ClaimsAggregate {
     AutomaticPaymentFailedEvent e = new AutomaticPaymentFailedEvent(
       cmd.getId(),
       cmd.getClaimId(),
-      cmd.getMemberId(),
+      this.userId,
       cmd.getTransactionStatus());
 
     apply(e);

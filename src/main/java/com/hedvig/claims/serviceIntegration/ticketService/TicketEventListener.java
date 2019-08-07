@@ -25,12 +25,8 @@ public class TicketEventListener {
   @EventHandler
   public void on(ClaimCreatedEvent event, @Timestamp Instant timestamp) {
     StringBuilder sb = new StringBuilder();
-    sb.append("A new claim with id: \n");
+    sb.append("A new claim created!\n");
     sb.append(event.getId());
-    sb.append("\nfrom user with id: \n");
-    sb.append(event.getUserId());
-    sb.append("\nClaim audio url: \n");
-    sb.append(event.getAudioURL());
     sb.append("\nCreated at: \n");
     sb.append(timestamp);
 
