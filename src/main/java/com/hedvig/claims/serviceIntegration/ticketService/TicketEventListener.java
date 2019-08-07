@@ -1,12 +1,14 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
 import com.hedvig.claims.events.ClaimCreatedEvent;
+import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.time.Instant;
 
 @Component
@@ -16,7 +18,7 @@ public class TicketEventListener {
   private final TicketService ticketService;
 
   @Autowired
-  public TicketEventListener ( TicketService ticketService ) {
+  public TicketEventListener(TicketService ticketService) {
     this.ticketService = ticketService;
   }
 
@@ -38,10 +40,14 @@ public class TicketEventListener {
       event.getId(),
       event.getUserId(),
       description
-    ) ;
+    );
 
     ticketService.createNewTicket(claimToTicket);
   }
+
+  @EventHandler
+  public void on(ClaimStatusUpdatedEvent event) {
+    ticketService.updateClaimTicket(event.getState(), event.getUserId(), event.getClaimsId());
+  }
+
 }
-
-
