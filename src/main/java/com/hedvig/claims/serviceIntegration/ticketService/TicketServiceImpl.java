@@ -39,7 +39,7 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
         client.reopenClaim(claimId, userId);
       } break;
       default: {
-        log.info("Got unexpected claim status, we do not handle: {status} yet!");
+        log.info("[Ticket-Service integration]: Got unexpected claim status, we do not handle: {status} yet!");
       } break;
     }
   }
