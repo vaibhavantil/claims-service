@@ -13,14 +13,14 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
   private TicketServiceClient client;
 
   @Autowired
-  public TicketServiceImpl(TicketServiceClient c) {
-    this.client = c;
+  public TicketServiceImpl(TicketServiceClient ticketServiceClient) {
+    this.client = ticketServiceClient;
   }
 
   @Override
-  public void createClaimTicket(CreateClaimTicketDto claimToTicket) {
+  public void createClaimTicket(CreateClaimTicketDto createClaimTicketRequest) {
     try {
-      client.createClaimTicket(claimToTicket);
+      client.createClaimTicket(createClaimTicketRequest);
     } catch (Exception exception) {
       log.info("Error when posting a 'Create New Ticket' request to ticket-service:" + exception.getMessage());
     }
