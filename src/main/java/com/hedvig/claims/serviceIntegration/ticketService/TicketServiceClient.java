@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 public interface TicketServiceClient {
 
   @PostMapping(value = "/_/tickets/claim")
-  ResponseEntity<Void> createClaimTicket(@RequestBody CreateClaimTicketDto claimToTicket);
+  ResponseEntity<Void> createClaimTicket(@RequestBody CreateClaimTicketDto createClaimTicketRequest);
 
   @PostMapping(value = "/_/tickets/claim/{claimId}/close")
   ResponseEntity<Void> closeClaimTicket(@PathVariable(name = "claimId") String claimId);

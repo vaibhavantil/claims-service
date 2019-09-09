@@ -4,6 +4,7 @@ import lombok.Value;
 
 @Value
 public class CreateClaimTicketDto {
+  private String createdBy;
   private String claimId;
   private String memberId;
   private String description;

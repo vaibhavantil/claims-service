@@ -4,7 +4,7 @@ import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateClaimTicketD
 
 
 public interface TicketService {
-  void createClaimTicket(CreateClaimTicketDto claimToTicket );
+  void createClaimTicket(CreateClaimTicketDto createClaimTicketRequest);
 
   void updateClaimTicketState(ClaimsAggregate.ClaimStates state, String userId, String claimId);
 }

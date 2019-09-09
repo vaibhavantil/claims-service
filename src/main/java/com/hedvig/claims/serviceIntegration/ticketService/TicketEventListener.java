@@ -32,13 +32,14 @@ public class TicketEventListener {
 
     String description = sb.toString();
 
-    CreateClaimTicketDto claimToTicket = new CreateClaimTicketDto(
+    CreateClaimTicketDto createClaimTicket = new CreateClaimTicketDto(
+      "claims-service",
       event.getId(),
       event.getUserId(),
       description
     );
 
-    ticketService.createClaimTicket(claimToTicket);
+    ticketService.createClaimTicket(createClaimTicket);
   }
 
   @EventHandler
