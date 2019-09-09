@@ -1,12 +1,10 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateClaimTicketDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Service
@@ -20,28 +18,26 @@ public class TicketServiceImpl implements com.hedvig.claims.serviceIntegration.t
   }
 
   @Override
-  public void createNewTicket(ClaimToTicketDto claimToTicket) {
+  public void createClaimTicket(CreateClaimTicketDto claimToTicket) {
     try {
-      ResponseEntity response = client.createNewTicket(claimToTicket);
-
-    } catch (RestClientResponseException e) {
-      log.info("Error when posting a 'Create New Ticket' request to ticket-service:" + e);
+      client.createClaimTicket(claimToTicket);
+    } catch (Exception exception) {
+      log.info("Error when posting a 'Create New Ticket' request to ticket-service:" + exception.getMessage());
     }
   }
 
   @Override
-  public void updateClaimTicket(ClaimsAggregate.ClaimStates status, String userId, String claimId) {
-    switch  (status){
+  public void updateClaimTicketState(ClaimsAggregate.ClaimStates state, String userId, String claimId) {
+    switch  (state){
       case CLOSED: {
-        client.closeClaim(claimId, userId);
+        client.closeClaimTicket(claimId);
       } break;
       case REOPENED:
       case OPEN:
-        client.reopenClaim(claimId, userId);
+        client.reopenClaimTicket(claimId);
         break;
-      default: {
-        log.info("[Ticket-Service integration]: Got unexpected claim status, we do not handle this status yet: " + status.toString());
-      } break;
+      default:
+        throw new IllegalArgumentException("Got unexpected claim status, we do not handle this status: " + state.toString());
     }
   }
 }

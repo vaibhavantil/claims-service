@@ -1,6 +1,6 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
-import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateClaimTicketDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.*;
 public interface TicketServiceClient {
 
   @PostMapping(value = "/_/tickets/claim")
-  ResponseEntity<Void> createNewTicket(@RequestBody ClaimToTicketDto claimToTicket);
+  ResponseEntity<Void> createClaimTicket(@RequestBody CreateClaimTicketDto claimToTicket);
 
   @PostMapping(value = "/_/tickets/claim/{claimId}/close")
-  ResponseEntity<Void> closeClaim(@PathVariable(name = "claimId") String claimId, @RequestBody String memberId);
+  ResponseEntity<Void> closeClaimTicket(@PathVariable(name = "claimId") String claimId);
 
   @PostMapping(value = "/_/tickets/claim/{claimId}/reopen")
-  ResponseEntity<Void> reopenClaim(@PathVariable(name = "claimId") String claimId, @RequestBody String memberId);
+  ResponseEntity<Void> reopenClaimTicket(@PathVariable(name = "claimId") String claimId);
 
 
 }

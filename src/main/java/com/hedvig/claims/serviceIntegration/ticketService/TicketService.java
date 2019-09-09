@@ -1,11 +1,10 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateClaimTicketDto;
 
 
 public interface TicketService {
-  void createNewTicket (ClaimToTicketDto claimToTicket );
+  void createClaimTicket(CreateClaimTicketDto claimToTicket );
 
-  void updateClaimTicket(ClaimsAggregate.ClaimStates status, String userId, String claimId);
-
+  void updateClaimTicketState(ClaimsAggregate.ClaimStates state, String userId, String claimId);
 }
