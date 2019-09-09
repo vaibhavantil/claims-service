@@ -2,7 +2,7 @@ package com.hedvig.claims.serviceIntegration.ticketService;
 
 import com.hedvig.claims.events.ClaimCreatedEvent;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
-import com.hedvig.claims.serviceIntegration.ticketService.dto.ClaimToTicketDto;
+import com.hedvig.claims.serviceIntegration.ticketService.dto.CreateClaimTicketDto;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
@@ -25,25 +25,25 @@ public class TicketEventListener {
   @EventHandler
   public void on(ClaimCreatedEvent event, @Timestamp Instant timestamp) {
     StringBuilder sb = new StringBuilder();
-    sb.append("A new claim created!\n");
+    sb.append("A new claim created\n");
     sb.append(event.getId());
     sb.append("\nCreated at: \n");
     sb.append(timestamp);
 
     String description = sb.toString();
 
-    ClaimToTicketDto claimToTicket = new ClaimToTicketDto(
+    CreateClaimTicketDto claimToTicket = new CreateClaimTicketDto(
       event.getId(),
       event.getUserId(),
       description
     );
 
-    ticketService.createNewTicket(claimToTicket);
+    ticketService.createClaimTicket(claimToTicket);
   }
 
   @EventHandler
   public void on(ClaimStatusUpdatedEvent event) {
-    ticketService.updateClaimTicket(event.getState(), event.getUserId(), event.getClaimsId());
+    ticketService.updateClaimTicketState(event.getState(), event.getUserId(), event.getClaimsId());
   }
 
 }
