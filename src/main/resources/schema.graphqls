@@ -1,0 +1,19 @@
+schema {
+    query: QueryType
+    mutation: MutationType
+}
+
+type QueryType {
+    _: Boolean
+}
+
+type MutationType {
+    createLuggageClaim(input: CreateLuggageClaimInput): Boolean
+}
+
+input CreateLuggageClaimInput {
+    reference: String
+    from: String!
+    to: String!
+    hoursDelayed: Int!
+}
