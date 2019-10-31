@@ -25,3 +25,8 @@ spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
+
+graphql:
+  servlet:
+    websocket:
+      enabled=false:
