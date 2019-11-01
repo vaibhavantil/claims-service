@@ -50,7 +50,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 @ContextConfiguration(classes = ClaimServiceTestConfiguration.class)
-@SpringBootTest(webEnvironment =  SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc
 public class InternalControllerTest {
 

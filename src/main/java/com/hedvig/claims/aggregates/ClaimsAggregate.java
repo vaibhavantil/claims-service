@@ -2,7 +2,6 @@ package com.hedvig.claims.aggregates;
 
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.events.*;
-import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.PaymentType;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
@@ -71,12 +70,6 @@ public class ClaimsAggregate {
         command.getMemberId(),
         command.getRegistrationDate(),
         command.getClaimSource()));
-  }
-
-  @CommandHandler
-  public ClaimsAggregate(CreateLuggageClaimCommand command) {
-    log.info("create claim");
-    apply(LuggageClaimCreatedEvent.from(command));
   }
 
   @CommandHandler
@@ -369,60 +362,4 @@ public class ClaimsAggregate {
     this.isCoveringEmployee = e.isCoveringEmployee();
   }
 
-  @EventSourcingHandler
-  public void on(LuggageClaimCreatedEvent e) {
-    safelyInitializeDataStructures();
-
-    this.id = e.getId();
-    this.userId = e.getMemberId();
-    this.type = "Travel - Delayed Luggage";
-
-    DataItem location = new DataItem();
-    location.date = e.getDate();
-    location.id = UUID.randomUUID().toString();
-    location.received = true;
-    location.type = ClaimDataType.DataType.TEXT;
-    location.userId = e.getMemberId();
-    location.title = "Place";
-    location.name = "Place";
-    location.value = e.getFrom() + " => " + e.getTo();
-
-    data.add(location);
-
-    Note hoursDelayedNote = new Note();
-    hoursDelayedNote.id = UUID.randomUUID().toString();
-    hoursDelayedNote.userId = e.getMemberId();
-    hoursDelayedNote.date = e.getDate();
-    hoursDelayedNote.text = "Hours delayed: " + e.getHoursDelayed();
-
-    notes.add(hoursDelayedNote);
-
-    if (e.getReference() != null) {
-      DataItem reference = new DataItem();
-      reference.id = UUID.randomUUID().toString();
-      reference.date = e.getDate();
-      reference.received = true;
-      reference.type = ClaimDataType.DataType.TICKET;
-      reference.name = "TICKET";
-      reference.title = "Ticket";
-      reference.value = e.getReference();
-
-      data.add(reference);
-    }
-  }
-
-  private void safelyInitializeDataStructures() {
-    if (this.notes == null) {
-      this.notes = new ArrayList<>();
-    }
-    if (this.payments == null) {
-      this.payments = new HashMap<>();
-    }
-    if (this.assets == null) {
-      this.assets = new ArrayList<>();
-    }
-    if (this.data == null) {
-      this.data = new ArrayList<>();
-    }
-  }
 }
