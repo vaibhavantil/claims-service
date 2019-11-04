@@ -215,6 +215,13 @@ public class ClaimsAggregate {
     apply(new EmployeeClaimStatusUpdatedEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
   }
 
+  @CommandHandler
+  public void on(UploadClaimFileCommand cmd) {
+    apply(new ClaimFileUploadedEvent(cmd.getId(), cmd.getBucket(), cmd.getClaimId(), cmd.getContentType(), cmd.getData(), cmd.getFileName(),
+      cmd.getImageId(), cmd.getMetaInfo(), cmd.getSize(), cmd.getUserId())
+    );
+  }
+
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler

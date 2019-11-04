@@ -23,12 +23,15 @@ public class ClaimsEventListener {
 
   private final ClaimsRepository claimRepository;
   private final PaymentRepository paymentRepository;
+  private final FileUploadRepository fileUploadRepository;
 
   @Autowired
   public ClaimsEventListener(ClaimsRepository claimRepository,
-                             PaymentRepository paymentRepository) {
+                             PaymentRepository paymentRepository,
+                             FileUploadRepository fileUploadRepository) {
     this.claimRepository = claimRepository;
     this.paymentRepository = paymentRepository;
+    this.fileUploadRepository = fileUploadRepository;
   }
 
   @EventHandler
@@ -375,4 +378,20 @@ public class ClaimsEventListener {
     }
   }
 
+  @EventHandler
+  public void on(ClaimFileUploadedEvent event) {
+      UploadFile uploadedFile = new UploadFile();
+
+      uploadedFile.userId = event.getUserId();
+      uploadedFile.setBucket(event.getBucket());
+      uploadedFile.setClaimsId(event.getClaimId());
+      uploadedFile.setContentType(event.getContentType());
+      uploadedFile.setData(event.getData());
+      uploadedFile.setFileName(event.getFileName());
+      uploadedFile.setImageId(event.getImageId());
+      uploadedFile.setMetaInfo(event.getMetaInfo());
+      uploadedFile.setSize(event.getSize());
+
+      fileUploadRepository.save(uploadedFile);
+  }
 }

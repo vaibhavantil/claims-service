@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 @Table(name = "file_uploads")
@@ -15,10 +17,13 @@ public class UploadFile {
   private byte[] data;
   public String userId;
   private UUID imageId;
-  private UUID claimsId;
+  @ManyToOne
+  @JoinColumn(name="claims_id", nullable=false)
+  private UUID claimId;
   private String contentType;
   private String metaInfo;
   private long size;
+  private String bucket;
 
   @Id
   @GeneratedValue
@@ -87,11 +92,11 @@ public class UploadFile {
 
   @Column(name = "claims_id")
   public UUID getClaimsId() {
-    return claimsId;
+    return claimId;
   }
 
   public void setClaimsId(UUID claims_id) {
-    this.claimsId = claims_id;
+    this.claimId = claims_id;
   }
 
   @Column(name = "data")
@@ -102,4 +107,11 @@ public class UploadFile {
   public void setData(byte[] data) {
     this.data = data;
   }
+
+  @Column(name = "bucket")
+  public String getBucket() {
+    return bucket;
+  }
+
+  public void setBucket(String bucket) { this.bucket = bucket; }
 }

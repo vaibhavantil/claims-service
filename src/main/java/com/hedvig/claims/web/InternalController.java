@@ -4,7 +4,9 @@ import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.query.FileUploadRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
+import com.hedvig.claims.query.UploadFile;
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
 import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
 import com.hedvig.claims.serviceIntegration.memberService.MemberService;
@@ -13,9 +15,11 @@ import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import lombok.val;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +44,18 @@ public class InternalController {
   private final ClaimsQueryService claimsQueryService;
   private final Meerkat meerkat;
   private final MemberService memberService;
+  private final FileUploadRepository fileUploadRepository;
 
   @Autowired
   public InternalController(CommandBus commandBus, ClaimsRepository repository,
                             ClaimsQueryService claimsQueryService,
-                            Meerkat meerkat, MemberService memberService) {
+                            Meerkat meerkat, MemberService memberService, FileUploadRepository fileUploadRepository) {
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
     this.claimsQueryService = claimsQueryService;
     this.meerkat = meerkat;
     this.memberService = memberService;
+    this.fileUploadRepository = fileUploadRepository;
   }
 
   @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
@@ -453,4 +459,50 @@ public class InternalController {
     commandBus.sendAndWait(new UpdateEmployeeClaimStatusCommand(dto.getClaimId(), dto.isCoveringEmployee()));
     return ResponseEntity.accepted().build();
   }
+
+  @PostMapping("claimFiles")
+  public ResponseEntity<Void> uploadClaimsFiles(@RequestBody ClaimsFilesUploadDTO dto) {
+
+    dto.getClaimsFiles().stream().forEach(claimFile -> {
+      commandBus.sendAndWait(new UploadClaimFileCommand(
+        claimFile.getId(),
+        claimFile.getBucket(),
+        claimFile.getClaimId(),
+        claimFile.getContentType(),
+        claimFile.getData(),
+        claimFile.getFileName(),
+        claimFile.getImageId(),
+        claimFile.getMetaInfo(),
+        claimFile.getSize(),
+        claimFile.getUserId()
+      ));
+    });
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/{claimId}/claimFiles")
+  public ResponseEntity<ClaimsFilesUploadDTO> allClaimsFiles(@PathVariable UUID claimId) {
+    List<UploadFile> fileUploads = fileUploadRepository.findAllByClaimsId(claimId);
+
+    List<ClaimFileDTO> claims = fileUploads.stream().map(file -> {
+      ClaimFileDTO claimFile = new ClaimFileDTO(
+        file.getId(),
+        file.getBucket(),
+        file.getClaimsId(),
+        file.getContentType(),
+        file.getData(),
+        file.getFileName(),
+        file.getImageId(),
+        file.getMetaInfo(),
+        file.getSize(),
+        file.getUserId()
+      );
+        return claimFile;
+      }
+    ).collect(Collectors.toList());
+    ClaimsFilesUploadDTO claimsFiles = new ClaimsFilesUploadDTO(claims);
+    return ResponseEntity.ok(claimsFiles);
+  }
 }
+
+
