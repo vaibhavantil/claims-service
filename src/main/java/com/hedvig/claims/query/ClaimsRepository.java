@@ -17,8 +17,6 @@ public interface ClaimsRepository extends JpaRepository<ClaimEntity, String> {
 
   List<ClaimEntity> findByUserId(String s);
 
-  List<ClaimEntity> findByIdIn(Set<String> ids);
-
   Long countByState(ClaimsAggregate.ClaimStates state);
 
   @Query("SELECT c FROM ClaimEntity c")
