@@ -2,6 +2,7 @@ package com.hedvig.claims.query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ public interface ClaimsRepository extends JpaRepository<ClaimEntity, String> {
   Optional<ClaimEntity> findById(String s);
 
   List<ClaimEntity> findByUserId(String s);
+
+  List<ClaimEntity> findByIdIn(Set<String> ids);
 
   Long countByState(ClaimsAggregate.ClaimStates state);
 

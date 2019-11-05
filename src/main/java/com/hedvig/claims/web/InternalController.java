@@ -433,7 +433,7 @@ public class InternalController {
   @PostMapping("/many")
   public ResponseEntity<Stream<ClaimDTO>> getClaimsByIds(@RequestBody ClaimsByIdsDTO dto) {
     val claims = claimsRepository
-      .findAllById(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toList()));
+      .findByIdIn(dto.getIds().stream().map(id -> id.toString()).collect(Collectors.toSet()));
 
     if (claims.size() != dto.getIds().size()) {
       log.error("Length mismatch on supplied claims and found claims: wanted {}, found {}",
