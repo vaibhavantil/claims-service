@@ -2,6 +2,7 @@ package com.hedvig.claims.query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate;
 import org.springframework.data.domain.Page;
