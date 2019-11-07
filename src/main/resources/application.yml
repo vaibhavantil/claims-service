@@ -18,10 +18,13 @@ spring:
           schema-generation:
             create-source: metadata
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       show_sql: true
       format_sql: true
       naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
   jackson:
     serialization:
       write_dates_as_timestamps: false
+
+  main:
+    allow-bean-definition-overriding: true
