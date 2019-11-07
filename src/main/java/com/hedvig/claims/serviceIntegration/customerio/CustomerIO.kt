@@ -1,11 +1,13 @@
 package com.hedvig.claims.serviceIntegration.customerio
 
-import com.hedvig.claims.aggregates.ClaimsAggregate
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.cloud.openfeign.EnableFeignClients
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.ZoneId
 
 @Profile("customer.io")
 @ConditionalOnProperty(value = ["customerio.siteId", "customerio.apiKey"], matchIfMissing = false)
@@ -13,17 +15,22 @@ import org.springframework.stereotype.Component
 @EnableFeignClients
 class CustomerIO(
     private val customerIOClient: CustomerIOClient
-){
-    val logger = LoggerFactory.getLogger(CustomerIO::class.java)
+) {
+    val logger: Logger = LoggerFactory.getLogger(CustomerIO::class.java)
 
-    fun setClaimStatus(userId: String, claimStatus: ClaimsAggregate.ClaimStates) {
-        val traits = mapOf(
-            "latest_claim_status" to claimStatus.name
-        )
+    fun notifyClaimClosed(userId: String, timestamp: Instant) {
         try {
-            this.customerIOClient.put(userId, traits)
+            this.customerIOClient.postUserEvent(
+                userId = userId,
+                event = CustomerIOEvent(
+                    name = "claim-closed",
+                    data = mapOf(
+                        "closed_at" to timestamp.atZone(ZoneId.of("Europe/Stockholm")).toEpochSecond()
+                    )
+                )
+            )
         } catch (exception: Exception) {
-            logger.error("Could not set \"latest_claim_status\" for $userId to $claimStatus in customer.io (exception=$exception)")
+            logger.error("Could not notify claim for member=$userId closed to customer.io (exception=$exception)")
         }
     }
 }
