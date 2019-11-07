@@ -1,5 +1,8 @@
 package com.hedvig.claims.serviceIntegration.customerio
 
+import com.hedvig.claims.aggregates.ClaimsAggregate
+import com.hedvig.claims.events.BackofficeClaimCreatedEvent
+import com.hedvig.claims.events.ClaimCreatedEvent
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -17,5 +20,15 @@ class CustomerIOEventListener(
     @EventHandler
     fun on(event: ClaimStatusUpdatedEvent) {
         customerIO.setClaimStatus(event.userId, event.state)
+    }
+
+    @EventHandler
+    fun on(event: ClaimCreatedEvent) {
+        customerIO.setClaimStatus(event.userId, ClaimsAggregate.ClaimStates.OPEN)
+    }
+
+    @EventHandler
+    fun on(event: BackofficeClaimCreatedEvent) {
+        customerIO.setClaimStatus(event.memberId, ClaimsAggregate.ClaimStates.OPEN)
     }
 }
