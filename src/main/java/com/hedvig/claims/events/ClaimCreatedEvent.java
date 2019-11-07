@@ -6,7 +6,7 @@ import org.axonframework.serialization.Revision;
 @Value
 @Revision("1.1")
 public class ClaimCreatedEvent {
-  private String id;
-  private String userId;
-  private String audioURL;
+  public String id;
+  public String userId;
+  public String audioURL;
 }
