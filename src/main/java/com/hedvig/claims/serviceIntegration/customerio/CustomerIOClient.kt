@@ -2,7 +2,7 @@ package com.hedvig.claims.serviceIntegration.customerio
 
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 
 @FeignClient(
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody
     configuration = [CustomerIOFeignConfiguration::class]
 )
 interface CustomerIOClient {
-    @PutMapping("/v1/customers/{userId}/events")
+    @PostMapping("/v1/customers/{userId}/events")
     fun postUserEvent(
         @PathVariable userId: String,
         @RequestBody event: CustomerIOEvent
