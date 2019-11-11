@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody
     configuration = [CustomerIOFeignConfiguration::class]
 )
 interface CustomerIOClient {
-    @PutMapping("/v1/customers/{userId}/event")
+    @PutMapping("/v1/customers/{userId}/events")
     fun postUserEvent(
         @PathVariable userId: String,
         @RequestBody event: CustomerIOEvent
