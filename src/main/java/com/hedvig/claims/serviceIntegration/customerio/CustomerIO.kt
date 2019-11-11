@@ -23,7 +23,7 @@ class CustomerIO(
             this.customerIOClient.postUserEvent(
                 userId = userId,
                 event = CustomerIOEvent(
-                    name = "claim-opened",
+                    name = "claim_opened",
                     data = mapOf(
                         "claim_id" to claimId,
                         "opened_at" to timestamp.atZone(ZoneId.of("Europe/Stockholm")).toEpochSecond()
@@ -40,7 +40,7 @@ class CustomerIO(
             this.customerIOClient.postUserEvent(
                 userId = userId,
                 event = CustomerIOEvent(
-                    name = "claim-closed",
+                    name = "claim_closed",
                     data = mapOf(
                         "claim_id" to claimId,
                         "closed_at" to timestamp.atZone(ZoneId.of("Europe/Stockholm")).toEpochSecond()
@@ -57,7 +57,7 @@ class CustomerIO(
             this.customerIOClient.postUserEvent(
                 userId = userId,
                 event = CustomerIOEvent(
-                    name = "claim-reopened",
+                    name = "claim_reopened",
                     data = mapOf(
                         "claim_id" to claimId,
                         "reopened_at" to timestamp.atZone(ZoneId.of("Europe/Stockholm")).toEpochSecond()
