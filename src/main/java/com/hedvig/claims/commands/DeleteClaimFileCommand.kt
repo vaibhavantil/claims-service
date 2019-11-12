@@ -6,5 +6,6 @@ import java.util.*
 data class DeleteClaimFileCommand(
         val claimFileId: UUID,
         @TargetAggregateIdentifier
-        val claimId: UUID
+        val claimId: UUID,
+        val deletedBy: String
 )

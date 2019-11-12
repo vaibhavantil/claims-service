@@ -532,10 +532,11 @@ public class InternalController {
   }
 
   @DeleteMapping("/{claimId}/deleteClaimFile/{claimFileId}")
-  ResponseEntity<Void> deleteClaimFile(@PathVariable UUID claimId, @PathVariable UUID claimFileId) {
+  ResponseEntity<Void> deleteClaimFile(@PathVariable UUID claimId, @PathVariable UUID claimFileId,
+                                       @RequestHeader("Authorized") String deletedBy) {
     val claimFile = fileUploadRepository.findById(claimFileId);
     if(claimFile.isPresent()) {
-      commandBus.sendAndWait(new DeleteClaimFileCommand(claimFileId, claimId));
+      commandBus.sendAndWait(new DeleteClaimFileCommand(claimFileId, claimId, deletedBy));
     }
     return ResponseEntity.noContent().build();
   }
