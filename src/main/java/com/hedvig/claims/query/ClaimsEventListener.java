@@ -1,6 +1,7 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.*;
+import com.hedvig.claims.commands.DeleteClaimFileCommand;
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.web.dto.PaymentType;
 import lombok.extern.slf4j.Slf4j;
@@ -393,5 +394,10 @@ public class ClaimsEventListener {
       uploadedFile.setSize(event.getSize());
 
       fileUploadRepository.save(uploadedFile);
+  }
+
+  @EventHandler
+  public void on(DeleteClaimFileEvent event) {
+    fileUploadRepository.deleteById(event.getClaimFileId());
   }
 }

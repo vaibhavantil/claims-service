@@ -467,6 +467,7 @@ public class InternalController {
       commandBus.sendAndWait(new UploadClaimFileCommand(
         claimFile.getId(),
         claimFile.getBucket(),
+        claimFile.getKey(),
         claimFile.getClaimId(),
         claimFile.getContentType(),
         claimFile.getData(),
@@ -488,6 +489,7 @@ public class InternalController {
       ClaimFileDTO claimFile = new ClaimFileDTO(
         file.getId(),
         file.getBucket(),
+        file.getKey(),
         file.getClaimsId(),
         file.getContentType(),
         file.getData(),
@@ -502,6 +504,15 @@ public class InternalController {
     ).collect(Collectors.toList());
     ClaimsFilesUploadDTO claimsFiles = new ClaimsFilesUploadDTO(claims);
     return ResponseEntity.ok(claimsFiles);
+  }
+
+  @DeleteMapping("/{claimId}/deleteClaimFile/{claimFileId}")
+  ResponseEntity<Void> deleteClaimFile(@PathVariable UUID claimId, @PathVariable UUID claimFileId) {
+    val claimFile = fileUploadRepository.findById(claimFileId);
+    if(claimFile.isPresent()) {
+      commandBus.sendAndWait(new DeleteClaimFileCommand(claimFileId, claimId));
+    }
+    return ResponseEntity.noContent().build();
   }
 }
 

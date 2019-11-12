@@ -4,6 +4,7 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.JoinColumn;
@@ -12,7 +13,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @Table(name = "file_uploads")
 public class UploadFile {
-  private long id;
+  private UUID id;
   private String fileName;
   private byte[] data;
   public String userId;
@@ -24,15 +25,15 @@ public class UploadFile {
   private String metaInfo;
   private long size;
   private String bucket;
+  private String key;
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy= GenerationType.AUTO)
   @Column(name = "id")
-  public long getId() {
-    return id;
-  }
+  public UUID getId() {
+    return id; }
 
-  public void setId(long id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 
@@ -114,4 +115,9 @@ public class UploadFile {
   }
 
   public void setBucket(String bucket) { this.bucket = bucket; }
+
+  @Column(name = "key")
+  public String getKey() { return key; }
+
+  public void setKey(String key) { this.key = key; }
 }

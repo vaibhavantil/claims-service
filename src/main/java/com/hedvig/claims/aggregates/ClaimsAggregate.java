@@ -217,9 +217,14 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on(UploadClaimFileCommand cmd) {
-    apply(new ClaimFileUploadedEvent(cmd.getId(), cmd.getBucket(), cmd.getClaimId(), cmd.getContentType(), cmd.getData(), cmd.getFileName(),
+    apply(new ClaimFileUploadedEvent(cmd.getId(), cmd.getBucket(), cmd.getKey(), cmd.getClaimId(), cmd.getContentType(), cmd.getData(), cmd.getFileName(),
       cmd.getImageId(), cmd.getMetaInfo(), cmd.getSize(), cmd.getUserId())
     );
+  }
+
+  @CommandHandler
+  public void on (DeleteClaimFileCommand cmd) {
+    apply(new DeleteClaimFileEvent(cmd.getClaimFileId()));
   }
 
   // ----------------- Event sourcing --------------------- //
