@@ -2,7 +2,7 @@ package com.hedvig.claims.web.dto
 import java.util.*
 
 data class ClaimFileDTO (
-        val id: UUID,
+        val claimFileId: UUID,
         val bucket: String,
         val key: String,
         val claimId: UUID,

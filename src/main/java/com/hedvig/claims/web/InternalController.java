@@ -465,7 +465,7 @@ public class InternalController {
 
     dto.getClaimsFiles().stream().forEach(claimFile -> {
       commandBus.sendAndWait(new UploadClaimFileCommand(
-        claimFile.getId(),
+        claimFile.getClaimFileId(),
         claimFile.getBucket(),
         claimFile.getKey(),
         claimFile.getClaimId(),

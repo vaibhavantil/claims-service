@@ -4,7 +4,7 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier
 import java.util.*
 
 data class UploadClaimFileCommand (
-        val id: UUID,
+        val claimFileId: UUID,
         val bucket: String,
         val key: String,
         @TargetAggregateIdentifier
