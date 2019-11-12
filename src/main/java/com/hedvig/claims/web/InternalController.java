@@ -506,6 +506,31 @@ public class InternalController {
     return ResponseEntity.ok(claimsFiles);
   }
 
+  @GetMapping("/claimFile/{claimFileId}")
+  ResponseEntity<ClaimFileDTO> claimFileById(@PathVariable UUID claimFileId) {
+    val optionalClaimFile = fileUploadRepository.findById(claimFileId);
+
+    if(!optionalClaimFile.isPresent()) throw new RuntimeException("no claimFile found with id " + claimFileId);
+
+    val claimFile = optionalClaimFile.get();
+
+    val claimFileDto = new ClaimFileDTO(
+      claimFile.getId(),
+      claimFile.getBucket(),
+      claimFile.getKey(),
+      claimFile.getClaimsId(),
+      claimFile.getContentType(),
+      claimFile.getData(),
+      claimFile.getFileName(),
+      claimFile.getImageId(),
+      claimFile.getMetaInfo(),
+      claimFile.getSize(),
+      claimFile.getUserId()
+    );
+
+    return ResponseEntity.ok(claimFileDto);
+  }
+
   @DeleteMapping("/{claimId}/deleteClaimFile/{claimFileId}")
   ResponseEntity<Void> deleteClaimFile(@PathVariable UUID claimId, @PathVariable UUID claimFileId) {
     val claimFile = fileUploadRepository.findById(claimFileId);
