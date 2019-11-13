@@ -217,7 +217,8 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on(UploadClaimFileCommand cmd) {
-    apply(new ClaimFileUploadedEvent(cmd.getClaimFileId(), cmd.getBucket(), cmd.getKey(), cmd.getClaimId(), cmd.getContentType(), cmd.getData(), cmd.getFileName(),
+    apply(new ClaimFileUploadedEvent(cmd.getClaimFileId(), cmd.getBucket(), cmd.getKey(),
+      cmd.getClaimId(), cmd.getContentType(), cmd.getData(), cmd.getFileName(),
       cmd.getImageId(), cmd.getMetaInfo(), cmd.getSize(), cmd.getUserId())
     );
   }

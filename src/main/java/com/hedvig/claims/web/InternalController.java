@@ -15,11 +15,9 @@ import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import lombok.val;
-import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -516,7 +514,9 @@ public class InternalController {
   ResponseEntity<ClaimFileDTO> claimFileById(@PathVariable String claimFileId) {
     val optionalClaimFile = fileUploadRepository.findById(claimFileId);
 
-    if(!optionalClaimFile.isPresent()) throw new RuntimeException("no claimFile found with id " + claimFileId);
+    if(!optionalClaimFile.isPresent()) {
+      throw new RuntimeException("no claimFile found with id " + claimFileId);
+    }
 
     val claimFile = optionalClaimFile.get();
 
@@ -540,12 +540,12 @@ public class InternalController {
     return ResponseEntity.ok(claimFileDto);
   }
 
-  @DeleteMapping("/{claimId}/deleteClaimFile/{claimFileId}")
+  @PostMapping("/{claimId}/deleteClaimFile/{claimFileId}")
   ResponseEntity<Void> deleteClaimFile(@PathVariable String claimId, @PathVariable String claimFileId,
-                                       @RequestHeader("Authorized") String deletedBy) {
+                                       @RequestBody MarkClaimFileAsDeletedDTO dto) {
     val claimFile = fileUploadRepository.findById(claimFileId);
     if(claimFile.isPresent()) {
-      commandBus.sendAndWait(new DeleteClaimFileCommand(claimFileId, claimId, deletedBy));
+      commandBus.sendAndWait(new DeleteClaimFileCommand(claimFileId, claimId, dto.getDeletedBy()));
     }
     return ResponseEntity.noContent().build();
   }
