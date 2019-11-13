@@ -1,8 +1,9 @@
 package com.hedvig.claims.events
 
-import java.util.*
+import java.time.Instant
 
 data class DeleteClaimFileEvent (
-        val claimFileId: UUID,
-        val deletedBy: String
+        val claimFileId: String,
+        val deletedBy: String,
+        val deletedAt: Instant
 )

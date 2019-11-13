@@ -3,10 +3,10 @@ package com.hedvig.claims.events
 import java.util.*
 
 data class ClaimFileUploadedEvent (
-        val claimFileId: UUID,
+        val claimFileId: String,
         val bucket: String,
         val key: String,
-        val claimId: UUID,
+        val claimId: String,
         val contentType: String,
         val data: ByteArray,
         val fileName: String,

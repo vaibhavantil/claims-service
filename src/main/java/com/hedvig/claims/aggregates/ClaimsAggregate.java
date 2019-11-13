@@ -224,7 +224,7 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on (DeleteClaimFileCommand cmd) {
-    apply(new DeleteClaimFileEvent(cmd.getClaimFileId(), cmd.getDeletedBy()));
+    apply(new DeleteClaimFileEvent(cmd.getClaimFileId(), cmd.getDeletedBy(), Instant.now()));
   }
 
   // ----------------- Event sourcing --------------------- //

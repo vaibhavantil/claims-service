@@ -1,5 +1,6 @@
 package com.hedvig.claims.query;
 
+import java.time.Instant;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,31 +10,35 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "file_uploads")
 public class UploadFile {
-  private UUID id;
+  private String id;
   private String fileName;
   private byte[] data;
   public String userId;
   private UUID imageId;
   @ManyToOne
   @JoinColumn(name="claims_id", nullable=false)
-  private UUID claimId;
+  private String claimId;
   private String contentType;
   private String metaInfo;
   private long size;
   private String bucket;
   private String key;
+  private Boolean markedAsDeleted = false;
+  private String markedAsDeletedBy;
+  private Instant markedAsDeletedAt;
 
-  @Id
-  @GeneratedValue(strategy= GenerationType.AUTO)
-  @Column(name = "id")
-  public UUID getId() {
+
+  @Id @GeneratedValue(generator="id")
+  @GenericGenerator(name="id", strategy = "uuid")
+  public String getId() {
     return id; }
 
-  public void setId(UUID id) {
+  public void setId(String id) {
     this.id = id;
   }
 
@@ -92,11 +97,11 @@ public class UploadFile {
   }
 
   @Column(name = "claims_id")
-  public UUID getClaimsId() {
+  public String getClaimsId() {
     return claimId;
   }
 
-  public void setClaimsId(UUID claims_id) {
+  public void setClaimsId(String claims_id) {
     this.claimId = claims_id;
   }
 
@@ -120,4 +125,30 @@ public class UploadFile {
   public String getKey() { return key; }
 
   public void setKey(String key) { this.key = key; }
+
+  @Column(name="markedAsDeleted")
+  public Boolean getMarkedAsDeleted() {
+    return markedAsDeleted;
+  }
+
+  public void setMarkedAsDeleted(Boolean markedAsDeleted) {
+    this.markedAsDeleted = markedAsDeleted;
+  }
+  @Column(name="markedAsDeletedBy")
+  public String getMarkedAsDeletedBy() {
+    return markedAsDeletedBy;
+  }
+
+  public void setMarkedAsDeletedBy(String markedAsDeletedBy) {
+    this.markedAsDeletedBy = markedAsDeletedBy;
+  }
+
+  @Column(name="markedAsDeletedAt")
+  public Instant getMarkedAsDeletedAt() {
+    return markedAsDeletedAt;
+  }
+
+  public void setMarkedAsDeletedAt(Instant markedAsDeletedAt) {
+    this.markedAsDeletedAt = markedAsDeletedAt;
+  }
 }

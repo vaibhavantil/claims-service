@@ -475,7 +475,10 @@ public class InternalController {
         claimFile.getImageId(),
         claimFile.getMetaInfo(),
         claimFile.getSize(),
-        claimFile.getUserId()
+        claimFile.getUserId(),
+        claimFile.getMarkedAsDeleted(),
+        claimFile.getMarkedAsDeletedBy(),
+        claimFile.getMarkedAsDeletedAt()
       ));
     });
     return ResponseEntity.noContent().build();
@@ -497,7 +500,10 @@ public class InternalController {
         file.getImageId(),
         file.getMetaInfo(),
         file.getSize(),
-        file.getUserId()
+        file.getUserId(),
+        file.getMarkedAsDeleted(),
+        file.getMarkedAsDeletedBy(),
+        file.getMarkedAsDeletedAt()
       );
         return claimFile;
       }
@@ -507,7 +513,7 @@ public class InternalController {
   }
 
   @GetMapping("/claimFile/{claimFileId}")
-  ResponseEntity<ClaimFileDTO> claimFileById(@PathVariable UUID claimFileId) {
+  ResponseEntity<ClaimFileDTO> claimFileById(@PathVariable String claimFileId) {
     val optionalClaimFile = fileUploadRepository.findById(claimFileId);
 
     if(!optionalClaimFile.isPresent()) throw new RuntimeException("no claimFile found with id " + claimFileId);
@@ -525,14 +531,17 @@ public class InternalController {
       claimFile.getImageId(),
       claimFile.getMetaInfo(),
       claimFile.getSize(),
-      claimFile.getUserId()
+      claimFile.getUserId(),
+      claimFile.getMarkedAsDeleted(),
+      claimFile.getMarkedAsDeletedBy(),
+      claimFile.getMarkedAsDeletedAt()
     );
 
     return ResponseEntity.ok(claimFileDto);
   }
 
   @DeleteMapping("/{claimId}/deleteClaimFile/{claimFileId}")
-  ResponseEntity<Void> deleteClaimFile(@PathVariable UUID claimId, @PathVariable UUID claimFileId,
+  ResponseEntity<Void> deleteClaimFile(@PathVariable String claimId, @PathVariable String claimFileId,
                                        @RequestHeader("Authorized") String deletedBy) {
     val claimFile = fileUploadRepository.findById(claimFileId);
     if(claimFile.isPresent()) {

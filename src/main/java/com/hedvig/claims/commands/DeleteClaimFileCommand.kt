@@ -4,8 +4,8 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier
 import java.util.*
 
 data class DeleteClaimFileCommand(
-        val claimFileId: UUID,
+        val claimFileId: String,
         @TargetAggregateIdentifier
-        val claimId: UUID,
+        val claimId: String,
         val deletedBy: String
 )

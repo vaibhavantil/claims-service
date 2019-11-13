@@ -385,6 +385,7 @@ public class ClaimsEventListener {
 
       uploadedFile.userId = event.getUserId();
       uploadedFile.setBucket(event.getBucket());
+      uploadedFile.setKey(event.getKey());
       uploadedFile.setClaimsId(event.getClaimId());
       uploadedFile.setContentType(event.getContentType());
       uploadedFile.setData(event.getData());
@@ -398,6 +399,9 @@ public class ClaimsEventListener {
 
   @EventHandler
   public void on(DeleteClaimFileEvent event) {
-    fileUploadRepository.deleteById(event.getClaimFileId());
+    UploadFile file = fileUploadRepository.findById(event.getClaimFileId()).get();
+    file.setMarkedAsDeleted(true);
+    file.setMarkedAsDeletedAt(event.getDeletedAt());
+    file.setMarkedAsDeletedBy(event.getDeletedBy());
   }
 }

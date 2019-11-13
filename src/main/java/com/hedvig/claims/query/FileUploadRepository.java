@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface FileUploadRepository extends JpaRepository<UploadFile, UUID> {
+public interface FileUploadRepository extends JpaRepository<UploadFile, String> {
   Optional<UploadFile> findByImageId(UUID id);
 
   List<UploadFile> findAllByClaimsId(UUID id);
