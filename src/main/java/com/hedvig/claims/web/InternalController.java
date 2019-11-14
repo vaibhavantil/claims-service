@@ -483,7 +483,7 @@ public class InternalController {
   }
 
   @GetMapping("/{claimId}/claimFiles")
-  public ResponseEntity<ClaimsFilesUploadDTO> allClaimsFiles(@PathVariable UUID claimId) {
+  public ResponseEntity<ClaimsFilesUploadDTO> allClaimsFiles(@PathVariable String claimId) {
     List<UploadFile> fileUploads = fileUploadRepository.findAllByClaimsId(claimId);
 
     List<ClaimFileDTO> claims = fileUploads.stream().map(file -> {
@@ -540,12 +540,12 @@ public class InternalController {
     return ResponseEntity.ok(claimFileDto);
   }
 
-  @PostMapping("/{claimId}/deleteClaimFile/{claimFileId}")
-  ResponseEntity<Void> deleteClaimFile(@PathVariable String claimId, @PathVariable String claimFileId,
+  @PostMapping("/{claimId}/markAsDeleted/{claimFileId}")
+  ResponseEntity<Void> markClaimFileAsDeleted(@PathVariable String claimId, @PathVariable String claimFileId,
                                        @RequestBody MarkClaimFileAsDeletedDTO dto) {
     val claimFile = fileUploadRepository.findById(claimFileId);
     if(claimFile.isPresent()) {
-      commandBus.sendAndWait(new DeleteClaimFileCommand(claimFileId, claimId, dto.getDeletedBy()));
+      commandBus.sendAndWait(new MarkClaimFileAsDeletedCommand(claimFileId, claimId, dto.getDeletedBy()));
     }
     return ResponseEntity.noContent().build();
   }

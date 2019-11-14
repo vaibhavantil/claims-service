@@ -1,7 +1,6 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.*;
-import com.hedvig.claims.commands.DeleteClaimFileCommand;
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.web.dto.PaymentType;
 import lombok.extern.slf4j.Slf4j;
@@ -398,7 +397,7 @@ public class ClaimsEventListener {
   }
 
   @EventHandler
-  public void on(DeleteClaimFileEvent event) {
+  public void on(MarkClaimFileAsDeletedEvent event) {
     UploadFile file = fileUploadRepository.findById(event.getClaimFileId()).get();
     file.setMarkedAsDeleted(true);
     file.setMarkedAsDeletedAt(event.getDeletedAt());

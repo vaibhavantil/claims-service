@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface FileUploadRepository extends JpaRepository<UploadFile, String> {
   Optional<UploadFile> findByImageId(UUID id);
 
-  List<UploadFile> findAllByClaimsId(UUID id);
+  List<UploadFile> findAllByClaimsId(String id);
 }
