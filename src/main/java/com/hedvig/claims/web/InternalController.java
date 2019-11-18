@@ -501,7 +501,8 @@ public class InternalController {
         file.getUserId(),
         file.getMarkedAsDeleted(),
         file.getMarkedAsDeletedBy(),
-        file.getMarkedAsDeletedAt()
+        file.getMarkedAsDeletedAt(),
+        file.getCategory()
       );
         return claimFile;
       }
@@ -534,7 +535,8 @@ public class InternalController {
       claimFile.getUserId(),
       claimFile.getMarkedAsDeleted(),
       claimFile.getMarkedAsDeletedBy(),
-      claimFile.getMarkedAsDeletedAt()
+      claimFile.getMarkedAsDeletedAt(),
+      claimFile.getCategory()
     );
 
     return ResponseEntity.ok(claimFileDto);
@@ -546,6 +548,16 @@ public class InternalController {
     val claimFile = fileUploadRepository.findById(claimFileId);
     if(claimFile.isPresent()) {
       commandBus.sendAndWait(new MarkClaimFileAsDeletedCommand(claimFileId, claimId, dto.getDeletedBy()));
+    }
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{claimId}/setClaimFileCategory/{claimFileId}")
+  ResponseEntity<Void> setClaimFileCategory(@PathVariable String claimId, @PathVariable String claimFileId,
+                                              @RequestBody ClaimFileCategoryDTO dto) {
+    val claimFile = fileUploadRepository.findById(claimFileId);
+    if(claimFile.isPresent()) {
+      commandBus.sendAndWait(new SetClaimFileCategoryCommand(claimFileId, claimId, dto.getCategory()));
     }
     return ResponseEntity.noContent().build();
   }

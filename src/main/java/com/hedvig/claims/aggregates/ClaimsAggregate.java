@@ -225,7 +225,12 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on (MarkClaimFileAsDeletedCommand cmd) {
-    apply(new MarkClaimFileAsDeletedEvent(cmd.getClaimFileId(), cmd.getDeletedBy(), Instant.now()));
+    apply(new ClaimFileMarkedAsDeletedEvent(cmd.getClaimFileId(), cmd.getDeletedBy(), Instant.now()));
+  }
+
+  @CommandHandler
+  public void on (SetClaimFileCategoryCommand cmd) {
+    apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getCategory()));
   }
 
   // ----------------- Event sourcing --------------------- //

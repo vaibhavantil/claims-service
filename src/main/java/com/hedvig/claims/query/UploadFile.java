@@ -31,6 +31,7 @@ public class UploadFile {
   private Boolean markedAsDeleted = false;
   private String markedAsDeletedBy;
   private Instant markedAsDeletedAt;
+  private String category;
 
 
   @Id @GeneratedValue(generator="id")
@@ -150,5 +151,14 @@ public class UploadFile {
 
   public void setMarkedAsDeletedAt(Instant markedAsDeletedAt) {
     this.markedAsDeletedAt = markedAsDeletedAt;
+  }
+
+  @Column(name="category")
+  public String getCategory() {
+    return category;
+  }
+
+  public void setCategory(String category) {
+    this.category = category;
   }
 }

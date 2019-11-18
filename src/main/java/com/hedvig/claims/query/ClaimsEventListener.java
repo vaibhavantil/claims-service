@@ -397,10 +397,16 @@ public class ClaimsEventListener {
   }
 
   @EventHandler
-  public void on(MarkClaimFileAsDeletedEvent event) {
+  public void on(ClaimFileMarkedAsDeletedEvent event) {
     UploadFile file = fileUploadRepository.findById(event.getClaimFileId()).get();
     file.setMarkedAsDeleted(true);
     file.setMarkedAsDeletedAt(event.getDeletedAt());
     file.setMarkedAsDeletedBy(event.getDeletedBy());
+  }
+
+  @EventHandler
+  public void on(ClaimFileCategorySetEvent event) {
+    UploadFile file = fileUploadRepository.findById(event.getClaimFileId()).get();
+    file.setCategory(event.getCategory());
   }
 }

@@ -16,7 +16,8 @@ data class ClaimFileDTO (
         val userId: String?,
         val markedAsDeleted: Boolean,
         val markedAsDeletedBy: String?,
-        val markedAsDeletedAt: Instant?
+        val markedAsDeletedAt: Instant?,
+        val category: String?
 )
 
 
