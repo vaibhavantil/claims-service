@@ -1,5 +1,5 @@
 package com.hedvig.claims.web.dto
 
-data class ClaimsFilesUploadDTO (
+data class ClaimsFilesUploadDTO(
     val claimsFiles: List<ClaimFileDTO>
 )

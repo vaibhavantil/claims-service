@@ -1,5 +1,5 @@
 package com.hedvig.claims.web.dto
 
-data class MarkClaimFileAsDeletedDTO (
-        val deletedBy: String
+data class MarkClaimFileAsDeletedDTO(
+    val deletedBy: String
 )
