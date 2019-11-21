@@ -85,7 +85,7 @@ public class InternalController {
 
       claims.add(
         new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-          c.claimSource, c.coveringEmployee, c.claimFiles));
+          c.claimSource, c.coveringEmployee));
     }
 
     return ResponseEntity.ok(claims);
@@ -108,7 +108,7 @@ public class InternalController {
         c ->
           new ClaimDTO(
             c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-            c.claimSource, c.coveringEmployee, c.claimFiles))
+            c.claimSource, c.coveringEmployee))
       .collect(Collectors.toList());
   }
 

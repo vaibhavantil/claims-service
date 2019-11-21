@@ -3,7 +3,6 @@ package com.hedvig.claims.web.dto;
 import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
 import com.hedvig.claims.query.ClaimEntity;
-import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.query.Event;
 
 import java.time.Instant;
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
@@ -47,7 +45,6 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.type = c.type;
     this.claimSource = c.claimSource;
     this.coveringEmployee = c.coveringEmployee;
-    this.claimFiles = claimFiles;
 
     for (Asset a : c.assets) {
       assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));
@@ -100,8 +97,8 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     String audioURL,
     Instant registrationDate,
     ClaimSource claimSource,
-    boolean coveringEmployee,
-    Set<ClaimFile> claimFiles) {
+    boolean coveringEmployee
+  ) {
     this.id = id;
     this.userId = userId;
     this.state = state;
@@ -112,19 +109,6 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.audioURL = audioURL;
     this.claimSource = claimSource;
     this.coveringEmployee = coveringEmployee;
-    this.claimFiles = claimFiles.stream().map(event ->
-      new ClaimFileDTO(event.getId(),
-        event.getBucket(),
-        event.getKey(),
-        this.id,
-        event.getContentType(),
-        event.getUploadedAt(),
-        event.getFileName(),
-        event.getMarkedAsDeleted(),
-        event.getMarkedAsDeletedBy(),
-        event.getMarkedAsDeletedAt(),
-        event.getCategory()))
-      .collect(Collectors.toList());
   }
 
   public void addNote(NoteDTO n) {
