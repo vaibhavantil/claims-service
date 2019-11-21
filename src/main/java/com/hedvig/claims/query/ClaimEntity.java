@@ -3,8 +3,8 @@ package com.hedvig.claims.query;
 import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.util.EnumMapChecker;
 import com.hedvig.claims.web.dto.ClaimSortColumn;
+import java.util.ArrayList;
 import java.util.List;
-import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +35,8 @@ public class ClaimEntity {
   public Double reserve;
 
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-  @JoinColumn(name = "claims_id")
-  public List<UploadFile> claimFiles;
+  @JoinColumn(name = "claimsId")
+  public Set<ClaimFile> claimFiles;
 
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
@@ -75,6 +75,10 @@ public class ClaimEntity {
 
   public void addPayment(Payment p) {
     payments.add(p);
+  }
+
+  public void addClaimFile(ClaimFile claimFile) {
+    claimFiles.add(claimFile);
   }
 
   public void addAsset(Asset a) {

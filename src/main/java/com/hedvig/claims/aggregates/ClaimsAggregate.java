@@ -2,8 +2,11 @@ package com.hedvig.claims.aggregates;
 
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.events.*;
+import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.web.dto.PaymentType;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
@@ -45,7 +48,10 @@ public class ClaimsAggregate {
   public ArrayList<Note> notes;
   public ArrayList<String> assets;
 
+  public ArrayList<ClaimFile> claimFiles = new ArrayList<ClaimFile>();
   public boolean isCoveringEmployee;
+  public boolean markedAsDeleted = false;
+  public String category;
 
   public ClaimsAggregate() {
     log.info("Instantiate ClaimsAggregate");
@@ -217,19 +223,25 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on(UploadClaimFileCommand cmd) {
-    apply(new ClaimFileUploadedEvent(cmd.getClaimFileId(), cmd.getBucket(), cmd.getKey(),
-      cmd.getClaimId(), cmd.getContentType(), cmd.getData(), cmd.getFileName(),
-      cmd.getImageId(), cmd.getMetaInfo(), cmd.getSize(), cmd.getUserId())
-    );
+    log.info("add claim file to claim {}", cmd.getClaimId());
+    apply(new ClaimFileUploadedEvent(
+      cmd.getClaimFileId(),
+      cmd.getBucket(),
+      cmd.getKey(),
+      cmd.getClaimId(),
+      cmd.getContentType(),
+      cmd.getUploadedAt(),
+      cmd.getFileName()
+    ));
   }
 
   @CommandHandler
-  public void on (MarkClaimFileAsDeletedCommand cmd) {
-    apply(new ClaimFileMarkedAsDeletedEvent(cmd.getClaimFileId(), cmd.getDeletedBy(), Instant.now()));
+  public void on(MarkClaimFileAsDeletedCommand cmd) {
+    apply(new ClaimFileMarkedAsDeletedEvent(cmd.getClaimFileId(), cmd.getClaimId(), cmd.getDeletedBy(), Instant.now()));
   }
 
   @CommandHandler
-  public void on (SetClaimFileCategoryCommand cmd) {
+  public void on(SetClaimFileCategoryCommand cmd) {
     apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getCategory()));
   }
 
@@ -248,6 +260,7 @@ public class ClaimsAggregate {
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
     this.claimSource = ClaimSource.APP;
+    this.claimFiles = new ArrayList<ClaimFile>();
 
     this.isCoveringEmployee = false;
   }
@@ -380,4 +393,25 @@ public class ClaimsAggregate {
     this.isCoveringEmployee = e.isCoveringEmployee();
   }
 
+  @EventSourcingHandler
+  public void on(ClaimFileUploadedEvent event) {
+    val claimFile = new ClaimFile();
+      claimFile.setId(event.getClaimFileId());
+      claimFile.setBucket(event.getBucket());
+      claimFile.setKey(event.getKey());
+      claimFile.setContentType(event.getContentType());
+      claimFile.setFileName(event.getFileName());
+      claimFile.setUploadedAt(event.getUploadedAt());
+    claimFiles.add(claimFile);
+  }
+
+  @EventSourcingHandler
+  public void on(ClaimFileMarkedAsDeletedEvent event) {
+    markedAsDeleted = true;
+  }
+
+  @EventSourcingHandler
+  public void on(ClaimFileCategorySetEvent event) {
+    category = event.getCategory();
+  }
 }
