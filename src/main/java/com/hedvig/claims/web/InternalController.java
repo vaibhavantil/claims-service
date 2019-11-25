@@ -4,6 +4,7 @@ import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
+import com.hedvig.claims.query.ClaimFileRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
 import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
@@ -40,16 +41,22 @@ public class InternalController {
   private final ClaimsQueryService claimsQueryService;
   private final Meerkat meerkat;
   private final MemberService memberService;
+  private final ClaimFileRepository claimFileRepository;
 
   @Autowired
-  public InternalController(CommandBus commandBus, ClaimsRepository repository,
-                            ClaimsQueryService claimsQueryService,
-                            Meerkat meerkat, MemberService memberService) {
+  public InternalController(
+    CommandBus commandBus,
+    ClaimsRepository repository,
+    ClaimsQueryService claimsQueryService,
+    Meerkat meerkat,
+    MemberService memberService,
+    ClaimFileRepository claimFileRepository) {
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
     this.claimsQueryService = claimsQueryService;
     this.meerkat = meerkat;
     this.memberService = memberService;
+    this.claimFileRepository = claimFileRepository;
   }
 
   @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
@@ -78,6 +85,7 @@ public class InternalController {
     log.info("Getting all claims:");
     ArrayList<ClaimDTO> claims = new ArrayList<>();
     for (ClaimEntity c : claimsRepository.findAll()) {
+
       claims.add(
         new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
           c.claimSource, c.coveringEmployee));
@@ -452,4 +460,49 @@ public class InternalController {
     commandBus.sendAndWait(new UpdateEmployeeClaimStatusCommand(dto.getClaimId(), dto.isCoveringEmployee()));
     return ResponseEntity.accepted().build();
   }
+
+  @PostMapping("claimFiles")
+  public ResponseEntity<Void> uploadClaimsFiles(@RequestBody ClaimsFilesUploadDTO dto) {
+
+    dto.getClaimsFiles().stream().forEach(claimFile -> {
+      commandBus.sendAndWait(new UploadClaimFileCommand(
+        claimFile.getClaimFileId(),
+        claimFile.getBucket(),
+        claimFile.getKey(),
+        claimFile.getClaimId(),
+        claimFile.getContentType(),
+        claimFile.getUploadedAt(),
+        claimFile.getFileName()
+      ));
+    });
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{claimId}/claimFile/{claimFileId}/delete")
+  ResponseEntity<Void> markClaimFileAsDeleted(
+    @PathVariable String claimId,
+    @PathVariable UUID claimFileId,
+    @RequestBody MarkClaimFileAsDeletedDTO dto
+  ) {
+    val claimFile = claimFileRepository.findById(claimFileId);
+    if(claimFile.isPresent()) {
+      commandBus.sendAndWait(new MarkClaimFileAsDeletedCommand(claimFileId, claimId, dto.getDeletedBy()));
+    }
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{claimId}/claimFile/{claimFileId}/setClaimFileCategory")
+  ResponseEntity<Void> setClaimFileCategory(
+    @PathVariable String claimId,
+    @PathVariable UUID claimFileId,
+    @RequestBody ClaimFileCategoryDTO dto
+  ) {
+    val claimFile = claimFileRepository.findById(claimFileId);
+    if(claimFile.isPresent()) {
+      commandBus.sendAndWait(new SetClaimFileCategoryCommand(claimFileId, claimId, dto.getCategory()));
+    }
+    return ResponseEntity.noContent().build();
+  }
 }
+
+

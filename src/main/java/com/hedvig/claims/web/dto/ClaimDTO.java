@@ -28,6 +28,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
   public String type;
   public ClaimSource claimSource;
   public boolean coveringEmployee;
+  public List<ClaimFileDTO> claimFiles = new ArrayList<>();
 
   public ClaimDTO() {
   }
@@ -69,6 +70,19 @@ public class ClaimDTO extends HedvigBackofficeDTO {
         new DataItemDTO(
           d.id, c.id, d.date, d.userId, d.type, d.name, d.title, d.received, d.value));
     }
+
+    claimFiles =
+      c.claimFiles
+        .stream().filter(claimFile -> !claimFile.getMarkedAsDeleted())
+        .map(event -> new ClaimFileDTO(event.getId(),
+          event.getBucket(),
+          event.getKey(),
+          this.id,
+          event.getContentType(),
+          event.getUploadedAt(),
+          event.getFileName(),
+          event.getCategory()))
+        .collect(Collectors.toList());
   }
 
   public ClaimDTO(
@@ -80,7 +94,8 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     String audioURL,
     Instant registrationDate,
     ClaimSource claimSource,
-    boolean coveringEmployee) {
+    boolean coveringEmployee
+  ) {
     this.id = id;
     this.userId = userId;
     this.state = state;

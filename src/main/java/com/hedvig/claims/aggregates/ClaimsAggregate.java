@@ -2,8 +2,14 @@ package com.hedvig.claims.aggregates;
 
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.events.*;
+import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.web.dto.PaymentType;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
@@ -45,6 +51,7 @@ public class ClaimsAggregate {
   public ArrayList<Note> notes;
   public ArrayList<String> assets;
 
+  public ArrayList<ClaimFile> claimFiles;
   public boolean isCoveringEmployee;
 
   public ClaimsAggregate() {
@@ -215,6 +222,49 @@ public class ClaimsAggregate {
     apply(new EmployeeClaimStatusUpdatedEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
   }
 
+  @CommandHandler
+  public void on(UploadClaimFileCommand cmd) {
+    log.info("add claim file to claim {}", cmd.getClaimId());
+    apply(new ClaimFileUploadedEvent(
+      cmd.getClaimFileId(),
+      cmd.getBucket(),
+      cmd.getKey(),
+      cmd.getClaimId(),
+      cmd.getContentType(),
+      cmd.getUploadedAt(),
+      cmd.getFileName()
+    ));
+  }
+
+  @CommandHandler
+  public void on(MarkClaimFileAsDeletedCommand cmd) {
+    Optional<ClaimFile> claimFileMaybe = claimFiles.stream()
+      .filter(claimFile -> claimFile.getId().equals(cmd.getClaimFileId()))
+      .findAny();
+
+    if(!claimFileMaybe.isPresent()) {
+      throw new RuntimeException(
+        "Cannot find claim file with an id of " + cmd.getClaimFileId());
+    }
+
+    if (claimFileMaybe.get().getMarkedAsDeleted()) {
+      throw new RuntimeException(
+        "Cannot delete claim file " + claimFileMaybe.get().getId() + " it has already been marked as deleted");
+    }
+    apply(new ClaimFileMarkedAsDeletedEvent(
+      cmd.getClaimFileId(),
+      cmd.getClaimId(),
+      cmd.getDeletedBy(),
+      Instant.now())
+    );
+  }
+
+
+  @CommandHandler
+  public void on(SetClaimFileCategoryCommand cmd) {
+    apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getClaimId(), cmd.getCategory()));
+  }
+
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler
@@ -230,6 +280,7 @@ public class ClaimsAggregate {
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
     this.claimSource = ClaimSource.APP;
+    this.claimFiles = new ArrayList<>();
 
     this.isCoveringEmployee = false;
   }
@@ -246,6 +297,7 @@ public class ClaimsAggregate {
     this.payments = new HashMap<>();
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
+    this.claimFiles = new ArrayList<>();
 
     this.isCoveringEmployee = false;
   }
@@ -362,4 +414,33 @@ public class ClaimsAggregate {
     this.isCoveringEmployee = e.isCoveringEmployee();
   }
 
+  @EventSourcingHandler
+  public void on(ClaimFileUploadedEvent event) {
+    val claimFile = new ClaimFile();
+      claimFile.setId(event.getClaimFileId());
+      claimFile.setBucket(event.getBucket());
+      claimFile.setKey(event.getKey());
+      claimFile.setContentType(event.getContentType());
+      claimFile.setFileName(event.getFileName());
+      claimFile.setUploadedAt(event.getUploadedAt());
+    claimFiles.add(claimFile);
+  }
+
+  @EventSourcingHandler
+  public void on(ClaimFileMarkedAsDeletedEvent event) {
+    Optional<ClaimFile> claimFileMaybe = claimFiles.stream()
+      .filter(claimFile -> claimFile.getId().equals(event.getClaimFileId()))
+      .findAny();
+
+    claimFileMaybe.ifPresent(claimFile -> claimFile.setMarkedAsDeleted(true));
+  }
+
+  @EventSourcingHandler
+  public void on(ClaimFileCategorySetEvent event) {
+    Optional<ClaimFile> claimFileMaybe = claimFiles.stream()
+      .filter(claimFile -> claimFile.getId().equals(event.getClaimFileId()))
+      .findAny();
+
+    claimFileMaybe.ifPresent(claimFile -> claimFile.setCategory(event.getCategory()));
+  }
 }

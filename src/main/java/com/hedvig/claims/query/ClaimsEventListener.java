@@ -2,8 +2,11 @@ package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.events.*;
+import com.hedvig.claims.web.dto.ClaimFileDTO;
 import com.hedvig.claims.web.dto.PaymentType;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -23,12 +26,16 @@ public class ClaimsEventListener {
 
   private final ClaimsRepository claimRepository;
   private final PaymentRepository paymentRepository;
+  private final ClaimFileRepository claimFileRepository;
 
   @Autowired
-  public ClaimsEventListener(ClaimsRepository claimRepository,
-                             PaymentRepository paymentRepository) {
+  public ClaimsEventListener(
+    ClaimsRepository claimRepository,
+    PaymentRepository paymentRepository,
+    ClaimFileRepository claimFileRepository) {
     this.claimRepository = claimRepository;
     this.paymentRepository = paymentRepository;
+    this.claimFileRepository = claimFileRepository;
   }
 
   @EventHandler
@@ -375,4 +382,78 @@ public class ClaimsEventListener {
     }
   }
 
+  @EventHandler
+  public void on(ClaimFileUploadedEvent event) {
+      ClaimEntity claim = findClaimOrThrowException(event.getClaimId());
+      ClaimFile claimFile = new ClaimFile();
+
+      claimFile.setId(event.getClaimFileId());
+      claimFile.setBucket(event.getBucket());
+      claimFile.setKey(event.getKey());
+      claimFile.setContentType(event.getContentType());
+      claimFile.setFileName(event.getFileName());
+      claimFile.setUploadedAt(event.getUploadedAt());
+
+      claim.addClaimFile(claimFile);
+
+      Event ev = new Event();
+      ev.type = event.getClass().getName();
+      ev.text = String.format(
+        "A claim file was uploaded with id %s at %s.",
+        event.getClaimFileId(), event.getUploadedAt());
+        claim.addEvent(ev);
+
+      claimRepository.save(claim);
+  }
+
+  @EventHandler
+  public void on(ClaimFileMarkedAsDeletedEvent event) {
+    ClaimEntity claim = findClaimOrThrowException(event.getClaimId());
+    ClaimFile claimFile = findClaimFileOrThrowException(event.getClaimFileId(), claim);
+
+    claimFile.setMarkedAsDeleted(true);
+    claimFile.setMarkedAsDeletedAt(event.getDeletedAt());
+    claimFile.setMarkedAsDeletedBy(event.getDeletedBy());
+    claimFileRepository.save(claimFile);
+
+    Event ev = new Event();
+    ev.type = event.getClass().getName();
+    ev.text = String.format(
+      "A claim file with id %s was deleted by %s at %s",
+      claimFile.getId(), event.getDeletedBy(), event.getDeletedAt());
+
+    claim.addEvent(ev);
+
+    claimRepository.save(claim);
+  }
+
+  @EventHandler
+  public void on(ClaimFileCategorySetEvent event) {
+    ClaimFile file = claimFileRepository.findById(event.getClaimFileId()).get();
+    file.setCategory(event.getCategory());
+    claimFileRepository.save(file);
+  }
+
+  private ClaimEntity findClaimOrThrowException(String claimId) {
+    ClaimEntity claim =
+      claimRepository
+        .findById(claimId)
+        .orElseThrow(
+          () ->
+            new ResourceNotFoundException(
+              "Could not find claim with id:" + claimId));
+    return claim;
+  }
+
+  private ClaimFile findClaimFileOrThrowException(UUID claimFileId, ClaimEntity claim) {
+
+    val claimFileMaybe = claim.claimFiles.stream()
+      .filter(claimFile -> claimFile.getId().equals(claimFileId)).findAny();
+
+    if (!claimFileMaybe.isPresent()) {
+      throw new RuntimeException(
+        "no claim file can be found with id " + claimFileId + "for claim " + claim.id);
+    }
+    return claimFileMaybe.get();
+  }
 }
