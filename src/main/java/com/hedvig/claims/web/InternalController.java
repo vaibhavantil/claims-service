@@ -6,7 +6,6 @@ import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.query.ClaimFileRepository;
 import com.hedvig.claims.query.ResourceNotFoundException;
-import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
 import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
 import com.hedvig.claims.serviceIntegration.memberService.MemberService;
@@ -45,9 +44,13 @@ public class InternalController {
   private final ClaimFileRepository claimFileRepository;
 
   @Autowired
-  public InternalController(CommandBus commandBus, ClaimsRepository repository,
-                            ClaimsQueryService claimsQueryService,
-                            Meerkat meerkat, MemberService memberService, ClaimFileRepository claimFileRepository) {
+  public InternalController(
+    CommandBus commandBus,
+    ClaimsRepository repository,
+    ClaimsQueryService claimsQueryService,
+    Meerkat meerkat,
+    MemberService memberService,
+    ClaimFileRepository claimFileRepository) {
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
     this.claimsQueryService = claimsQueryService;
@@ -470,18 +473,18 @@ public class InternalController {
         claimFile.getClaimId(),
         claimFile.getContentType(),
         claimFile.getUploadedAt(),
-        claimFile.getFileName(),
-        claimFile.getMarkedAsDeleted(),
-        claimFile.getMarkedAsDeletedBy(),
-        claimFile.getMarkedAsDeletedAt()
+        claimFile.getFileName()
       ));
     });
     return ResponseEntity.noContent().build();
   }
 
-  @PostMapping("/{claimId}/claimFile/{claimFileId}/markAsDeleted")
-  ResponseEntity<Void> markClaimFileAsDeleted(@PathVariable String claimId, @PathVariable UUID claimFileId,
-                                       @RequestBody MarkClaimFileAsDeletedDTO dto) {
+  @PostMapping("/{claimId}/claimFile/{claimFileId}/delete")
+  ResponseEntity<Void> markClaimFileAsDeleted(
+    @PathVariable String claimId,
+    @PathVariable UUID claimFileId,
+    @RequestBody MarkClaimFileAsDeletedDTO dto
+  ) {
     val claimFile = claimFileRepository.findById(claimFileId);
     if(claimFile.isPresent()) {
       commandBus.sendAndWait(new MarkClaimFileAsDeletedCommand(claimFileId, claimId, dto.getDeletedBy()));
@@ -490,8 +493,11 @@ public class InternalController {
   }
 
   @PostMapping("/{claimId}/claimFile/{claimFileId}/setClaimFileCategory")
-  ResponseEntity<Void> setClaimFileCategory(@PathVariable String claimId, @PathVariable UUID claimFileId,
-                                              @RequestBody ClaimFileCategoryDTO dto) {
+  ResponseEntity<Void> setClaimFileCategory(
+    @PathVariable String claimId,
+    @PathVariable UUID claimFileId,
+    @RequestBody ClaimFileCategoryDTO dto
+  ) {
     val claimFile = claimFileRepository.findById(claimFileId);
     if(claimFile.isPresent()) {
       commandBus.sendAndWait(new SetClaimFileCategoryCommand(claimFileId, claimId, dto.getCategory()));

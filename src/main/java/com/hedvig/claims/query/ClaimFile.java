@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Data;
@@ -15,17 +14,16 @@ import org.springframework.lang.Nullable;
 @Table(name = "claim_file")
 public class ClaimFile {
   @Id
-  @GeneratedValue
   @Column(name = "id")
   private UUID id;
 
   @Column(name = "name")
   private String fileName;
 
-  @Column(name = "contentType")
+  @Column(name = "content_type")
   private String contentType;
 
-  @Column(name = "uploadedAt")
+  @Column(name = "uploaded_at")
   private Instant uploadedAt;
 
   @Column(name = "bucket")
@@ -34,13 +32,13 @@ public class ClaimFile {
   @Column(name = "key")
   private String key;
 
-  @Column(name="markedAsDeleted")
+  @Column(name="marked_as_deleted")
   private Boolean markedAsDeleted = false;
 
-  @Column(name="markedAsDeletedBy")
+  @Column(name="marked_as_deleted_by")
   @Nullable private String markedAsDeletedBy;
 
-  @Column(name="markedAsDeletedAt")
+  @Column(name="marked_as_deleted_at")
   @Nullable  private Instant markedAsDeletedAt;
 
   @Column(name="category")

@@ -5,5 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ClaimFileRepository extends JpaRepository<ClaimFile, UUID> {
-}
+public interface ClaimFileRepository extends JpaRepository<ClaimFile, UUID>{}

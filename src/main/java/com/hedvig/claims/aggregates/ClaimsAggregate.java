@@ -4,6 +4,9 @@ import com.hedvig.claims.commands.*;
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.web.dto.PaymentType;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.tomcat.util.http.fileupload.FileUpload;
@@ -48,10 +51,8 @@ public class ClaimsAggregate {
   public ArrayList<Note> notes;
   public ArrayList<String> assets;
 
-  public ArrayList<ClaimFile> claimFiles = new ArrayList<ClaimFile>();
+  public ArrayList<ClaimFile> claimFiles;
   public boolean isCoveringEmployee;
-  public boolean markedAsDeleted = false;
-  public String category;
 
   public ClaimsAggregate() {
     log.info("Instantiate ClaimsAggregate");
@@ -237,12 +238,31 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on(MarkClaimFileAsDeletedCommand cmd) {
-    apply(new ClaimFileMarkedAsDeletedEvent(cmd.getClaimFileId(), cmd.getClaimId(), cmd.getDeletedBy(), Instant.now()));
+    Optional<ClaimFile> claimFileMaybe = claimFiles.stream()
+      .filter(claimFile -> claimFile.getId().equals(cmd.getClaimFileId()))
+      .findAny();
+
+    if(!claimFileMaybe.isPresent()) {
+      throw new RuntimeException(
+        "Cannot find claim file with an id of " + cmd.getClaimFileId());
+    }
+
+    if (claimFileMaybe.get().getMarkedAsDeleted()) {
+      throw new RuntimeException(
+        "Cannot delete claim file " + claimFileMaybe.get().getId() + " it has already been marked as deleted");
+    }
+    apply(new ClaimFileMarkedAsDeletedEvent(
+      cmd.getClaimFileId(),
+      cmd.getClaimId(),
+      cmd.getDeletedBy(),
+      Instant.now())
+    );
   }
+
 
   @CommandHandler
   public void on(SetClaimFileCategoryCommand cmd) {
-    apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getCategory()));
+    apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getClaimId(), cmd.getCategory()));
   }
 
   // ----------------- Event sourcing --------------------- //
@@ -260,7 +280,7 @@ public class ClaimsAggregate {
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
     this.claimSource = ClaimSource.APP;
-    this.claimFiles = new ArrayList<ClaimFile>();
+    this.claimFiles = new ArrayList<>();
 
     this.isCoveringEmployee = false;
   }
@@ -277,6 +297,7 @@ public class ClaimsAggregate {
     this.payments = new HashMap<>();
     this.assets = new ArrayList<String>();
     this.data = new ArrayList<>();
+    this.claimFiles = new ArrayList<>();
 
     this.isCoveringEmployee = false;
   }
@@ -407,11 +428,19 @@ public class ClaimsAggregate {
 
   @EventSourcingHandler
   public void on(ClaimFileMarkedAsDeletedEvent event) {
-    markedAsDeleted = true;
+    Optional<ClaimFile> claimFileMaybe = claimFiles.stream()
+      .filter(claimFile -> claimFile.getId().equals(event.getClaimFileId()))
+      .findAny();
+
+    claimFileMaybe.ifPresent(claimFile -> claimFile.setMarkedAsDeleted(true));
   }
 
   @EventSourcingHandler
   public void on(ClaimFileCategorySetEvent event) {
-    category = event.getCategory();
+    Optional<ClaimFile> claimFileMaybe = claimFiles.stream()
+      .filter(claimFile -> claimFile.getId().equals(event.getClaimFileId()))
+      .findAny();
+
+    claimFileMaybe.ifPresent(claimFile -> claimFile.setCategory(event.getCategory()));
   }
 }

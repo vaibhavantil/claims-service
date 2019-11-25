@@ -73,7 +73,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
 
     claimFiles =
       c.claimFiles
-        .stream()
+        .stream().filter(claimFile -> !claimFile.getMarkedAsDeleted())
         .map(event -> new ClaimFileDTO(event.getId(),
           event.getBucket(),
           event.getKey(),
@@ -81,9 +81,6 @@ public class ClaimDTO extends HedvigBackofficeDTO {
           event.getContentType(),
           event.getUploadedAt(),
           event.getFileName(),
-          event.getMarkedAsDeleted(),
-          event.getMarkedAsDeletedBy(),
-          event.getMarkedAsDeletedAt(),
           event.getCategory()))
         .collect(Collectors.toList());
   }

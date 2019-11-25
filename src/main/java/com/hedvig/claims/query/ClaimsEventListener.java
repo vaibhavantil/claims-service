@@ -29,9 +29,10 @@ public class ClaimsEventListener {
   private final ClaimFileRepository claimFileRepository;
 
   @Autowired
-  public ClaimsEventListener(ClaimsRepository claimRepository,
-                             PaymentRepository paymentRepository,
-                             ClaimFileRepository claimFileRepository) {
+  public ClaimsEventListener(
+    ClaimsRepository claimRepository,
+    PaymentRepository paymentRepository,
+    ClaimFileRepository claimFileRepository) {
     this.claimRepository = claimRepository;
     this.paymentRepository = paymentRepository;
     this.claimFileRepository = claimFileRepository;
@@ -386,6 +387,7 @@ public class ClaimsEventListener {
       ClaimEntity claim = findClaimOrThrowException(event.getClaimId());
       ClaimFile claimFile = new ClaimFile();
 
+      claimFile.setId(event.getClaimFileId());
       claimFile.setBucket(event.getBucket());
       claimFile.setKey(event.getKey());
       claimFile.setContentType(event.getContentType());
@@ -445,13 +447,13 @@ public class ClaimsEventListener {
 
   private ClaimFile findClaimFileOrThrowException(UUID claimFileId, ClaimEntity claim) {
 
-    val optionalClaimFile = claim.claimFiles.stream()
+    val claimFileMaybe = claim.claimFiles.stream()
       .filter(claimFile -> claimFile.getId().equals(claimFileId)).findAny();
 
-    if (!optionalClaimFile.isPresent()) {
+    if (!claimFileMaybe.isPresent()) {
       throw new RuntimeException(
         "no claim file can be found with id " + claimFileId + "for claim " + claim.id);
     }
-    return optionalClaimFile.get();
+    return claimFileMaybe.get();
   }
 }

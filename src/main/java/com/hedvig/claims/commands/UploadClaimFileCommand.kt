@@ -12,8 +12,5 @@ data class UploadClaimFileCommand(
     val claimId: String,
     val contentType: String,
     val uploadedAt: Instant,
-    val fileName: String,
-    val markedAsDeleted: Boolean? = false,
-    val markedAsDeletedBy: String?,
-    val markedAsDeletedAt: Instant?
+    val fileName: String
 )

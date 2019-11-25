@@ -10,8 +10,5 @@ data class ClaimFileDTO(
     val contentType: String,
     val uploadedAt: Instant,
     val fileName: String,
-    val markedAsDeleted: Boolean,
-    val markedAsDeletedBy: String?,
-    val markedAsDeletedAt: Instant?,
     val category: String?
 )
