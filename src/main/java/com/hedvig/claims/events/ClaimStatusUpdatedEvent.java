@@ -7,9 +7,8 @@ import java.time.LocalDateTime;
 
 @Value
 public class ClaimStatusUpdatedEvent {
-
-  private String claimsId;
-  private String userId;
-  private LocalDateTime registrationDate;
-  private ClaimStates state;
+  public String claimsId;
+  public String userId;
+  public LocalDateTime registrationDate;
+  public ClaimStates state;
 }

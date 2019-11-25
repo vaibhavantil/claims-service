@@ -448,7 +448,6 @@ public class InternalController {
         dto.getIds().size(), claims.size());
       return ResponseEntity.notFound().build();
     }
-
     return ResponseEntity.ok(claims.stream().map(claim -> new ClaimDTO(claim)));
   }
 
