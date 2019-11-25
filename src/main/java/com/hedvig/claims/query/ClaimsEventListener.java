@@ -419,7 +419,7 @@ public class ClaimsEventListener {
     Event ev = new Event();
     ev.type = event.getClass().getName();
     ev.text = String.format(
-      "A claim file with id %s was marked as deleted by %s at %s",
+      "A claim file with id %s was deleted by %s at %s",
       claimFile.getId(), event.getDeletedBy(), event.getDeletedAt());
 
     claim.addEvent(ev);
