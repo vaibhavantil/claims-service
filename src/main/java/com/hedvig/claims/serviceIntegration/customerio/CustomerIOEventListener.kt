@@ -4,13 +4,13 @@ import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent
 import com.hedvig.claims.events.ClaimCreatedEvent
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent
+import java.time.Instant
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.Timestamp
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.time.Instant
 
 @Profile("customer.io")
 @ConditionalOnProperty(value = ["customerio.siteId", "customerio.apiKey"], matchIfMissing = false)
