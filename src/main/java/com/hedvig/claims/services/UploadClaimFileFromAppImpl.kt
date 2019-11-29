@@ -31,10 +31,14 @@ class UploadClaimFileFromAppImpl @Autowired constructor(
 
         val claims = claimsRepository.findByUserId(dto.memberId)
 
-        val openClaims = claims.filter { claim -> claim.state == ClaimsAggregate.ClaimStates.OPEN || claim.state == ClaimsAggregate.ClaimStates.REOPENED }
+        val openClaims = claims.filter {
+                claim -> claim.state == ClaimsAggregate.ClaimStates.OPEN || claim.state == ClaimsAggregate.ClaimStates.REOPENED
+        }
 
         if (openClaims.size != 1) {
-            throw RuntimeException("Either none or more than 1 claim was found for member ${dto.memberId}, we cannot know which claim to upload the file to")
+            throw RuntimeException(
+                "Either none or more than 1 claim was found for member ${dto.memberId}, we cannot know which claim to upload the file to"
+            )
         }
 
         val claimId = openClaims.last().id
