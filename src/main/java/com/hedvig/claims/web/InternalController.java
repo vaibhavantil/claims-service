@@ -485,7 +485,8 @@ public class InternalController {
   @PostMapping("/{claimId}/claimFileUploadedFromApp")
   ResponseEntity<Void> claimFileUploadedFromApp(@RequestBody ClaimFileFromAppDTO dto) {
     try {
-      val uploadResponse = uploadClaimFileFromAppService.copyFromAppUploadsS3BucketToClaimsS3Bucket(dto);
+      uploadClaimFileFromAppService.copyFromAppUploadsS3BucketToClaimsS3Bucket(dto);
+
     } catch(Exception exception) {
       return ResponseEntity.noContent().build();
     }
