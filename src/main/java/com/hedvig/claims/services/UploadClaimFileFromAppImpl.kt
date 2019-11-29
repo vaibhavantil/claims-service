@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class UploadClaimFileFromAppImpl @Autowired constructor(
-    @Value("\${hedvig.chat}") val chatS3Bucket: String,
+    @Value("\${hedvig.chat.s3Bucket}") val chatS3Bucket: String,
     @Value("\${hedvig.claims.filesUploaded}") val claimsS3Bucket: String,
     private val amazonS3: AmazonS3,
     private val claimsRepository: ClaimsRepository,
