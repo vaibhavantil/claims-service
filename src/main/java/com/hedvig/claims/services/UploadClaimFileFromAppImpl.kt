@@ -1,6 +1,7 @@
 package com.hedvig.claims.services
 
 import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.AmazonS3Client
 import com.hedvig.claims.aggregates.ClaimsAggregate
 import com.hedvig.claims.commands.UploadClaimFileCommand
 import com.hedvig.claims.query.ClaimsRepository
@@ -12,17 +13,22 @@ import java.util.UUID
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class UploadClaimFileFromAppImpl @Autowired constructor(
-    @Value("\${hedvig.chat.s3Bucket}") val chatS3Bucket: String,
-    @Value("\${hedvig.claims.filesUploaded}") val claimsS3Bucket: String,
-    private val amazonS3: AmazonS3,
+    private val amazonS3: AmazonS3Client,
     private val claimsRepository: ClaimsRepository,
     private val commandBus: CommandGateway
 
 ) : UploadClaimFileFromAppService {
+
+    @Value("\${hedvig.chat.s3Bucket}")
+    private lateinit var chatS3Bucket: String
+
+    @Value("\${claims.claimFileUploadBucketName}")
+    private lateinit var claimsS3Bucket: String
+
     override fun copyFromAppUploadsS3BucketToClaimsS3Bucket(
         dto: ClaimFileFromAppDTO
     ) {
@@ -40,7 +46,7 @@ class UploadClaimFileFromAppImpl @Autowired constructor(
         }
 
         val claimId = openClaims.last().id
-        val key = "claim-$claimId/${UUID.randomUUID()}-uploadFromApp-${Math.random()}"
+        val key = "claim-$claimId/uploadFromApp-${UUID.randomUUID()}"
 
         amazonS3.copyObject(
             chatS3Bucket,
