@@ -1,5 +1,6 @@
 package com.hedvig.claims.commands
 
+import com.hedvig.claims.query.UploadSource
 import java.time.Instant
 import java.util.UUID
 import org.axonframework.commandhandling.TargetAggregateIdentifier
@@ -12,5 +13,6 @@ data class UploadClaimFileCommand(
     val claimId: String,
     val contentType: String,
     val uploadedAt: Instant,
-    val fileName: String
+    val fileName: String,
+    val uploadSource: UploadSource
 )

@@ -3,6 +3,7 @@ package com.hedvig.claims.aggregates;
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.query.ClaimFile;
+import com.hedvig.claims.query.UploadSource;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.util.List;
 import java.util.Optional;
@@ -225,6 +226,7 @@ public class ClaimsAggregate {
   @CommandHandler
   public void on(UploadClaimFileCommand cmd) {
     log.info("add claim file to claim {}", cmd.getClaimId());
+
     apply(new ClaimFileUploadedEvent(
       cmd.getClaimFileId(),
       cmd.getBucket(),
@@ -232,7 +234,8 @@ public class ClaimsAggregate {
       cmd.getClaimId(),
       cmd.getContentType(),
       cmd.getUploadedAt(),
-      cmd.getFileName()
+      cmd.getFileName(),
+      cmd.getUploadSource()
     ));
   }
 
@@ -423,6 +426,7 @@ public class ClaimsAggregate {
       claimFile.setContentType(event.getContentType());
       claimFile.setFileName(event.getFileName());
       claimFile.setUploadedAt(event.getUploadedAt());
+      claimFile.setUploadSource(event.getUploadSource());
     claimFiles.add(claimFile);
   }
 

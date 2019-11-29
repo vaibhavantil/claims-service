@@ -2,7 +2,6 @@ package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.events.*;
-import com.hedvig.claims.web.dto.ClaimFileDTO;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
