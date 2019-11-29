@@ -6,15 +6,13 @@ import com.hedvig.claims.commands.UploadClaimFileCommand
 import com.hedvig.claims.query.ClaimsRepository
 import com.hedvig.claims.query.UploadSource
 import com.hedvig.claims.web.dto.ClaimFileFromAppDTO
-import org.axonframework.commandhandling.CommandBus
+import java.lang.RuntimeException
+import java.time.Instant
+import java.util.UUID
 import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.commandhandling.gateway.DefaultCommandGateway
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.lang.RuntimeException
-import java.time.Instant
-import java.util.*
 
 @Component
 class UploadClaimFileFromAppImpl @Autowired constructor(
@@ -24,7 +22,7 @@ class UploadClaimFileFromAppImpl @Autowired constructor(
     private val claimsRepository: ClaimsRepository,
     private val commandBus: CommandGateway
 
-    ): UploadClaimFileFromAppService {
+) : UploadClaimFileFromAppService {
     override fun copyFromAppUploadsS3BucketToClaimsS3Bucket(
         dto: ClaimFileFromAppDTO
     ) {

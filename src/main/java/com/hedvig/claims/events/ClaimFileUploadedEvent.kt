@@ -1,9 +1,9 @@
 package com.hedvig.claims.events
 
 import com.hedvig.claims.query.UploadSource
-import org.axonframework.serialization.Revision
 import java.time.Instant
 import java.util.UUID
+import org.axonframework.serialization.Revision
 
 @Revision("1.0")
 data class ClaimFileUploadedEvent(

@@ -17,8 +17,8 @@ class ClaimFileUploadedEventUpcaster : SingleEventUpcaster() {
         return intermediateRepresentation.upcastPayload(
             targetType,
             org.dom4j.Document::class.java
-        ) {document ->
-            val  element = document.rootElement
+        ) { document ->
+            val element = document.rootElement
             element.addElement("uploadSource").data = UploadSource.MANUAL
             document
         }
