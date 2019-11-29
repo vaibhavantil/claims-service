@@ -482,8 +482,8 @@ public class InternalController {
     return ResponseEntity.noContent().build();
   }
 
-  @PostMapping("/{claimId}/claimFileUploadedFromApp")
-  ResponseEntity<Void> claimFileUploadedFromApp(@RequestBody ClaimFileFromAppDTO dto) {
+  @PostMapping("/fileUploadedFromApp")
+  ResponseEntity<Void> fileUploadedFromApp(@RequestBody ClaimFileFromAppDTO dto) {
     try {
       uploadClaimFileFromAppService.copyFromAppUploadsS3BucketToClaimsS3Bucket(dto);
 
