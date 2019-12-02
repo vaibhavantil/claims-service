@@ -36,6 +36,6 @@ public class ClaimFile {
   private String category;
 
   @Enumerated(EnumType.STRING)
-  @Column(columnDefinition ="String default MANUAL")
+  @Column(columnDefinition ="varchar(50) default 'MANUAL'")
   private UploadSource uploadSource;
 }
