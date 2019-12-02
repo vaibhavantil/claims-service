@@ -43,7 +43,8 @@ class LinkFileFromAppToClaimImpl @Autowired constructor(
         }
 
         val claimId = openClaims.last().id
-        val key = "claim-$claimId/uploadFromApp-${UUID.randomUUID()}"
+        val claimFileId = UUID.randomUUID()
+        val key = "claim-$claimId/uploadFromApp-$claimFileId"
 
         amazonS3.copyObject(
             chatS3Bucket,
@@ -54,7 +55,7 @@ class LinkFileFromAppToClaimImpl @Autowired constructor(
 
         commandBus.sendAndWait<UploadClaimFileCommand>(
             UploadClaimFileCommand(
-                UUID.randomUUID(),
+                claimFileId,
                 claimsS3Bucket,
                 key,
                 claimId,
