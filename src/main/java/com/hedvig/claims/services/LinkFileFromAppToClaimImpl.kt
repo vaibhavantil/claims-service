@@ -15,13 +15,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
-class UploadClaimFileFromAppImpl @Autowired constructor(
+class LinkFileFromAppToClaimImpl @Autowired constructor(
     private val amazonS3: AmazonS3Client,
     private val claimsRepository: ClaimsRepository,
     private val commandBus: CommandGateway
 
-) : UploadClaimFileFromAppService {
-
+) : LinkFileFromAppToClaimService {
     @Value("\${hedvig.chat.s3Bucket}")
     private lateinit var chatS3Bucket: String
 
@@ -31,7 +30,6 @@ class UploadClaimFileFromAppImpl @Autowired constructor(
     override fun copyFromAppUploadsS3BucketToClaimsS3Bucket(
         dto: ClaimFileFromAppDTO
     ) {
-
         val claims = claimsRepository.findByUserId(dto.memberId)
 
         val openClaims = claims.filter {
