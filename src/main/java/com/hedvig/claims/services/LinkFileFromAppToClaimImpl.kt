@@ -33,8 +33,8 @@ class LinkFileFromAppToClaimImpl @Autowired constructor(
         val claims = claimsRepository.findByUserId(dto.memberId)
 
         val openClaims = claims.filter {
-                claim -> claim.state == ClaimsAggregate.ClaimStates.OPEN
-                || claim.state == ClaimsAggregate.ClaimStates.REOPENED
+                claim -> claim.state == ClaimsAggregate.ClaimStates.OPEN ||
+                claim.state == ClaimsAggregate.ClaimStates.REOPENED
         }
 
         if (openClaims.size != 1) {
