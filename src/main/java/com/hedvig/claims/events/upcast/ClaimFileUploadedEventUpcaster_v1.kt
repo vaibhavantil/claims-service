@@ -6,7 +6,7 @@ import org.axonframework.serialization.SimpleSerializedType
 import org.axonframework.serialization.upcasting.event.IntermediateEventRepresentation
 import org.axonframework.serialization.upcasting.event.SingleEventUpcaster
 
-class ClaimFileUploadedEventUpcaster : SingleEventUpcaster() {
+class ClaimFileUploadedEventUpcaster_v1 : SingleEventUpcaster() {
 
     override fun canUpcast(intermediateRepresentation: IntermediateEventRepresentation): Boolean {
         return intermediateRepresentation.type == targetType

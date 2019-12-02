@@ -1,7 +1,7 @@
 package com.hedvig.claims.config;
 
 import com.hedvig.claims.events.upcast.ClaimCreatedEvent_v1;
-import com.hedvig.claims.events.upcast.ClaimFileUploadedEventUpcaster;
+import com.hedvig.claims.events.upcast.ClaimFileUploadedEventUpcaster_v1;
 import com.hedvig.claims.events.upcast.PaymentAddedEvent_v1;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
@@ -19,7 +19,7 @@ public class AxonConfiguration {
     return new EventUpcasterChain(
       new ClaimCreatedEvent_v1(),
       new PaymentAddedEvent_v1(),
-      new ClaimFileUploadedEventUpcaster()
+      new ClaimFileUploadedEventUpcaster_v1()
     );
   }
 

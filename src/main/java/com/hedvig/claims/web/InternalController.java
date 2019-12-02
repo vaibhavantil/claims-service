@@ -8,7 +8,7 @@ import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
 import com.hedvig.claims.serviceIntegration.memberService.MemberService;
 import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
 import com.hedvig.claims.services.ClaimsQueryService;
-import com.hedvig.claims.services.LinkFileFromAppToClaimService;
+import com.hedvig.claims.services.LinkFileToClaimService;
 import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import lombok.val;
@@ -40,7 +40,7 @@ public class InternalController {
   private final Meerkat meerkat;
   private final MemberService memberService;
   private final ClaimFileRepository claimFileRepository;
-  private final LinkFileFromAppToClaimService linkFileFromAppToClaimService;
+  private final LinkFileToClaimService linkFileToClaimService;
 
   @Autowired
   public InternalController(
@@ -50,7 +50,7 @@ public class InternalController {
     Meerkat meerkat,
     MemberService memberService,
     ClaimFileRepository claimFileRepository,
-    LinkFileFromAppToClaimService linkFileFromAppToClaimService
+    LinkFileToClaimService linkFileToClaimService
   ){
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
@@ -58,7 +58,7 @@ public class InternalController {
     this.meerkat = meerkat;
     this.memberService = memberService;
     this.claimFileRepository = claimFileRepository;
-    this.linkFileFromAppToClaimService = linkFileFromAppToClaimService;
+    this.linkFileToClaimService = linkFileToClaimService;
   }
 
   @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
@@ -482,7 +482,7 @@ public class InternalController {
 
   @PostMapping("/linkFileToClaim")
   ResponseEntity<Void> linkFileFromAppToClaim(@RequestBody ClaimFileFromAppDTO dto) {
-    linkFileFromAppToClaimService.copyFromAppUploadsS3BucketToClaimsS3Bucket(dto);
+    linkFileToClaimService.copyFromAppUploadsS3BucketToClaimsS3Bucket(dto);
     return ResponseEntity.noContent().build();
   }
 

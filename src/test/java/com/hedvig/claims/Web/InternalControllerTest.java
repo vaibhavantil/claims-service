@@ -23,7 +23,7 @@ import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
 import com.hedvig.claims.services.ClaimsQueryService;
-import com.hedvig.claims.services.LinkFileFromAppToClaimService;
+import com.hedvig.claims.services.LinkFileToClaimService;
 import com.hedvig.claims.web.dto.PaymentRequestDTO;
 
 import java.time.LocalDate;
@@ -90,7 +90,7 @@ public class InternalControllerTest {
   private ClaimsRepository claimsRepository;
 
   @MockBean
-  private LinkFileFromAppToClaimService linkFileFromAppToClaimService;
+  private LinkFileToClaimService linkFileToClaimService;
 
   @Test
   public void Should_ReturnAnInitiatedPaymentEvent_WhenPaymentSuccessfullyCompletedFromPaymentService() {

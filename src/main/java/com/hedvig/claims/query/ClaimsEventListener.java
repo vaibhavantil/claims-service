@@ -392,7 +392,7 @@ public class ClaimsEventListener {
       claimFile.setContentType(event.getContentType());
       claimFile.setFileName(event.getFileName());
       claimFile.setUploadedAt(event.getUploadedAt());
-
+      claimFile.setUploadSource(event.getUploadSource());
       claim.addClaimFile(claimFile);
 
       Event ev = new Event();
