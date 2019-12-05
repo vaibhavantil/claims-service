@@ -1,5 +1,6 @@
 package com.hedvig.claims.services
 
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.hedvig.claims.aggregates.ClaimsAggregate
 import com.hedvig.claims.commands.UploadClaimFileCommand
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class LinkFileToClaimImpl @Autowired constructor(
-    private val amazonS3: AmazonS3Client,
+    private val amazonS3: AmazonS3,
     private val claimsRepository: ClaimsRepository,
     private val commandGateway: CommandGateway
 
