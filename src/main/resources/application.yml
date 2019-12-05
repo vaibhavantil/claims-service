@@ -28,11 +28,3 @@ spring:
 
   main:
     allow-bean-definition-overriding: true
-
-cloud:
-  aws:
-    region:
-      static: eu-central-1
-    credentials.useDefaultAwsCredentialsChain: true
-    stack:
-      auto: false
