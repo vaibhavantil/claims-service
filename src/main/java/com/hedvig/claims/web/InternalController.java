@@ -2,15 +2,13 @@ package com.hedvig.claims.web;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.commands.*;
-import com.hedvig.claims.query.ClaimEntity;
-import com.hedvig.claims.query.ClaimsRepository;
-import com.hedvig.claims.query.ClaimFileRepository;
-import com.hedvig.claims.query.ResourceNotFoundException;
+import com.hedvig.claims.query.*;
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
 import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
 import com.hedvig.claims.serviceIntegration.memberService.MemberService;
 import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
 import com.hedvig.claims.services.ClaimsQueryService;
+import com.hedvig.claims.services.LinkFileToClaimService;
 import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
 import lombok.val;
@@ -42,6 +40,7 @@ public class InternalController {
   private final Meerkat meerkat;
   private final MemberService memberService;
   private final ClaimFileRepository claimFileRepository;
+  private final LinkFileToClaimService linkFileToClaimService;
 
   @Autowired
   public InternalController(
@@ -50,13 +49,16 @@ public class InternalController {
     ClaimsQueryService claimsQueryService,
     Meerkat meerkat,
     MemberService memberService,
-    ClaimFileRepository claimFileRepository) {
+    ClaimFileRepository claimFileRepository,
+    LinkFileToClaimService linkFileToClaimService
+  ){
     this.commandBus = new DefaultCommandGateway(commandBus);
     this.claimsRepository = repository;
     this.claimsQueryService = claimsQueryService;
     this.meerkat = meerkat;
     this.memberService = memberService;
     this.claimFileRepository = claimFileRepository;
+    this.linkFileToClaimService = linkFileToClaimService;
   }
 
   @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
@@ -462,8 +464,7 @@ public class InternalController {
   }
 
   @PostMapping("claimFiles")
-  public ResponseEntity<Void> uploadClaimsFiles(@RequestBody ClaimsFilesUploadDTO dto) {
-
+  public ResponseEntity<Void> link(@RequestBody ClaimsFilesUploadDTO dto) {
     dto.getClaimsFiles().stream().forEach(claimFile -> {
       commandBus.sendAndWait(new UploadClaimFileCommand(
         claimFile.getClaimFileId(),
@@ -472,9 +473,16 @@ public class InternalController {
         claimFile.getClaimId(),
         claimFile.getContentType(),
         claimFile.getUploadedAt(),
-        claimFile.getFileName()
+        claimFile.getFileName(),
+        UploadSource.MANUAL
       ));
     });
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/linkFileToClaim")
+  ResponseEntity<Void> linkFileFromAppToClaim(@RequestBody ClaimFileFromAppDTO dto) {
+    linkFileToClaimService.copyFromAppUploadsS3BucketToClaimsS3Bucket(dto);
     return ResponseEntity.noContent().build();
   }
 
