@@ -1,7 +1,6 @@
 package com.hedvig.claims.services
 
 import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3Client
 import com.hedvig.claims.aggregates.ClaimsAggregate
 import com.hedvig.claims.commands.UploadClaimFileCommand
 import com.hedvig.claims.query.ClaimsRepository
