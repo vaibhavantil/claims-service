@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping
 
 @FeignClient(value = "ticket-service", url = "\${hedvig.ticket-service.url:ticket-service}")
 interface TicketServiceClient {
-  @PostMapping(value = ["/_/tickets/claim/{claimId}/close"])
-  fun closeClaimTicket(@PathVariable(name = "claimId") claimId: String?): ResponseEntity<Void?>?
+    @PostMapping(value = ["/_/tickets/claim/{claimId}/close"])
+    fun closeClaimTicket(@PathVariable(name = "claimId") claimId: String?): ResponseEntity<Void?>?
 }

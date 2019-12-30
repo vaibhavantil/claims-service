@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component
 @Component
 @ProcessingGroup("TicketService")
 class TicketEventListener @Autowired constructor(
-  private val ticketService: TicketService
+    private val ticketService: TicketService
 ) {
-  @EventHandler
-  fun on(event: ClaimStatusUpdatedEvent) {
-    if (event.state == ClaimStates.CLOSED) {
-      ticketService.closeClaimTicket(event.userId, event.claimsId)
+    @EventHandler
+    fun on(event: ClaimStatusUpdatedEvent) {
+        if (event.state == ClaimStates.CLOSED) {
+            ticketService.closeClaimTicket(event.userId, event.claimsId)
+        }
     }
-  }
 }

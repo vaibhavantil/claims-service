@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service
 @Slf4j
 @Service
 class TicketServiceImpl @Autowired constructor(
-  private val client: TicketServiceClient
+    private val client: TicketServiceClient
 ) : TicketService {
-  override fun closeClaimTicket(userId: String?, claimId: String?) {
-    client.closeClaimTicket(claimId)
-  }
+    override fun closeClaimTicket(userId: String?, claimId: String?) {
+        client.closeClaimTicket(claimId)
+    }
 }
