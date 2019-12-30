@@ -1,5 +1,6 @@
 package com.hedvig.claims.serviceIntegration.ticketService;
 
+import com.hedvig.claims.aggregates.ClaimsAggregate;
 import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -19,7 +20,9 @@ public class TicketEventListener {
 
   @EventHandler
   public void on(ClaimStatusUpdatedEvent event) {
-    ticketService.closeClaimTicket(event.getState(), event.getUserId(), event.getClaimsId());
+    if (event.state == ClaimsAggregate.ClaimStates.CLOSED) {
+      ticketService.closeClaimTicket(event.getState(), event.getUserId(), event.getClaimsId());
+    }
   }
 
 }
