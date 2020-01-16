@@ -19,10 +19,9 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.UUID
 
-
 @Component
 class SpeechHandler {
-  fun convertSpeechToText(audioURL: String, languageCode: LanguageCode? = LanguageCode.SWEDISH): String {
+  fun convertSpeechToText(audioURL: String, languageCode: LanguageCode? = LanguageCode.SWEDISH): String =
     SpeechClient.create().use { speechClient ->
 
       val config = RecognitionConfig.newBuilder()
@@ -64,7 +63,6 @@ class SpeechHandler {
 
       return finalResult
     }
-  }
 
 
   private fun convert(filename: String): File {
