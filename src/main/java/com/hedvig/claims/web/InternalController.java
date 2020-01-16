@@ -124,6 +124,21 @@ public class InternalController {
                 uid.toString(),
                 requestData.getUserId(),
                 requestData.getAudioURL()));
+
+        try {
+            val claimAudioToText = speechHandler.convertSpeechToText(requestData.getAudioURL(), LanguageCode.SWEDISH);
+            commandBus.sendAndWait(new AddNoteCommand(
+                    UUID.randomUUID().toString(),
+                    uid.toString(),
+                    LocalDateTime.now(),
+                    claimAudioToText,
+                    requestData.getUserId(),
+                    requestData.getAudioURL()
+                )
+            );
+        } catch (Exception e) {
+            log.error("Tyvarr");
+        }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
