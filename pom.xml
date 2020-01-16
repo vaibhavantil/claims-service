@@ -247,6 +247,19 @@
       <version>1.11.415</version>
       <scope>compile</scope>
     </dependency>
+
+    <!-- THE FUTURE -->
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-speech</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.bramp.ffmpeg</groupId>
+      <artifactId>ffmpeg</artifactId>
+      <version>0.6.2</version>
+    </dependency>
+
+
   </dependencies>
 
   <build>
