@@ -10,13 +10,13 @@ import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
 import net.bramp.ffmpeg.FFprobe
 import net.bramp.ffmpeg.builder.FFmpegBuilder
+import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.net.URL
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.UUID
 
 
@@ -29,11 +29,12 @@ class SpeechHandler {
         .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
         .setSampleRateHertz(RATE)
         .setLanguageCode(languageCode.toString())
+        .setAudioChannelCount(1)
         .build()
 
-      val fileName = ""
+      val filename: String = downloadFile(audioURL)
 
-      val file = convert(fileName)
+      val file = convert(filename)
       val data = Files.readAllBytes(file.toPath())
       val audioBytes = ByteString.copyFrom(data)
 
@@ -57,6 +58,10 @@ class SpeechHandler {
         logger.info("Transcription: ${alternative.transcript}]\n")
         finalResult += alternative.transcript
       }
+
+      FileUtils.deleteQuietly(file)
+      FileUtils.deleteQuietly(File(filename))
+
       return finalResult
     }
   }
@@ -85,18 +90,17 @@ class SpeechHandler {
     return tempOutputFile
   }
 
-  private fun downloadFile(urlStr: String, file: String) {
-    val url = URL(urlStr)
-    val bis = BufferedInputStream(url.openStream())
-    val fis = FileOutputStream(file)
-    val buffer = ByteArray(1024)
-    var count = 0
-    while (count != -1) {
-      fis.write(buffer, 0, count)
-      count = bis.read(buffer, 0, 1024)
-    }
-    fis.close()
-    bis.close()
+  private fun downloadFile(urlStr: String): String {
+    val webUrl = URL(urlStr)
+
+    val ending = urlStr.substring(urlStr.lastIndexOf(".") + 1)
+
+    val tempExecId = UUID.randomUUID().toString()
+    val tempInputFile = File.createTempFile("temp_$tempExecId", "_in.$ending")
+
+    webUrl.openStream().use { `in` -> Files.copy(`in`, tempInputFile.toPath(), StandardCopyOption.REPLACE_EXISTING) }
+
+    return tempInputFile.absolutePath
   }
 
   companion object {
