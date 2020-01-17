@@ -55,7 +55,7 @@ class SpeechHandler {
       results.forEach { result ->
         val alternative = result.getAlternatives(0)
         logger.info("Transcription: ${alternative.transcript}]\n")
-        finalResult += alternative.transcript + "\n"
+        finalResult += alternative.transcript +  " [Confidence: ${alternative.confidence}] " + "\n"
       }
 
       FileUtils.deleteQuietly(file)

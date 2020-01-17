@@ -131,7 +131,7 @@ public class InternalController {
                     UUID.randomUUID().toString(),
                     uid.toString(),
                     LocalDateTime.now(),
-                    claimAudioToText,
+                    "[AUDIO]: " + claimAudioToText,
                     requestData.getUserId(),
                     requestData.getAudioURL()
                 )
