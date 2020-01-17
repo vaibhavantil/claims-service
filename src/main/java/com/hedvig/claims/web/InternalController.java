@@ -126,26 +126,52 @@ public class InternalController {
                 requestData.getAudioURL()));
 
         try {
-            val claimAudioToText = speechHandler.convertSpeechToText(requestData.getAudioURL(), LanguageCode.SWEDISH);
+            val claimAudioToTextSWE = speechHandler.convertSpeechToText(requestData.getAudioURL(), LanguageCode.SWEDISH);
+            val claimAudioToTextGRE = speechHandler.convertSpeechToText(requestData.getAudioURL(), LanguageCode.GREEK);
+
+            String finaltext = "";
+            Float finalConfidence = 0f;
+
+            if (claimAudioToTextSWE.getConfidence() > claimAudioToTextGRE.getConfidence()) {
+                finaltext = claimAudioToTextSWE.getText();
+                finalConfidence = claimAudioToTextSWE.getConfidence();
+            } else {
+                finaltext = claimAudioToTextGRE.getText();
+                finalConfidence = claimAudioToTextGRE.getConfidence();
+            }
+
             commandBus.sendAndWait(new AddNoteCommand(
                     UUID.randomUUID().toString(),
                     uid.toString(),
                     LocalDateTime.now(),
-                    "[AUDIO]: " + claimAudioToText,
+                    "[AUDIO]: " + finaltext + " [Confidence]: " + finalConfidence,
                     requestData.getUserId(),
                     requestData.getAudioURL()
                 )
             );
         } catch (Exception e) {
-            log.error("Tyvarr");
+            log.error("TYVVAR");
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @RequestMapping(path = "/testSpeechToText", method = RequestMethod.POST)
     public ResponseEntity<?> test(@RequestBody String aurioUrl) {
-        String test = speechHandler.convertSpeechToText(aurioUrl, LanguageCode.SWEDISH);
-        return ResponseEntity.ok(test);
+        val claimAudioToTextSWE = speechHandler.convertSpeechToText(aurioUrl, LanguageCode.SWEDISH);
+        val claimAudioToTextGRE = speechHandler.convertSpeechToText(aurioUrl, LanguageCode.GREEK);
+
+        String finaltext = "";
+        Float finalConfidence = 0f;
+
+        if (claimAudioToTextSWE.getConfidence() > claimAudioToTextGRE.getConfidence()) {
+            finaltext = claimAudioToTextSWE.getText();
+            finalConfidence = claimAudioToTextSWE.getConfidence();
+        } else {
+            finaltext = claimAudioToTextGRE.getText();
+            finalConfidence = claimAudioToTextGRE.getConfidence();
+        }
+
+        return ResponseEntity.ok(finaltext + finalConfidence);
     }
 
     @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)

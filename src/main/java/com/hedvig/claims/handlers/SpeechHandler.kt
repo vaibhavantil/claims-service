@@ -21,7 +21,7 @@ import java.util.UUID
 
 @Component
 class SpeechHandler {
-  fun convertSpeechToText(audioURL: String, languageCode: LanguageCode? = LanguageCode.SWEDISH): String =
+  fun convertSpeechToText(audioURL: String, languageCode: LanguageCode? = LanguageCode.SWEDISH): SpeechResult =
     SpeechClient.create().use { speechClient ->
 
       val config = RecognitionConfig.newBuilder()
@@ -50,18 +50,22 @@ class SpeechHandler {
 
       val results: List<SpeechRecognitionResult> = response.get().resultsList
 
-      var finalResult: String = ""
+      var finalResult: String = "";
+      var averageConfidence: Float = 0f;
 
       results.forEach { result ->
         val alternative = result.getAlternatives(0)
         logger.info("Transcription: ${alternative.transcript}]\n")
-        finalResult += alternative.transcript +  " [Confidence: ${alternative.confidence}] " + "\n"
+        finalResult += alternative.transcript + "\n"
+        averageConfidence += alternative.confidence
       }
+
+      averageConfidence /= results.count()
 
       FileUtils.deleteQuietly(file)
       FileUtils.deleteQuietly(File(filename))
 
-      return finalResult
+      return SpeechResult(finalResult, averageConfidence)
     }
 
 
@@ -105,4 +109,10 @@ class SpeechHandler {
     val logger = LoggerFactory.getLogger(SpeechHandler::class.java)
     const val RATE: Int = 16000
   }
+
+
+  class SpeechResult(
+    val text: String,
+    val confidence: Float
+  )
 }
