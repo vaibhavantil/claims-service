@@ -62,6 +62,10 @@ class SpeechHandler {
 
       averageConfidence /= results.count()
 
+      if (averageConfidence.isNaN()) {
+        averageConfidence = 0f
+      }
+
       FileUtils.deleteQuietly(file)
       FileUtils.deleteQuietly(File(filename))
 
