@@ -1,4 +1,4 @@
-package com.hedvig.claims.handlers.utils
+package com.hedvig.homer.handlers.utils
 
 enum class LanguageCode {
   SWEDISH {

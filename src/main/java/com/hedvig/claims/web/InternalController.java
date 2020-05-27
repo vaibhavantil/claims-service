@@ -14,8 +14,6 @@ import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand;
 import com.hedvig.claims.commands.UploadClaimFileCommand;
-import com.hedvig.claims.handlers.SpeechHandler;
-import com.hedvig.claims.handlers.utils.LanguageCode;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimFileRepository;
 import com.hedvig.claims.query.ClaimsRepository;
@@ -92,7 +90,6 @@ public class InternalController {
     private final MemberService memberService;
     private final ClaimFileRepository claimFileRepository;
     private final LinkFileToClaimService linkFileToClaimService;
-    private final SpeechHandler speechHandler;
 
     @Autowired
     public InternalController(
@@ -102,9 +99,8 @@ public class InternalController {
         Meerkat meerkat,
         MemberService memberService,
         ClaimFileRepository claimFileRepository,
-        LinkFileToClaimService linkFileToClaimService,
-        SpeechHandler speechHandler
-    ) {
+        LinkFileToClaimService linkFileToClaimService
+        ) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.claimsRepository = repository;
         this.claimsQueryService = claimsQueryService;
@@ -112,7 +108,6 @@ public class InternalController {
         this.memberService = memberService;
         this.claimFileRepository = claimFileRepository;
         this.linkFileToClaimService = linkFileToClaimService;
-        this.speechHandler = speechHandler;
     }
 
     @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
@@ -125,53 +120,7 @@ public class InternalController {
                 requestData.getUserId(),
                 requestData.getAudioURL()));
 
-        try {
-            val claimAudioToTextSWE = speechHandler.convertSpeechToText(requestData.getAudioURL(), LanguageCode.SWEDISH);
-            val claimAudioToTextGRE = speechHandler.convertSpeechToText(requestData.getAudioURL(), LanguageCode.GREEK);
-
-            String finaltext = "";
-            Float finalConfidence = 0f;
-
-            if (claimAudioToTextSWE.getConfidence() > claimAudioToTextGRE.getConfidence()) {
-                finaltext = claimAudioToTextSWE.getText();
-                finalConfidence = claimAudioToTextSWE.getConfidence();
-            } else {
-                finaltext = claimAudioToTextGRE.getText();
-                finalConfidence = claimAudioToTextGRE.getConfidence();
-            }
-
-            commandBus.sendAndWait(new AddNoteCommand(
-                    UUID.randomUUID().toString(),
-                    uid.toString(),
-                    LocalDateTime.now(),
-                    "[AUDIO]: " + finaltext + " [Confidence]: " + finalConfidence,
-                    requestData.getUserId(),
-                    requestData.getAudioURL()
-                )
-            );
-        } catch (Exception e) {
-            log.error("TYVVAR");
-        }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @RequestMapping(path = "/testSpeechToText", method = RequestMethod.POST)
-    public ResponseEntity<?> test(@RequestBody String aurioUrl) {
-        val claimAudioToTextSWE = speechHandler.convertSpeechToText(aurioUrl, LanguageCode.SWEDISH);
-        val claimAudioToTextGRE = speechHandler.convertSpeechToText(aurioUrl, LanguageCode.GREEK);
-
-        String finaltext = "";
-        Float finalConfidence = 0f;
-
-        if (claimAudioToTextSWE.getConfidence() > claimAudioToTextGRE.getConfidence()) {
-            finaltext = claimAudioToTextSWE.getText();
-            finalConfidence = claimAudioToTextSWE.getConfidence();
-        } else {
-            finaltext = claimAudioToTextGRE.getText();
-            finalConfidence = claimAudioToTextGRE.getConfidence();
-        }
-
-        return ResponseEntity.ok(finaltext + finalConfidence);
     }
 
     @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)

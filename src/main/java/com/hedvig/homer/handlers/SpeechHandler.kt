@@ -5,7 +5,7 @@ import com.google.cloud.speech.v1.RecognitionConfig
 import com.google.cloud.speech.v1.SpeechClient
 import com.google.cloud.speech.v1.SpeechRecognitionResult
 import com.google.protobuf.ByteString
-import com.hedvig.claims.handlers.utils.LanguageCode
+import com.hedvig.homer.handlers.utils.LanguageCode
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
 import net.bramp.ffmpeg.FFprobe
