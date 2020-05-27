@@ -34,27 +34,27 @@ public class ClaimEntity {
   public String type;
   public Double reserve;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
   public Set<ClaimFile> claimFiles;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
   public Set<DataItem> data;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
   public Set<Asset> assets;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
   public Set<Event> events;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
   public Set<Note> notes;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "claimsId")
   public Set<Payment> payments;
 
