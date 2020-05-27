@@ -4,7 +4,7 @@ import com.google.cloud.speech.v1.RecognitionAudio
 import com.google.cloud.speech.v1.RecognitionConfig
 import com.google.cloud.speech.v1.SpeechClient
 import com.google.cloud.speech.v1.SpeechRecognitionResult
-import com.google.protobuf.ByteString
+import com.hedvig.homer.handlers.Uploader
 import com.hedvig.homer.handlers.utils.LanguageCode
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
@@ -20,7 +20,9 @@ import java.nio.file.StandardCopyOption
 import java.util.UUID
 
 @Component
-class SpeechHandler {
+class SpeechHandler(
+  val uploader: Uploader
+) {
   fun convertSpeechToText(audioURL: String, languageCode: LanguageCode? = LanguageCode.SWEDISH): SpeechResult =
     SpeechClient.create().use { speechClient ->
 
@@ -34,14 +36,14 @@ class SpeechHandler {
       val filename: String = downloadFile(audioURL)
 
       val file = convert(filename)
-      val data = Files.readAllBytes(file.toPath())
-      val audioBytes = ByteString.copyFrom(data)
+
+      val uploadedRawAudio = uploader.uploadObjectAndGetUri(file.toPath())
 
       val audio = RecognitionAudio.newBuilder()
-        .setContent(audioBytes)
+        .setUri(uploadedRawAudio)
         .build()
 
-      val response = speechClient.longRunningRecognizeAsync(config, audio)
+      val response = speechClient.recognize()
 
       while (!response.isDone) {
         println("Waiting for response...")
