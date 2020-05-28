@@ -13,11 +13,8 @@ import java.util.UUID
 class StorageServiceImpl(
   val storage: Storage,
   val storageConfig: StorageConfig
-) : StorageService  {
-
-  override fun uploadObjectAndGetUri(
-    filePath: Path
-  ): String {
+) : StorageService {
+  override fun uploadObjectAndGetUri(filePath: Path): String {
     val objectName = "${UUID.randomUUID()}_raw_audio.flac"
 
     val blobId: BlobId = BlobId.of(storageConfig.rawAudioBucketName, objectName)
