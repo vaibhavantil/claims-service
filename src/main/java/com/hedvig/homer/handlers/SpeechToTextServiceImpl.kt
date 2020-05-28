@@ -4,6 +4,7 @@ package com.hedvig.homer.handlers
 import com.google.cloud.speech.v1p1beta1.RecognitionAudio
 import com.google.cloud.speech.v1p1beta1.SpeechClient
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult
+import com.hedvig.homer.SpeechToTextService
 import com.hedvig.homer.configuration.SpeechConfig
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
@@ -24,7 +25,7 @@ class SpeechToTextServiceImpl(
   val speechConfig: SpeechConfig,
   val speechClient: SpeechClient
 ) : SpeechToTextService {
-  override fun convertSpeechToText(audioURL: String, requestId: UUID): SpeechToTextResult =
+  override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult =
     speechClient.use { speechClient ->
       val filename: String = downloadFile(audioURL)
       val file = convert(filename)
