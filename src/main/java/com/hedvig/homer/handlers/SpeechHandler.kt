@@ -1,10 +1,10 @@
 package com.hedvig.homer.handlers
 
-import com.google.cloud.speech.v1.RecognitionAudio
-import com.google.cloud.speech.v1.RecognitionConfig
-import com.google.cloud.speech.v1.SpeechClient
-import com.google.cloud.speech.v1.SpeechRecognitionResult
-import com.hedvig.homer.handlers.utils.LanguageCode
+
+import com.google.cloud.speech.v1p1beta1.RecognitionAudio
+import com.google.cloud.speech.v1p1beta1.SpeechClient
+import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult
+import com.hedvig.homer.configuration.SpeechConfig
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
 import net.bramp.ffmpeg.FFprobe
@@ -20,29 +20,20 @@ import java.util.UUID
 
 @Component
 class SpeechHandler(
-  val uploader: Uploader
+  private val storageService: StorageService,
+  val speechConfig: SpeechConfig,
+  val speechClient: SpeechClient
 ) {
-  fun convertSpeechToText(audioURL: String, languageCode: LanguageCode? = LanguageCode.SWEDISH): SpeechResult =
-    SpeechClient.create().use { speechClient ->
-
-      val config = RecognitionConfig.newBuilder()
-        .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
-        .setSampleRateHertz(RATE)
-        .setLanguageCode(languageCode.toString())
-        .setAudioChannelCount(1)
-        .build()
-
+  fun convertSpeechToText(audioURL: String): SpeechToTextResult =
+    speechClient.use { speechClient ->
       val filename: String = downloadFile(audioURL)
-
       val file = convert(filename)
-
-      val uploadedRawAudio = uploader.uploadObjectAndGetUri(file.toPath())
-
+      val uploadedRawAudio = storageService.uploadObjectAndGetUri(file.toPath())
       val audio = RecognitionAudio.newBuilder()
         .setUri(uploadedRawAudio)
         .build()
 
-      val response = speechClient.longRunningRecognizeAsync(config, audio)
+      val response = speechClient.longRunningRecognizeAsync(speechConfig.speechClientConfig, audio)
 
       while (!response.isDone) {
         println("Waiting for response...")
@@ -70,9 +61,8 @@ class SpeechHandler(
       FileUtils.deleteQuietly(file)
       FileUtils.deleteQuietly(File(filename))
 
-      return SpeechResult(finalResult, averageConfidence)
+      return SpeechToTextResult(finalResult, averageConfidence)
     }
-
 
   private fun convert(filename: String): File {
     val tempExecId = UUID.randomUUID().toString()
@@ -114,10 +104,4 @@ class SpeechHandler(
     val logger = LoggerFactory.getLogger(SpeechHandler::class.java)
     const val RATE: Int = 16000
   }
-
-
-  class SpeechResult(
-    val text: String,
-    val confidence: Float
-  )
 }

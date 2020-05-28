@@ -1,6 +1,7 @@
 package com.hedvig.homer.web
 
 import com.hedvig.homer.handlers.SpeechHandler
+import com.hedvig.homer.handlers.SpeechToTextResult
 import com.hedvig.homer.handlers.utils.LanguageCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
@@ -17,19 +18,8 @@ class HomerController(
     method = [RequestMethod.POST]
   )
   fun test(@RequestBody aurioUrl: String): ResponseEntity<*>? {
-    val claimAudioToTextSWE: SpeechHandler.SpeechResult =
-      speechHandler.convertSpeechToText(aurioUrl, LanguageCode.SWEDISH)
-    val claimAudioToTextGRE: SpeechHandler.SpeechResult =
-      speechHandler.convertSpeechToText(aurioUrl, LanguageCode.GREEK)
-    var finaltext = ""
-    var finalConfidence = 0f
-    if (claimAudioToTextSWE.confidence > claimAudioToTextGRE.confidence) {
-      finaltext = claimAudioToTextSWE.text
-      finalConfidence = claimAudioToTextSWE.confidence
-    } else {
-      finaltext = claimAudioToTextGRE.text
-      finalConfidence = claimAudioToTextGRE.confidence
-    }
-    return ResponseEntity.ok(finaltext + finalConfidence)
+    val result: SpeechToTextResult =
+      speechHandler.convertSpeechToText(aurioUrl)
+    return ResponseEntity.ok(result.text + result.confidence)
   }
 }

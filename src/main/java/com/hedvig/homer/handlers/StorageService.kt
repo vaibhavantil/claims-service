@@ -10,7 +10,7 @@ import java.nio.file.Path
 import java.util.UUID
 
 @Component
-class Uploader(
+class StorageService(
   val storage: Storage,
   val storageConfig: StorageConfig
 ) {
