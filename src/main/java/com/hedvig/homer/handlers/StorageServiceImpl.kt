@@ -13,9 +13,9 @@ import java.util.UUID
 class StorageServiceImpl(
   val storage: Storage,
   val storageConfig: StorageConfig
-)  {
+) : StorageService  {
 
-  fun uploadObjectAndGetUri(
+  override fun uploadObjectAndGetUri(
     filePath: Path
   ): String {
     val objectName = "${UUID.randomUUID()}_raw_audio.flac"
