@@ -1,6 +1,6 @@
 package com.hedvig.homer.web
 
-import com.hedvig.homer.handlers.SpeechToTextService
+import com.hedvig.homer.handlers.SpeechToTextServiceImpl
 import com.hedvig.homer.handlers.SpeechToTextResult
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class HomerController(
-  val speechToTextService: SpeechToTextService
+  val speechToTextService: SpeechToTextServiceImpl
 ) {
   @RequestMapping(
     path = ["/testSpeechToText"],

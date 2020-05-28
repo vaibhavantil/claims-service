@@ -2,7 +2,7 @@ package com.hedvig.homer.configuration
 
 import com.google.cloud.speech.v1p1beta1.RecognitionConfig
 import com.google.cloud.speech.v1p1beta1.SpeechClient
-import com.hedvig.homer.handlers.SpeechToTextService
+import com.hedvig.homer.handlers.SpeechToTextServiceImpl
 import com.hedvig.homer.handlers.utils.LanguageCode
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration
 open class SpeechConfig {
   val speechClientConfig = RecognitionConfig.newBuilder()
     .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
-    .setSampleRateHertz(SpeechToTextService.RATE)
+    .setSampleRateHertz(SpeechToTextServiceImpl.RATE)
     .setLanguageCode(LanguageCode.SWEDISH.value)
     .addAllAlternativeLanguageCodes(supportedLanguages)
     .setAudioChannelCount(1)
