@@ -52,4 +52,21 @@ class TranscribeClaimsUploadTest {
             .whenPublishingA(event)
             .expectActiveSagas(0)
     }
+
+    @Test
+    fun `when textToSpeechSerice throws exception do nothing`() {
+        val event = ClaimCreatedEvent(
+            "aClaimId",
+            "aUserId",
+            "theUrl:)"
+        )
+
+        every { textToSpeechService.convertSpeechToText(any(), any()) } throws RuntimeException("Error")
+
+        sagaFixture
+            .whenPublishingA(event)
+            .expectNoDispatchedCommands()
+            .expectActiveSagas(0)
+
+    }
 }

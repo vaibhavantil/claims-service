@@ -9,6 +9,7 @@ import org.axonframework.eventhandling.saga.EndSaga
 import org.axonframework.eventhandling.saga.SagaEventHandler
 import org.axonframework.eventhandling.saga.StartSaga
 import org.axonframework.spring.stereotype.Saga
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
 @Saga
@@ -27,8 +28,16 @@ class TranscribeAudioSaga {
     @SagaEventHandler(associationProperty = "id")
     fun onClaimCreated(evt: ClaimCreatedEvent) {
 
-        val result = speechToTextService.convertSpeechToText(evt.audioURL, evt.id)
-        commandGateway.send<Void>(AudioTranscribedCommand(result.text, result.confidence))
+        try {
+            val result = speechToTextService.convertSpeechToText(evt.audioURL, evt.id)
+            commandGateway.send<Void>(AudioTranscribedCommand(result.text, result.confidence))
+        }catch (e :Exception) {
+            logger.error("Caught exception transcribing audio", e)
+        }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
 }
