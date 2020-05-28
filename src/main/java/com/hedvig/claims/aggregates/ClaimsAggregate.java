@@ -268,6 +268,11 @@ public class ClaimsAggregate {
     apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getClaimId(), cmd.getCategory()));
   }
 
+  @CommandHandler
+  public void on(AudioTranscribedCommand cmd) {
+      apply(new AudioTranscribedEvent(cmd.getText(), cmd.getConfidence()));
+  }
+
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler

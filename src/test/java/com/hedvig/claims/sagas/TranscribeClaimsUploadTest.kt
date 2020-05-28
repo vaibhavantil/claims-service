@@ -34,7 +34,7 @@ class TranscribeClaimsUploadTest {
 
         sagaFixture
             .whenPublishingA(event)
-            .expectDispatchedCommands(AudioTranscribedCommand("A weird text", confidence = 1.0f))
+            .expectDispatchedCommands(AudioTranscribedCommand("aClaimId","A weird text", confidence = 1.0f))
     }
 
     @Test

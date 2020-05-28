@@ -30,7 +30,7 @@ class TranscribeAudioSaga {
 
         try {
             val result = speechToTextService.convertSpeechToText(evt.audioURL, evt.id)
-            commandGateway.send<Void>(AudioTranscribedCommand(result.text, result.confidence))
+            commandGateway.send<Void>(AudioTranscribedCommand(evt.id, result.text, result.confidence))
         }catch (e :Exception) {
             logger.error("Caught exception transcribing audio", e)
         }
