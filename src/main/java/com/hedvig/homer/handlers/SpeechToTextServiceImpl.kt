@@ -1,6 +1,8 @@
 package com.hedvig.homer.handlers
 
 
+import com.amazonaws.HttpMethod
+import com.amazonaws.services.s3.AmazonS3
 import com.google.cloud.speech.v1p1beta1.RecognitionAudio
 import com.google.cloud.speech.v1p1beta1.SpeechClient
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult
@@ -15,11 +17,15 @@ import net.bramp.ffmpeg.FFprobe
 import net.bramp.ffmpeg.builder.FFmpegBuilder
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import java.util.UUID
 
 @Component
@@ -27,11 +33,25 @@ class SpeechToTextServiceImpl(
   private val storageService: StorageServiceImpl,
   val speechConfig: SpeechConfig,
   val speechClient: SpeechClient,
-  val speechToTextRepository: SpeechToTextRepository
+  val speechToTextRepository: SpeechToTextRepository,
+  val amazonS3: AmazonS3,
+  @Value("\${claims.voiceRecordingBucketName}")
+  val bucketName: String
 ) : SpeechToTextService {
   override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult =
     speechClient.use { speechClient ->
-      val filename: String = downloadFile(audioURL)
+
+      val split: Array<String> = audioURL.split("/".toRegex()).toTypedArray()
+      val key = split[split.size - 1]
+
+      val preSignedUrl = amazonS3.generatePresignedUrl(
+        bucketName,
+        key,
+        Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()),
+        HttpMethod.GET
+      ).toString()
+
+      val filename: String = downloadFile(preSignedUrl)
       val file = convert(filename)
       val uploadedRawAudio = storageService.uploadObjectAndGetUri(file.toPath())
       val audio = RecognitionAudio.newBuilder()
