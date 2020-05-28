@@ -24,7 +24,7 @@ class SpeechToTextServiceImpl(
   val speechConfig: SpeechConfig,
   val speechClient: SpeechClient
 ) : SpeechToTextService {
-  override fun convertSpeechToText(audioURL: String): SpeechToTextResult =
+  override fun convertSpeechToText(audioURL: String, requestId: UUID): SpeechToTextResult =
     speechClient.use { speechClient ->
       val filename: String = downloadFile(audioURL)
       val file = convert(filename)
