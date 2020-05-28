@@ -5,6 +5,9 @@ import com.google.cloud.speech.v1p1beta1.RecognitionAudio
 import com.google.cloud.speech.v1p1beta1.SpeechClient
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult
 import com.hedvig.homer.configuration.SpeechConfig
+import com.hedvig.homer.repository.SpeechRecognitionResultDao
+import com.hedvig.homer.repository.SpeechToTextDao
+import com.hedvig.homer.repository.SpeechToTextRepository
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
 import net.bramp.ffmpeg.FFprobe
@@ -22,9 +25,10 @@ import java.util.UUID
 class SpeechToTextServiceImpl(
   private val storageService: StorageServiceImpl,
   val speechConfig: SpeechConfig,
-  val speechClient: SpeechClient
+  val speechClient: SpeechClient,
+  val speechToTextRepository: SpeechToTextRepository
 ) : SpeechToTextService {
-  override fun convertSpeechToText(audioURL: String, requestId: UUID): SpeechToTextResult =
+  override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult =
     speechClient.use { speechClient ->
       val filename: String = downloadFile(audioURL)
       val file = convert(filename)
@@ -32,6 +36,13 @@ class SpeechToTextServiceImpl(
       val audio = RecognitionAudio.newBuilder()
         .setUri(uploadedRawAudio)
         .build()
+
+      val dao = speechToTextRepository.save(
+        SpeechToTextDao().also {
+          it.requestId = requestId
+          it.aurioUri = uploadedRawAudio
+        }
+      )
 
       val response = speechClient.longRunningRecognizeAsync(speechConfig.speechClientConfig, audio)
 
@@ -42,26 +53,31 @@ class SpeechToTextServiceImpl(
 
       val results: List<SpeechRecognitionResult> = response.get().resultsList
 
-      var finalResult: String = "";
-      var averageConfidence: Float = 0f;
+      var finalTranscript: String = "";
+      var averageConfidenceScore: Float = 0f;
 
       results.forEach { result ->
         val alternative = result.getAlternatives(0)
         logger.info("Transcription: ${alternative.transcript}]\n")
-        finalResult += alternative.transcript + "\n"
-        averageConfidence += alternative.confidence
+        finalTranscript += alternative.transcript + "\n"
+        averageConfidenceScore += alternative.confidence
       }
 
-      averageConfidence /= results.count()
+      averageConfidenceScore /= results.count()
 
-      if (averageConfidence.isNaN()) {
-        averageConfidence = 0f
+      if (averageConfidenceScore.isNaN()) {
+        averageConfidenceScore = 0f
       }
 
       FileUtils.deleteQuietly(file)
       FileUtils.deleteQuietly(File(filename))
 
-      return SpeechToTextResult(finalResult, averageConfidence)
+      dao.response = results.map { it -> SpeechRecognitionResultDao.from(it) }.toMutableList()
+      dao.transcript = finalTranscript
+      dao.confidenceScore = averageConfidenceScore
+
+      speechToTextRepository.save(dao)
+      return SpeechToTextResult(finalTranscript, averageConfidenceScore)
     }
 
   private fun convert(filename: String): File {

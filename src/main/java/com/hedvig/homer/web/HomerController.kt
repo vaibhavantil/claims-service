@@ -19,7 +19,7 @@ class HomerController(
   )
   fun test(@RequestBody aurioUrl: String): ResponseEntity<*>? {
     val result: SpeechToTextResult =
-      speechToTextService.convertSpeechToText(aurioUrl, UUID.randomUUID())
+      speechToTextService.convertSpeechToText(aurioUrl, UUID.randomUUID().toString())
     return ResponseEntity.ok(result.text + result.confidence)
   }
 }
