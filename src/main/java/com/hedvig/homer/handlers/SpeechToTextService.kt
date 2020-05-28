@@ -19,7 +19,7 @@ import java.nio.file.StandardCopyOption
 import java.util.UUID
 
 @Component
-class SpeechHandler(
+class SpeechToTextService(
   private val storageService: StorageService,
   val speechConfig: SpeechConfig,
   val speechClient: SpeechClient
@@ -101,7 +101,7 @@ class SpeechHandler(
   }
 
   companion object {
-    val logger = LoggerFactory.getLogger(SpeechHandler::class.java)
+    val logger = LoggerFactory.getLogger(SpeechToTextService::class.java)
     const val RATE: Int = 16000
   }
 }

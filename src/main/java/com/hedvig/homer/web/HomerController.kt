@@ -1,8 +1,7 @@
 package com.hedvig.homer.web
 
-import com.hedvig.homer.handlers.SpeechHandler
+import com.hedvig.homer.handlers.SpeechToTextService
 import com.hedvig.homer.handlers.SpeechToTextResult
-import com.hedvig.homer.handlers.utils.LanguageCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class HomerController(
-  val speechHandler: SpeechHandler
+  val speechToTextService: SpeechToTextService
 ) {
   @RequestMapping(
     path = ["/testSpeechToText"],
@@ -19,7 +18,7 @@ class HomerController(
   )
   fun test(@RequestBody aurioUrl: String): ResponseEntity<*>? {
     val result: SpeechToTextResult =
-      speechHandler.convertSpeechToText(aurioUrl)
+      speechToTextService.convertSpeechToText(aurioUrl)
     return ResponseEntity.ok(result.text + result.confidence)
   }
 }
