@@ -1,6 +1,7 @@
 package com.hedvig.homer.repository
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
