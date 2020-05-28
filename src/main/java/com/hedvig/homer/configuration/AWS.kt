@@ -11,8 +11,14 @@ import org.springframework.context.annotation.Profile
 @Configuration
 class AWS {
   @Bean
-  @Profile("production", "staging")
+  @Profile("production")
   fun s3ClientProd(credentialsProvider: AWSCredentialsProvider?): AmazonS3 {
+    return AmazonS3Client.builder().withCredentials(credentialsProvider).build()
+  }
+
+  @Bean
+  @Profile("staging")
+  fun s3ClientStaging(credentialsProvider: AWSCredentialsProvider?): AmazonS3 {
     return AmazonS3Client.builder().withCredentials(credentialsProvider).build()
   }
 
