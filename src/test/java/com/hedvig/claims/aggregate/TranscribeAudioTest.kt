@@ -11,7 +11,7 @@ import org.junit.Test
 class TranscribeAudioTest {
 
     @Test
-    fun test() {
+    fun `command with no previous events emitts event`() {
         val fixture = AggregateTestFixture(ClaimsAggregate::class.java)
 
         fixture
@@ -22,6 +22,23 @@ class TranscribeAudioTest {
             .expectState {
                 assertThat(it.transcritptionResut.text).isEqualTo("A text")
                 assertThat(it.transcritptionResut.confidence).isEqualTo(1.0f)
+            }
+    }
+
+    @Test
+    fun `aggregate with previous event emmits event replaces old value`() {
+        val fixture = AggregateTestFixture(ClaimsAggregate::class.java)
+
+        fixture
+            .given(
+                ClaimCreatedEvent("id", "userId", "audioUrl"),
+                AudioTranscribedCommand("id","A text", 1.0f))
+            .`when`(AudioTranscribedCommand("id","A new text", 0.7f))
+            .expectSuccessfulHandlerExecution()
+            .expectEvents(AudioTranscribedEvent("A new text", 0.7f))
+            .expectState {
+                assertThat(it.transcritptionResut.text).isEqualTo("A new text")
+                assertThat(it.transcritptionResut.confidence).isEqualTo(.7f)
             }
     }
 
