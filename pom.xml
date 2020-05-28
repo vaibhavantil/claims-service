@@ -275,6 +275,11 @@
       <artifactId>ffmpeg</artifactId>
       <version>0.6.2</version>
     </dependency>
+    <dependency>
+      <groupId>com.vladmihalcea</groupId>
+      <artifactId>hibernate-types-52</artifactId>
+      <version>2.9.10</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -310,7 +315,27 @@
         </executions>
         <configuration>
           <jvmTarget>1.8</jvmTarget>
+          <compilerPlugins>
+            <plugin>jpa</plugin>
+            <plugin>all-open</plugin>
+            <plugin>spring</plugin>
+          </compilerPlugins>
+          <pluginOptions>
+            <option>all-open:annotation=javax.persistence.Entity</option>
+          </pluginOptions>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-maven-allopen</artifactId>
+            <version>${kotlin.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-maven-noarg</artifactId>
+            <version>${kotlin.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
