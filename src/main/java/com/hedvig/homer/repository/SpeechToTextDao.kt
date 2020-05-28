@@ -1,37 +1,42 @@
 package com.hedvig.homer.repository
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType
 import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 import javax.annotation.Nullable
-import javax.persistence.Column
+import javax.persistence.CascadeType
+import javax.persistence.ElementCollection
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.OneToMany
 
 @Entity
-@TypeDef(
-  name = "jsonb-node",
-  typeClass = JsonNodeBinaryType::class
-)
 class SpeechToTextDao(
   @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  val id: Long = 0,
-  @Type(type = "jsonb-node")
-  @Column(columnDefinition = "jsonb")
-  val response: JsonNode,
+  val id: Long = 0
+) {
   @Nullable
-  val transcript: String?,
+  var requestId: String? = null
+
   @Nullable
-  val confidenceScore: Float?,
+  var aurioUri: String? = null
+
+  @OneToMany(cascade = [(CascadeType.ALL)])
+  var response: MutableList<SpeechRecognitionResultDao> = arrayListOf()
+
+  @Nullable
+  var transcript: String? = null
+
+  @Nullable
+  var confidenceScore: Float? = null
+
   @CreationTimestamp
-  val createdAt: Instant = Instant.now(),
+  var createdAt: Instant = Instant.now()
+
   @UpdateTimestamp
   var updatedAt: Instant = Instant.now()
-){
 }
