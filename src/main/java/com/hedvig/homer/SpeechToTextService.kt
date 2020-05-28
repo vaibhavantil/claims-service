@@ -1,6 +1,6 @@
-package com.hedvig.homer.handlers
+package com.hedvig.homer
 
-import java.util.UUID
+import com.hedvig.homer.handlers.SpeechToTextResult
 
 interface SpeechToTextService {
   fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult

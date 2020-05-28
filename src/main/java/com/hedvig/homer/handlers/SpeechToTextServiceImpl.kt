@@ -4,6 +4,7 @@ package com.hedvig.homer.handlers
 import com.google.cloud.speech.v1p1beta1.RecognitionAudio
 import com.google.cloud.speech.v1p1beta1.SpeechClient
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult
+import com.hedvig.homer.SpeechToTextService
 import com.hedvig.homer.configuration.SpeechConfig
 import com.hedvig.homer.repository.SpeechRecognitionResultDao
 import com.hedvig.homer.repository.SpeechToTextDao

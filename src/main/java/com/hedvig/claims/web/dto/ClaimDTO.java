@@ -18,10 +18,11 @@ public class ClaimDTO extends HedvigBackofficeDTO {
 
   public String id;
   public String audioURL;
-  public ArrayList<NoteDTO> notes = new ArrayList<NoteDTO>();
-  public ArrayList<PaymentDTO> payments = new ArrayList<PaymentDTO>();
-  public ArrayList<AssetDTO> assets = new ArrayList<AssetDTO>();
-  public List<EventDTO> events = new ArrayList<EventDTO>();
+  public ArrayList<NoteDTO> notes = new ArrayList<>();
+  public ArrayList<ClaimTranscriptions> transcriptions = new ArrayList();
+  public ArrayList<PaymentDTO> payments = new ArrayList<>();
+  public ArrayList<AssetDTO> assets = new ArrayList<>();
+  public List<EventDTO> events = new ArrayList<>();
   public ArrayList<DataItemDTO> data = new ArrayList<>();
   public ClaimStates state;
   public Double reserve;
@@ -56,6 +57,10 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     }
     for (Note n : c.notes) {
       notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
+    }
+
+    if(c.transcriptionText != null && c.transcriptionConfidence != null) {
+        this.transcriptions.add(new ClaimTranscriptions(c.transcriptionText,c.transcriptionConfidence));
     }
 
     events =

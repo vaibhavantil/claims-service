@@ -61,6 +61,11 @@ public class ClaimEntity {
   @Column(columnDefinition = "BOOLEAN NOT NULL DEFAULT FALSE")
   public boolean coveringEmployee;
 
+  @Column(columnDefinition = "TEXT")
+  public String transcriptionText;
+
+  public Float transcriptionConfidence;
+
   public void addDataItem(DataItem d) {
     data.add(d);
   }

@@ -433,6 +433,17 @@ public class ClaimsEventListener {
     claimFileRepository.save(file);
   }
 
+  @EventHandler
+  public void on(AudioTranscribedEvent event) {
+      Optional<ClaimEntity> entity = claimRepository.findById(event.getClaimId());
+      if(entity.isPresent()) {
+          val e = entity.get();
+          e.transcriptionText = event.getText();
+          e.transcriptionConfidence = event.getConfidence();
+          claimRepository.save(e);
+      }
+  }
+
   private ClaimEntity findClaimOrThrowException(String claimId) {
     ClaimEntity claim =
       claimRepository

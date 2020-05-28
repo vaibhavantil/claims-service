@@ -32,6 +32,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
+
+import com.hedvig.homer.SpeechToTextService;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -95,6 +97,9 @@ public class InternalControllerTest {
 
   @MockBean
   private TicketService ticketService;
+
+  @MockBean
+  private SpeechToTextService speechToTextService;
 
   @Test
   public void Should_ReturnAnInitiatedPaymentEvent_WhenPaymentSuccessfullyCompletedFromPaymentService() {

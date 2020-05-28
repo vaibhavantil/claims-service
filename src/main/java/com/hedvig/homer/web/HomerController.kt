@@ -1,7 +1,7 @@
 package com.hedvig.homer.web
 
 import com.hedvig.homer.handlers.SpeechToTextResult
-import com.hedvig.homer.handlers.SpeechToTextService
+import com.hedvig.homer.SpeechToTextService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
