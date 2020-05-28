@@ -43,7 +43,7 @@ class SpeechHandler(
         .setUri(uploadedRawAudio)
         .build()
 
-      val response = speechClient.recognize()
+      val response = speechClient.longRunningRecognizeAsync(config, audio)
 
       while (!response.isDone) {
         println("Waiting for response...")
