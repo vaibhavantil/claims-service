@@ -5,6 +5,7 @@ import com.hedvig.claims.events.ClaimCreatedEvent
 import com.hedvig.claims.events.upcast.ClaimCreatedEvent_v1
 import com.hedvig.homer.SpeechToTextService
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.eventhandling.saga.EndSaga
 import org.axonframework.eventhandling.saga.SagaEventHandler
 import org.axonframework.eventhandling.saga.StartSaga
 import org.axonframework.spring.stereotype.Saga
@@ -22,6 +23,7 @@ class TranscribeAudioSaga {
     lateinit var speechToTextService: SpeechToTextService
 
     @StartSaga
+    @EndSaga
     @SagaEventHandler(associationProperty = "id")
     fun onClaimCreated(evt: ClaimCreatedEvent) {
 
