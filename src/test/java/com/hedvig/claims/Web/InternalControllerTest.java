@@ -22,6 +22,7 @@ import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
+import com.hedvig.claims.serviceIntegration.ticketService.TicketService;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.services.LinkFileToClaimService;
 import com.hedvig.claims.web.dto.PaymentRequestDTO;
@@ -91,6 +92,9 @@ public class InternalControllerTest {
 
   @MockBean
   private LinkFileToClaimService linkFileToClaimService;
+
+  @MockBean
+  private TicketService ticketService;
 
   @Test
   public void Should_ReturnAnInitiatedPaymentEvent_WhenPaymentSuccessfullyCompletedFromPaymentService() {
