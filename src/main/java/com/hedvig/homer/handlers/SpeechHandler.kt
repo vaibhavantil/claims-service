@@ -1,10 +1,9 @@
-package com.hedvig.claims.handlers
+package com.hedvig.homer.handlers
 
 import com.google.cloud.speech.v1.RecognitionAudio
 import com.google.cloud.speech.v1.RecognitionConfig
 import com.google.cloud.speech.v1.SpeechClient
 import com.google.cloud.speech.v1.SpeechRecognitionResult
-import com.hedvig.homer.handlers.Uploader
 import com.hedvig.homer.handlers.utils.LanguageCode
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor

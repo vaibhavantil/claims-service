@@ -1,6 +1,6 @@
 package com.hedvig.homer.web
 
-import com.hedvig.claims.handlers.SpeechHandler
+import com.hedvig.homer.handlers.SpeechHandler
 import com.hedvig.homer.handlers.utils.LanguageCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
