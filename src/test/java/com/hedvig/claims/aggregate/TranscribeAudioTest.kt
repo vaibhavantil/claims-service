@@ -18,7 +18,7 @@ class TranscribeAudioTest {
             .given(ClaimCreatedEvent("id", "userId", "audioUrl"))
             .`when`(AudioTranscribedCommand("id","A text", 1.0f))
             .expectSuccessfulHandlerExecution()
-            .expectEvents(AudioTranscribedEvent("A text", 1.0f))
+            .expectEvents(AudioTranscribedEvent("id", "A text", 1.0f))
             .expectState {
                 assertThat(it.transcritptionResut.text).isEqualTo("A text")
                 assertThat(it.transcritptionResut.confidence).isEqualTo(1.0f)
@@ -26,7 +26,7 @@ class TranscribeAudioTest {
     }
 
     @Test
-    fun `aggregate with previous event emmits event replaces old value`() {
+    fun `aggregate with previous event emits event replaces old value`() {
         val fixture = AggregateTestFixture(ClaimsAggregate::class.java)
 
         fixture
@@ -35,7 +35,7 @@ class TranscribeAudioTest {
                 AudioTranscribedCommand("id","A text", 1.0f))
             .`when`(AudioTranscribedCommand("id","A new text", 0.7f))
             .expectSuccessfulHandlerExecution()
-            .expectEvents(AudioTranscribedEvent("A new text", 0.7f))
+            .expectEvents(AudioTranscribedEvent("id", "A new text", 0.7f))
             .expectState {
                 assertThat(it.transcritptionResut.text).isEqualTo("A new text")
                 assertThat(it.transcritptionResut.confidence).isEqualTo(.7f)

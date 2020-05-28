@@ -274,7 +274,7 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on(AudioTranscribedCommand cmd) {
-    apply(new AudioTranscribedEvent(cmd.getText(), cmd.getConfidence()));
+    apply(new AudioTranscribedEvent(this.id, cmd.getText(), cmd.getConfidence()));
   }
 
   // ----------------- Event sourcing --------------------- //
