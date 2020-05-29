@@ -5,6 +5,7 @@ import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 import javax.annotation.Nullable
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.ElementCollection
 import javax.persistence.Embedded
 import javax.persistence.Entity
@@ -29,6 +30,7 @@ class SpeechToTextDao(
   var response: MutableList<SpeechRecognitionResultDao> = arrayListOf()
 
   @Nullable
+  @Column(columnDefinition = "TEXT")
   var transcript: String? = null
 
   @Nullable
