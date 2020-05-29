@@ -8,8 +8,8 @@ import com.google.cloud.speech.v1p1beta1.SpeechClient
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult
 import com.hedvig.homer.SpeechToTextService
 import com.hedvig.homer.configuration.SpeechConfig
-import com.hedvig.homer.repository.SpeechRecognitionResultDao
-import com.hedvig.homer.repository.SpeechToTextDao
+import com.hedvig.homer.repository.SpeechRecognitionResultData
+import com.hedvig.homer.repository.SpeechToText
 import com.hedvig.homer.repository.SpeechToTextRepository
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
@@ -49,7 +49,7 @@ class SpeechToTextServiceImpl(
       .build()
 
     val dao = speechToTextRepository.save(
-      SpeechToTextDao().also {
+      SpeechToText().also {
         it.requestId = requestId
         it.aurioUri = uploadedRawAudio
       }
@@ -84,7 +84,7 @@ class SpeechToTextServiceImpl(
     FileUtils.deleteQuietly(file)
     FileUtils.deleteQuietly(File(filename))
 
-    dao.response = results.map { SpeechRecognitionResultDao.from(it) }.toMutableList()
+    dao.response = results.map { SpeechRecognitionResultData.from(it) }.toMutableList()
     dao.transcript = finalTranscript
     dao.confidenceScore = averageConfidenceScore
 
