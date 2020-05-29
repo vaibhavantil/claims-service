@@ -84,7 +84,7 @@ class SpeechToTextServiceImpl(
     FileUtils.deleteQuietly(file)
     FileUtils.deleteQuietly(File(filename))
 
-    val averageConfidenceScore = addedConfidenceScore / results.size
+    val averageConfidenceScore = if (results.isNotEmpty()) addedConfidenceScore / results.size else 0f
 
     dao.response = results.map { SpeechRecognitionResultData.from(it) }.toMutableList()
     dao.transcript = finalTranscript
