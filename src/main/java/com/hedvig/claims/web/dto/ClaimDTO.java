@@ -4,6 +4,7 @@ import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.Event;
+import com.hedvig.claims.query.Transcription;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -18,10 +19,11 @@ public class ClaimDTO extends HedvigBackofficeDTO {
 
   public String id;
   public String audioURL;
-  public ArrayList<NoteDTO> notes = new ArrayList<NoteDTO>();
-  public ArrayList<PaymentDTO> payments = new ArrayList<PaymentDTO>();
-  public ArrayList<AssetDTO> assets = new ArrayList<AssetDTO>();
-  public List<EventDTO> events = new ArrayList<EventDTO>();
+  public ArrayList<NoteDTO> notes = new ArrayList<>();
+  public ArrayList<ClaimTranscriptions> transcriptions = new ArrayList();
+  public ArrayList<PaymentDTO> payments = new ArrayList<>();
+  public ArrayList<AssetDTO> assets = new ArrayList<>();
+  public List<EventDTO> events = new ArrayList<>();
   public ArrayList<DataItemDTO> data = new ArrayList<>();
   public ClaimStates state;
   public Double reserve;
@@ -56,6 +58,10 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     }
     for (Note n : c.notes) {
       notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
+    }
+
+    for (Transcription t: c.transcriptions) {
+        transcriptions.add(new ClaimTranscriptions(t.getText(),t.getConfidenceScore(),t.getLanguageCode()));
     }
 
     events =

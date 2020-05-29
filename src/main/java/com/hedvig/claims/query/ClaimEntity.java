@@ -61,6 +61,10 @@ public class ClaimEntity {
   @Column(columnDefinition = "BOOLEAN NOT NULL DEFAULT FALSE")
   public boolean coveringEmployee;
 
+  @OneToMany(cascade = CascadeType.ALL)
+  @JoinColumn(name = "claimsId")
+  public Set<Transcription> transcriptions;
+
   public void addDataItem(DataItem d) {
     data.add(d);
   }

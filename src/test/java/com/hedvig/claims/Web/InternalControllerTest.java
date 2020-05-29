@@ -22,6 +22,7 @@ import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
+import com.hedvig.claims.serviceIntegration.ticketService.TicketService;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.services.LinkFileToClaimService;
 import com.hedvig.claims.web.dto.PaymentRequestDTO;
@@ -31,6 +32,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
+
+import com.hedvig.homer.SpeechToTextService;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -91,6 +94,12 @@ public class InternalControllerTest {
 
   @MockBean
   private LinkFileToClaimService linkFileToClaimService;
+
+  @MockBean
+  private TicketService ticketService;
+
+  @MockBean
+  private SpeechToTextService speechToTextService;
 
   @Test
   public void Should_ReturnAnInitiatedPaymentEvent_WhenPaymentSuccessfullyCompletedFromPaymentService() {

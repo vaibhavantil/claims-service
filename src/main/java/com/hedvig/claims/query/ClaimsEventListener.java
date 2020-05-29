@@ -9,6 +9,7 @@ import lombok.val;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,10 +56,8 @@ public class ClaimsEventListener {
     claim.assets = new HashSet<Asset>();
     claim.events = new HashSet<Event>();
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
+    Event ev = createEvent(e, "Claim created");
     ev.userId = e.getUserId();
-    ev.text = "Claim created";
     claim.addEvent(ev);
 
     claimRepository.save(claim);
@@ -81,10 +80,9 @@ public class ClaimsEventListener {
     claim.assets = new HashSet<Asset>();
     claim.events = new HashSet<Event>();
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
+    Event ev = createEvent(e, "Claim created");
     ev.userId = e.getMemberId();
-    ev.text = "Claim created";
+
     claim.addEvent(ev);
 
     claimRepository.save(claim);
@@ -109,10 +107,9 @@ public class ClaimsEventListener {
     n.userId = e.getUserId();
     claim.addNote(n);
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
+    Event ev = createEvent(e, "Note added:" + n.text);
     ev.userId = e.getUserId();
-    ev.text = "Note added:" + n.text;
+
     claim.addEvent(ev);
 
     claimRepository.save(claim);
@@ -128,10 +125,8 @@ public class ClaimsEventListener {
             new ResourceNotFoundException(
               "Could not find claim with id:" + e.getClaimsId()));
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
+    Event ev = createEvent(e, "Status updated from " + claim.state + " to " + e.getState().toString());
     ev.userId = e.getUserId();
-    ev.text = "Status updated from " + claim.state + " to " + e.getState().toString();
 
     claim.state = e.getState();
     claim.addEvent(ev);
@@ -149,13 +144,11 @@ public class ClaimsEventListener {
             new ResourceNotFoundException(
               "Could not find claim with id:" + e.getClaimID()));
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
-    ev.userId = e.getUserId();
-    ev.text =
-      "Claim's type "
+    Event ev = createEvent(e,
+          "Claim's type "
         + (claim.type == null ? "initialised as " : ("updated from " + claim.type + " to "))
-        + e.getType();
+        + e.getType());
+    ev.userId = e.getUserId();
 
     claim.type = e.getType();
     claim.addEvent(ev);
@@ -173,10 +166,8 @@ public class ClaimsEventListener {
             new ResourceNotFoundException(
               "Could not find claim with id:" + e.getClaimID()));
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
+    Event ev = createEvent(e, "Reserve updated from " + claim.reserve + " to " + e.getAmount());
     ev.userId = e.getUserId();
-    ev.text = "Reserve updated from " + claim.reserve + " to " + e.getAmount();
 
     claim.reserve = e.getAmount();
     claim.addEvent(ev);
@@ -206,10 +197,8 @@ public class ClaimsEventListener {
     d.value = e.getValue();
     claim.addDataItem(d);
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
+    Event ev = createEvent(e, "Data item added. " + d.name + ":" + (d.received == null ? "not" : "") + " received ");
     ev.userId = e.getUserId();
-    ev.text = "Data item added. " + d.name + ":" + (d.received == null ? "not" : "") + " received ";
     claim.addEvent(ev);
 
     claimRepository.save(claim);
@@ -239,12 +228,11 @@ public class ClaimsEventListener {
     p.payoutStatus = PayoutStatus.COMPLETED;
     claim.addPayment(p);
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
-    ev.userId = e.getUserId();
-    ev.text = String.format(
+    Event ev = createEvent(e, String.format(
       "A manual payment (%s) was executed. The amount is %s \nThe payment was added by %s on %s",
-      p.id, p.amount.toString(), p.handlerReference, p.payoutDate.toString());
+      p.id, p.amount.toString(), p.handlerReference, p.payoutDate.toString()));
+    ev.userId = e.getUserId();
+
     claim.addEvent(ev);
 
     claimRepository.save(claim);
@@ -275,12 +263,11 @@ public class ClaimsEventListener {
     p.payoutStatus = PayoutStatus.PREPARED;
     claim.addPayment(p);
 
-    Event ev = new Event();
-    ev.type = e.getClass().getName();
-    ev.userId = e.getMemberId();
-    ev.text = String.format(
+    Event ev = createEvent(e, String.format(
       "An automatic payment (%s) was executed. The amount is %s \nThe payment was initiated by %s on %s",
-      p.id, p.amount.toString(), p.handlerReference, p.payoutDate.toString());
+      p.id, p.amount.toString(), p.handlerReference, p.payoutDate.toString()));
+    ev.userId = e.getMemberId();
+
     claim.addEvent(ev);
 
     claimRepository.save(claim);
@@ -312,12 +299,11 @@ public class ClaimsEventListener {
               new ResourceNotFoundException(
                 "Could not find claim with id:" + e.getClaimId()));
 
-      Event ev = new Event();
-      ev.type = e.getClass().getName();
-      ev.userId = e.getMemberId();
-      ev.text = String.format(
+      Event ev = createEvent(e, String.format(
         "An automatic payment (%s) with the amount %s was successfully initiated.\nThe payment was initiated by %s with referenceId %s",
-        payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutReference);
+        payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutReference));
+      ev.userId = e.getMemberId();
+
       claim.addEvent(ev);
 
       claimRepository.save(claim);
@@ -349,12 +335,11 @@ public class ClaimsEventListener {
               new ResourceNotFoundException(
                 "Could not find claim with id:" + e.getClaimId()));
 
-      Event ev = new Event();
-      ev.type = e.getClass().getName();
-      ev.userId = e.getMemberId();
-      ev.text = String.format(
+      Event ev = createEvent(e, String.format(
         "An automatic payment (%s) with the amount %s failed!\nThe payment was initiated by %s with referenceId %s",
-        payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutReference);
+        payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutReference));
+      ev.userId = e.getMemberId();
+
       claim.addEvent(ev);
 
       claimRepository.save(claim);
@@ -371,10 +356,8 @@ public class ClaimsEventListener {
       ClaimEntity claim = optionalClaim.get();
       claim.coveringEmployee = e.isCoveringEmployee();
 
-      Event ev = new Event();
-      ev.type = e.getClass().getName();
+      Event ev = createEvent(e, e.isCoveringEmployee() ? "Claim marked as an employee's claim" : "Claim was marked as a regular claim");
       ev.userId = claim.userId;
-      ev.text = e.isCoveringEmployee() ? "Claim marked as an employee's claim" : "Claim was marked as a regular claim";
       claim.addEvent(ev);
 
       claimRepository.save(claim);
@@ -395,11 +378,9 @@ public class ClaimsEventListener {
       claimFile.setUploadSource(event.getUploadSource());
       claim.addClaimFile(claimFile);
 
-      Event ev = new Event();
-      ev.type = event.getClass().getName();
-      ev.text = String.format(
+      Event ev = createEvent(event, String.format(
         "A claim file was uploaded with id %s at %s.",
-        event.getClaimFileId(), event.getUploadedAt());
+        event.getClaimFileId(), event.getUploadedAt()));
         claim.addEvent(ev);
 
       claimRepository.save(claim);
@@ -415,11 +396,9 @@ public class ClaimsEventListener {
     claimFile.setMarkedAsDeletedBy(event.getDeletedBy());
     claimFileRepository.save(claimFile);
 
-    Event ev = new Event();
-    ev.type = event.getClass().getName();
-    ev.text = String.format(
+    Event ev = createEvent(event, String.format(
       "A claim file with id %s was deleted by %s at %s",
-      claimFile.getId(), event.getDeletedBy(), event.getDeletedAt());
+      claimFile.getId(), event.getDeletedBy(), event.getDeletedAt()));
 
     claim.addEvent(ev);
 
@@ -433,7 +412,38 @@ public class ClaimsEventListener {
     claimFileRepository.save(file);
   }
 
-  private ClaimEntity findClaimOrThrowException(String claimId) {
+  @EventHandler
+  public void on(AudioTranscribedEvent event) {
+      Optional<ClaimEntity> entity = claimRepository.findById(event.getClaimId());
+      if(entity.isPresent()) {
+          val e = entity.get();
+          e.transcriptions.add(
+              new Transcription(
+                  UUID.randomUUID().toString(),
+                  event.getText(),
+                  event.getConfidence(),
+                  event.getLanguageCode()
+              )
+          );
+
+          Event ev = createEvent(event, String.format(
+              "Homer created a new transcription with the confidence of %s. Transcription: %s language code: %s",
+              event.getConfidence(), event.getText(), event.getLanguageCode()));
+          e.addEvent(ev);
+
+          claimRepository.save(e);
+      }
+  }
+
+    @NotNull
+    private Event createEvent(Object event, String message) {
+        Event ev = new Event();
+        ev.type = event.getClass().getName();
+        ev.text = message;
+        return ev;
+    }
+
+    private ClaimEntity findClaimOrThrowException(String claimId) {
     ClaimEntity claim =
       claimRepository
         .findById(claimId)

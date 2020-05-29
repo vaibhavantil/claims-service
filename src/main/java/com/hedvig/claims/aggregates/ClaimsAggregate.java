@@ -16,6 +16,7 @@ import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -54,6 +55,9 @@ public class ClaimsAggregate {
 
   public ArrayList<ClaimFile> claimFiles;
   public boolean isCoveringEmployee;
+
+  @NotNull
+  public AudioTranscription transcritptionResut;
 
   public ClaimsAggregate() {
     log.info("Instantiate ClaimsAggregate");
@@ -268,6 +272,11 @@ public class ClaimsAggregate {
     apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getClaimId(), cmd.getCategory()));
   }
 
+  @CommandHandler
+  public void on(AudioTranscribedCommand cmd) {
+    apply(new AudioTranscribedEvent(this.id, cmd.getText(), cmd.getConfidence(), cmd.getLanguageCode()));
+  }
+
   // ----------------- Event sourcing --------------------- //
 
   @EventSourcingHandler
@@ -446,5 +455,10 @@ public class ClaimsAggregate {
       .findAny();
 
     claimFileMaybe.ifPresent(claimFile -> claimFile.setCategory(event.getCategory()));
+  }
+
+  @EventSourcingHandler
+    public void on(AudioTranscribedEvent event) {
+      this.transcritptionResut = new AudioTranscription(event.getText(), event.getConfidence(), event.getLanguageCode());
   }
 }
