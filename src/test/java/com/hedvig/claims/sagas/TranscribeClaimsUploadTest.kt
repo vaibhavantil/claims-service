@@ -33,12 +33,12 @@ class TranscribeClaimsUploadTest {
         every { textToSpeechService.convertSpeechToText("theUrl:)", "aClaimId") } returns SpeechToTextResult(
             "A weird text",
             1.0f,
-            ""
+            "se-SV"
         )
 
         sagaFixture
             .whenPublishingA(event)
-            .expectDispatchedCommands(AudioTranscribedCommand("aClaimId","A weird text", 1.0f, ""))
+            .expectDispatchedCommands(AudioTranscribedCommand("aClaimId","A weird text", 1.0f, "se-SV"))
     }
 
     @Test
@@ -52,7 +52,7 @@ class TranscribeClaimsUploadTest {
         every { textToSpeechService.convertSpeechToText(any(), any()) } returns SpeechToTextResult(
             "A weird text",
             1.0f,
-            ""
+            "se-SV"
         )
 
 
