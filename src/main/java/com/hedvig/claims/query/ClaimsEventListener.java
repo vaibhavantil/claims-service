@@ -55,6 +55,7 @@ public class ClaimsEventListener {
     claim.payments = new HashSet<Payment>();
     claim.assets = new HashSet<Asset>();
     claim.events = new HashSet<Event>();
+    claim.transcriptions = new HashSet<>();
 
     Event ev = createEvent(e, "Claim created");
     ev.userId = e.getUserId();
