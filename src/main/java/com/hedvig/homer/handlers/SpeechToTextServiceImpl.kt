@@ -41,17 +41,7 @@ class SpeechToTextServiceImpl(
   override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult =
     speechClient.use { speechClient ->
 
-      val split: Array<String> = audioURL.split("/".toRegex()).toTypedArray()
-      val key = split[split.size - 1]
-
-      val preSignedUrl = amazonS3.generatePresignedUrl(
-        bucketName,
-        key,
-        Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()),
-        HttpMethod.GET
-      ).toString()
-
-      val filename: String = downloadFile(preSignedUrl)
+      val filename: String = extractFileFromURL(audioURL)
       val file = convert(filename)
       val uploadedRawAudio = storageService.uploadObjectAndGetUri(file.toPath())
       val audio = RecognitionAudio.newBuilder()
@@ -100,6 +90,19 @@ class SpeechToTextServiceImpl(
       speechToTextRepository.save(dao)
       return SpeechToTextResult(finalTranscript, averageConfidenceScore)
     }
+
+  private fun extractFileFromURL(audioURL: String): String {
+    val split: Array<String> = audioURL.split("/".toRegex()).toTypedArray()
+    val key = split[split.size - 1]
+
+    val preSignedUrl = amazonS3.generatePresignedUrl(
+      bucketName,
+      key,
+      Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()),
+      HttpMethod.GET
+    ).toString()
+    return downloadFile(preSignedUrl)
+  }
 
   private fun convert(filename: String): File {
     val tempExecId = UUID.randomUUID().toString()
