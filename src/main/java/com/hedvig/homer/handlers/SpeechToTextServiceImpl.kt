@@ -56,7 +56,7 @@ class SpeechToTextServiceImpl(
     )
 
     var finalTranscript = ""
-    var averageConfidenceScore = 0f
+    var addedConfidenceScore = 0f
     var languageCode = ""
 
     val response = speechClient.longRunningRecognizeAsync(speechConfig.speechClientConfig, audio)
@@ -67,7 +67,7 @@ class SpeechToTextServiceImpl(
       val alternative = result.getAlternatives(0)
       logger.info("Transcription: ${alternative.transcript}]\n")
       finalTranscript += alternative.transcript + "\n"
-      averageConfidenceScore += alternative.confidence
+      addedConfidenceScore += alternative.confidence
       if (!languageCode.contains(result.languageCode)) {
         if (languageCode.isEmpty()) {
           languageCode = result.languageCode
@@ -77,12 +77,14 @@ class SpeechToTextServiceImpl(
       }
     }
 
-    if (averageConfidenceScore.isNaN()) {
-      averageConfidenceScore = 0f
+    if (addedConfidenceScore.isNaN()) {
+      addedConfidenceScore = 0f
     }
 
     FileUtils.deleteQuietly(file)
     FileUtils.deleteQuietly(File(filename))
+
+    val averageConfidenceScore = addedConfidenceScore / results.size
 
     dao.response = results.map { SpeechRecognitionResultData.from(it) }.toMutableList()
     dao.transcript = finalTranscript
