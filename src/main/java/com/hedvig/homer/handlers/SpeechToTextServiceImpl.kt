@@ -32,69 +32,65 @@ import java.util.UUID
 class SpeechToTextServiceImpl(
   private val storageService: StorageServiceImpl,
   val speechConfig: SpeechConfig,
-  val speechClient: SpeechClient,
   val speechToTextRepository: SpeechToTextRepository,
   val amazonS3: AmazonS3,
+  val speechClient: SpeechClient,
   @Value("\${claims.voiceRecordingBucketName}")
   val bucketName: String
 ) : SpeechToTextService {
 
   @Throws
-  override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult =
-    speechClient.use { speechClient ->
+  override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult {
+    val filename: String = extractFileFromURL(audioURL)
+    val file = convert(filename)
+    val uploadedRawAudio = storageService.uploadObjectAndGetUri(file.toPath())
+    val audio = RecognitionAudio.newBuilder()
+      .setUri(uploadedRawAudio)
+      .build()
 
-      val filename: String = extractFileFromURL(audioURL)
-      val file = convert(filename)
-      val uploadedRawAudio = storageService.uploadObjectAndGetUri(file.toPath())
-      val audio = RecognitionAudio.newBuilder()
-        .setUri(uploadedRawAudio)
-        .build()
+    val dao = speechToTextRepository.save(
+      SpeechToTextDao().also {
+        it.requestId = requestId
+        it.aurioUri = uploadedRawAudio
+      }
+    )
 
-      val dao = speechToTextRepository.save(
-        SpeechToTextDao().also {
-          it.requestId = requestId
-          it.aurioUri = uploadedRawAudio
-        }
-      )
+    var finalTranscript = ""
+    var averageConfidenceScore = 0f
+    var languageCode = ""
 
-      val response = speechClient.longRunningRecognizeAsync(speechConfig.speechClientConfig, audio)
+    val response = speechClient.longRunningRecognizeAsync(speechConfig.speechClientConfig, audio)
 
-      val results: List<SpeechRecognitionResult> = response.get().resultsList
+    val results: List<SpeechRecognitionResult> = response.get().resultsList
 
-      var finalTranscript = ""
-      var averageConfidenceScore = 0f
-      var languageCode = ""
-
-      results.forEach { result ->
-        val alternative = result.getAlternatives(0)
-        logger.info("Transcription: ${alternative.transcript}]\n")
-        finalTranscript += alternative.transcript + "\n"
-        averageConfidenceScore += alternative.confidence
-        if (!languageCode.contains(result.languageCode)) {
-          if (languageCode.isEmpty()) {
-            languageCode = result.languageCode
-          } else {
-            languageCode += ", ${result.languageCode}"
-          }
+    results.forEach { result ->
+      val alternative = result.getAlternatives(0)
+      logger.info("Transcription: ${alternative.transcript}]\n")
+      finalTranscript += alternative.transcript + "\n"
+      averageConfidenceScore += alternative.confidence
+      if (!languageCode.contains(result.languageCode)) {
+        if (languageCode.isEmpty()) {
+          languageCode = result.languageCode
+        } else {
+          languageCode += ", ${result.languageCode}"
         }
       }
-
-      averageConfidenceScore /= results.count()
-
-      if (averageConfidenceScore.isNaN()) {
-        averageConfidenceScore = 0f
-      }
-
-      FileUtils.deleteQuietly(file)
-      FileUtils.deleteQuietly(File(filename))
-
-      dao.response = results.map { SpeechRecognitionResultDao.from(it) }.toMutableList()
-      dao.transcript = finalTranscript
-      dao.confidenceScore = averageConfidenceScore
-
-      speechToTextRepository.save(dao)
-      return SpeechToTextResult(finalTranscript, averageConfidenceScore, languageCode)
     }
+
+    if (averageConfidenceScore.isNaN()) {
+      averageConfidenceScore = 0f
+    }
+
+    FileUtils.deleteQuietly(file)
+    FileUtils.deleteQuietly(File(filename))
+
+    dao.response = results.map { SpeechRecognitionResultDao.from(it) }.toMutableList()
+    dao.transcript = finalTranscript
+    dao.confidenceScore = averageConfidenceScore
+
+    speechToTextRepository.save(dao)
+    return SpeechToTextResult(finalTranscript, averageConfidenceScore, languageCode)
+  }
 
   private fun extractFileFromURL(audioURL: String): String {
     val split: Array<String> = audioURL.split("/".toRegex()).toTypedArray()
