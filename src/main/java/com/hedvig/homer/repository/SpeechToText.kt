@@ -6,17 +6,14 @@ import java.time.Instant
 import javax.annotation.Nullable
 import javax.persistence.CascadeType
 import javax.persistence.Column
-import javax.persistence.ElementCollection
-import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
-import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
 
 @Entity
-class SpeechToTextDao(
+class SpeechToText(
   @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
   val id: Long = 0
 ) {
@@ -27,7 +24,7 @@ class SpeechToTextDao(
   var aurioUri: String? = null
 
   @OneToMany(cascade = [(CascadeType.ALL)])
-  var response: MutableList<SpeechRecognitionResultDao> = arrayListOf()
+  var response: MutableList<SpeechRecognitionResultData> = arrayListOf()
 
   @Nullable
   @Column(columnDefinition = "TEXT")

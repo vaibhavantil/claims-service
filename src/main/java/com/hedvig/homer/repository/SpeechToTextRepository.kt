@@ -4,5 +4,5 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface SpeechToTextRepository : CrudRepository<SpeechToTextDao, Long> {
+interface SpeechToTextRepository : CrudRepository<SpeechToText, Long> {
 }
