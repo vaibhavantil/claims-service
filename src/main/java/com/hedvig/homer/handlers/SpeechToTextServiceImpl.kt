@@ -57,11 +57,6 @@ class SpeechToTextServiceImpl(
 
       val response = speechClient.longRunningRecognizeAsync(speechConfig.speechClientConfig, audio)
 
-      while (!response.isDone) {
-        println("Waiting for response...")
-        Thread.sleep(10000)
-      }
-
       val results: List<SpeechRecognitionResult> = response.get().resultsList
 
       var finalTranscript: String = "";
