@@ -1,6 +1,7 @@
 package com.hedvig.homer.repository
 
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionAlternative
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -11,6 +12,7 @@ class SpeechRecognitionAlternativesDao(
   @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
   val speechRecognitionAlternativesDaoId: Long = 0
 ) {
+  @Column(columnDefinition = "TEXT")
   var transcript: String? = null
   var confidence: Float? = null
 
