@@ -17,7 +17,7 @@ open class SpeechConfig {
     .setAudioChannelCount(1)
     .build()
 
-  @Bean
+  @Bean(destroyMethod = "close")
   open fun createSpeechClient() : SpeechClient {
     return SpeechClient.create()
   }
