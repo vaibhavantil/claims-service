@@ -38,6 +38,8 @@ class SpeechToTextServiceImpl(
   @Value("\${claims.voiceRecordingBucketName}")
   val bucketName: String
 ) : SpeechToTextService {
+
+  @Throws
   override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult =
     speechClient.use { speechClient ->
 
@@ -59,14 +61,22 @@ class SpeechToTextServiceImpl(
 
       val results: List<SpeechRecognitionResult> = response.get().resultsList
 
-      var finalTranscript: String = "";
-      var averageConfidenceScore: Float = 0f;
+      var finalTranscript = ""
+      var averageConfidenceScore = 0f
+      var languageCode = ""
 
       results.forEach { result ->
         val alternative = result.getAlternatives(0)
         logger.info("Transcription: ${alternative.transcript}]\n")
         finalTranscript += alternative.transcript + "\n"
         averageConfidenceScore += alternative.confidence
+        if (!languageCode.contains(result.languageCode)) {
+          if (languageCode.isEmpty()) {
+            languageCode = result.languageCode
+          } else {
+            languageCode += ", ${result.languageCode}"
+          }
+        }
       }
 
       averageConfidenceScore /= results.count()
@@ -78,12 +88,12 @@ class SpeechToTextServiceImpl(
       FileUtils.deleteQuietly(file)
       FileUtils.deleteQuietly(File(filename))
 
-      dao.response = results.map { it -> SpeechRecognitionResultDao.from(it) }.toMutableList()
+      dao.response = results.map { SpeechRecognitionResultDao.from(it) }.toMutableList()
       dao.transcript = finalTranscript
       dao.confidenceScore = averageConfidenceScore
 
       speechToTextRepository.save(dao)
-      return SpeechToTextResult(finalTranscript, averageConfidenceScore)
+      return SpeechToTextResult(finalTranscript, averageConfidenceScore, languageCode)
     }
 
   private fun extractFileFromURL(audioURL: String): String {

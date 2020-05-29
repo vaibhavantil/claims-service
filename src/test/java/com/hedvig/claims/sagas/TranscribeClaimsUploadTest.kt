@@ -30,7 +30,11 @@ class TranscribeClaimsUploadTest {
             "theUrl:)"
         )
 
-        every { textToSpeechService.convertSpeechToText("theUrl:)", "aClaimId") } returns SpeechToTextResult("A weird text", 1.0f)
+        every { textToSpeechService.convertSpeechToText("theUrl:)", "aClaimId") } returns SpeechToTextResult(
+            "A weird text",
+            1.0f,
+            languageCode
+        )
 
         sagaFixture
             .whenPublishingA(event)
@@ -45,7 +49,11 @@ class TranscribeClaimsUploadTest {
             "theUrl:)"
         )
 
-        every { textToSpeechService.convertSpeechToText(any(), any()) } returns SpeechToTextResult("A weird text", 1.0f)
+        every { textToSpeechService.convertSpeechToText(any(), any()) } returns SpeechToTextResult(
+            "A weird text",
+            1.0f,
+            languageCode
+        )
 
 
         sagaFixture

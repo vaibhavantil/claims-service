@@ -4,6 +4,7 @@ import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.Event;
+import com.hedvig.claims.query.Transcription;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -59,8 +60,8 @@ public class ClaimDTO extends HedvigBackofficeDTO {
       notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
     }
 
-    if(c.transcriptionText != null && c.transcriptionConfidence != null) {
-        this.transcriptions.add(new ClaimTranscriptions(c.transcriptionText,c.transcriptionConfidence));
+    for (Transcription t: c.transcriptions) {
+        transcriptions.add(new ClaimTranscriptions(t.getText(),t.getConfidenceScore(),t.getLanguageCode()));
     }
 
     events =

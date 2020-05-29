@@ -274,7 +274,7 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void on(AudioTranscribedCommand cmd) {
-    apply(new AudioTranscribedEvent(this.id, cmd.getText(), cmd.getConfidence()));
+    apply(new AudioTranscribedEvent(this.id, cmd.getText(), cmd.getConfidence(), cmd.getLanguageCode()));
   }
 
   // ----------------- Event sourcing --------------------- //
@@ -459,6 +459,6 @@ public class ClaimsAggregate {
 
   @EventSourcingHandler
     public void on(AudioTranscribedEvent event) {
-      this.transcritptionResut = new AudioTranscription(event.getText(), event.getConfidence());
+      this.transcritptionResut = new AudioTranscription(event.getText(), event.getConfidence(), event.getLanguageCode());
   }
 }
