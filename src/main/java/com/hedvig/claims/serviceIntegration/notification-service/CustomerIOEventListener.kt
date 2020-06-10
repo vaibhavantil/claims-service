@@ -1,4 +1,4 @@
-package com.hedvig.claims.serviceIntegration.customerio
+package com.hedvig.claims.serviceIntegration.`notification-service`
 
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates
 import com.hedvig.claims.events.BackofficeClaimCreatedEvent
@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Profile("customer.io")
-@ConditionalOnProperty(value = ["customerio.siteId", "customerio.apiKey"], matchIfMissing = false)
 @ProcessingGroup("CustomerIO")
 @Component
 class CustomerIOEventListener(

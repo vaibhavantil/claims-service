@@ -1,4 +1,4 @@
-package com.hedvig.claims.serviceIntegration.customerio
+package com.hedvig.claims.serviceIntegration.`notification-service`
 
 data class CustomerIOEvent(
     val name: String,

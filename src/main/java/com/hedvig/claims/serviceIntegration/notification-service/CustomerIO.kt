@@ -1,4 +1,4 @@
-package com.hedvig.claims.serviceIntegration.customerio
+package com.hedvig.claims.serviceIntegration.`notification-service`
 
 import java.time.Instant
 import java.time.ZoneId
@@ -10,11 +10,10 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Profile("customer.io")
-@ConditionalOnProperty(value = ["customerio.siteId", "customerio.apiKey"], matchIfMissing = false)
 @Component
 @EnableFeignClients
 class CustomerIO(
-    private val customerIOClient: CustomerIOClient
+    private val customerIOClient: NotificationServiceClient
 ) {
     val logger: Logger = LoggerFactory.getLogger(CustomerIO::class.java)
 
