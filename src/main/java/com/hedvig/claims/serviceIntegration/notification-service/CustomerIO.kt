@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 @EnableFeignClients
 class CustomerIO(
-    private val customerIOClient: NotificationServiceClient
+    private val notificationServiceClient: NotificationServiceClient
 ) {
     val logger: Logger = LoggerFactory.getLogger(CustomerIO::class.java)
 
