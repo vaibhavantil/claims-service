@@ -19,8 +19,8 @@ class CustomerIO(
 
     fun notifyClaimOpened(userId: String, claimId: String, timestamp: Instant) {
         try {
-            this.customerIOClient.postUserEvent(
-                userId = userId,
+            this.notificationServiceClient.postUserEvent(
+                memberId = userId,
                 event = CustomerIOEvent(
                     name = "claim_opened",
                     data = mapOf(
@@ -36,8 +36,8 @@ class CustomerIO(
 
     fun notifyClaimClosed(userId: String, claimId: String, timestamp: Instant) {
         try {
-            this.customerIOClient.postUserEvent(
-                userId = userId,
+            this.notificationServiceClient.postUserEvent(
+                memberId = userId,
                 event = CustomerIOEvent(
                     name = "claim_closed",
                     data = mapOf(
@@ -53,8 +53,8 @@ class CustomerIO(
 
     fun notifyClaimReopened(userId: String, claimId: String, timestamp: Instant) {
         try {
-            this.customerIOClient.postUserEvent(
-                userId = userId,
+            this.notificationServiceClient.postUserEvent(
+                memberId = userId,
                 event = CustomerIOEvent(
                     name = "claim_reopened",
                     data = mapOf(

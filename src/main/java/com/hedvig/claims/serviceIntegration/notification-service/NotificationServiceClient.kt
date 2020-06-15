@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody
 )
 interface NotificationServiceClient  {
 
-    @PostMapping("_/customerio/{userId}/events")
-    fun postUserEvent(@PathVariable userId: String, @RequestBody event: CustomerIOEvent): ResponseEntity<String>
+    @PostMapping("_/customerio/{memberId}/events")
+    fun postUserEvent(@PathVariable memberId: String, @RequestBody event: CustomerIOEvent): ResponseEntity<String>
 }
