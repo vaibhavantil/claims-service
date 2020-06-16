@@ -1,4 +1,4 @@
-package com.hedvig.claims.serviceIntegration.customerio
+package com.hedvig.claims.serviceIntegration.`notification-service`
 
 import java.time.Instant
 import java.time.ZoneId
@@ -10,18 +10,17 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Profile("customer.io")
-@ConditionalOnProperty(value = ["customerio.siteId", "customerio.apiKey"], matchIfMissing = false)
 @Component
 @EnableFeignClients
 class CustomerIO(
-    private val customerIOClient: CustomerIOClient
+    private val notificationServiceClient: NotificationServiceClient
 ) {
     val logger: Logger = LoggerFactory.getLogger(CustomerIO::class.java)
 
     fun notifyClaimOpened(userId: String, claimId: String, timestamp: Instant) {
         try {
-            this.customerIOClient.postUserEvent(
-                userId = userId,
+            this.notificationServiceClient.postUserEvent(
+                memberId = userId,
                 event = CustomerIOEvent(
                     name = "claim_opened",
                     data = mapOf(
@@ -37,8 +36,8 @@ class CustomerIO(
 
     fun notifyClaimClosed(userId: String, claimId: String, timestamp: Instant) {
         try {
-            this.customerIOClient.postUserEvent(
-                userId = userId,
+            this.notificationServiceClient.postUserEvent(
+                memberId = userId,
                 event = CustomerIOEvent(
                     name = "claim_closed",
                     data = mapOf(
@@ -54,8 +53,8 @@ class CustomerIO(
 
     fun notifyClaimReopened(userId: String, claimId: String, timestamp: Instant) {
         try {
-            this.customerIOClient.postUserEvent(
-                userId = userId,
+            this.notificationServiceClient.postUserEvent(
+                memberId = userId,
                 event = CustomerIOEvent(
                     name = "claim_reopened",
                     data = mapOf(
