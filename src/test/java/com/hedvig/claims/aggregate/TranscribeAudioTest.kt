@@ -15,13 +15,13 @@ class TranscribeAudioTest {
         val fixture = AggregateTestFixture(ClaimsAggregate::class.java)
 
         fixture
-            .given(ClaimCreatedEvent("id", "userId", "audioUrl"))
+            .given(ClaimCreatedEvent("id", "userId", "audioUrl", null))
             .`when`(AudioTranscribedCommand("id","A text", 1.0f, "sv-EN"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(AudioTranscribedEvent("id", "A text", 1.0f, "sv-EN"))
             .expectState {
-                assertThat(it.transcritptionResut.text).isEqualTo("A text")
-                assertThat(it.transcritptionResut.confidence).isEqualTo(1.0f)
+                assertThat(it.transcriptionResult.text).isEqualTo("A text")
+                assertThat(it.transcriptionResult.confidence).isEqualTo(1.0f)
             }
     }
 
@@ -31,14 +31,14 @@ class TranscribeAudioTest {
 
         fixture
             .given(
-                ClaimCreatedEvent("id", "userId", "audioUrl"),
+                ClaimCreatedEvent("id", "userId", "audioUrl", null),
                 AudioTranscribedCommand("id","A text", 1.0f, "sv-EN"))
             .`when`(AudioTranscribedCommand("id","A new text", 0.7f, "sv-EN"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(AudioTranscribedEvent("id", "A new text", 0.7f, "sv-EN"))
             .expectState {
-                assertThat(it.transcritptionResut.text).isEqualTo("A new text")
-                assertThat(it.transcritptionResut.confidence).isEqualTo(.7f)
+                assertThat(it.transcriptionResult.text).isEqualTo("A new text")
+                assertThat(it.transcriptionResult.confidence).isEqualTo(.7f)
             }
     }
 

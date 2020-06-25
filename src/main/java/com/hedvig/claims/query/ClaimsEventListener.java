@@ -49,7 +49,7 @@ public class ClaimsEventListener {
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
     claim.claimSource = ClaimSource.APP;
     claim.coveringEmployee = false;
-
+    claim.contractId = e.getContractId();
     // Init data structures
     claim.notes = new HashSet<Note>();
     claim.payments = new HashSet<Payment>();
@@ -74,6 +74,7 @@ public class ClaimsEventListener {
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
     claim.claimSource = e.getClaimSource();
     claim.coveringEmployee = false;
+    claim.contractId = e.contractId;
 
     // Init data structures
     claim.notes = new HashSet<Note>();

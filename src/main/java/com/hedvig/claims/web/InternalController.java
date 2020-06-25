@@ -23,31 +23,12 @@ import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
 import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
 import com.hedvig.claims.serviceIntegration.memberService.MemberService;
 import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
+import com.hedvig.claims.serviceIntegration.productPricing.Contract;
+import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.services.LinkFileToClaimService;
-import com.hedvig.claims.web.dto.ActiveClaimsDTO;
-import com.hedvig.claims.web.dto.ClaimDTO;
-import com.hedvig.claims.web.dto.ClaimDataType;
+import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
-import com.hedvig.claims.web.dto.ClaimFileCategoryDTO;
-import com.hedvig.claims.web.dto.ClaimFileFromAppDTO;
-import com.hedvig.claims.web.dto.ClaimStateDTO;
-import com.hedvig.claims.web.dto.ClaimType;
-import com.hedvig.claims.web.dto.ClaimTypeDTO;
-import com.hedvig.claims.web.dto.ClaimsByIdsDTO;
-import com.hedvig.claims.web.dto.ClaimsFilesUploadDTO;
-import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO;
-import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
-import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
-import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO;
-import com.hedvig.claims.web.dto.DataItemDTO;
-import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO;
-import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO;
-import com.hedvig.claims.web.dto.NoteDTO;
-import com.hedvig.claims.web.dto.PaymentDTO;
-import com.hedvig.claims.web.dto.PaymentRequestDTO;
-import com.hedvig.claims.web.dto.ReserveDTO;
-import com.hedvig.claims.web.dto.StartClaimAudioDTO;
 import lombok.val;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -90,6 +71,7 @@ public class InternalController {
     private final MemberService memberService;
     private final ClaimFileRepository claimFileRepository;
     private final LinkFileToClaimService linkFileToClaimService;
+    private final ProductPricingService productPricingService;
 
     @Autowired
     public InternalController(
@@ -99,7 +81,8 @@ public class InternalController {
         Meerkat meerkat,
         MemberService memberService,
         ClaimFileRepository claimFileRepository,
-        LinkFileToClaimService linkFileToClaimService
+        LinkFileToClaimService linkFileToClaimService,
+        ProductPricingService productPricingService
         ) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.claimsRepository = repository;
@@ -108,29 +91,69 @@ public class InternalController {
         this.memberService = memberService;
         this.claimFileRepository = claimFileRepository;
         this.linkFileToClaimService = linkFileToClaimService;
+        this.productPricingService = productPricingService;
+  }
+
+  @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
+  public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
+    log.info("Claim recieved!:" + requestData.toString());
+    UUID uid = UUID.randomUUID();
+
+    List<Contract> contracts = productPricingService.getContractsByMemberId(requestData.getUserId());
+
+    if(contracts.size() == 1) {
+      commandBus.sendAndWait(
+        new CreateClaimCommand(
+          uid.toString(),
+          requestData.getUserId(),
+          requestData.getAudioURL(),
+          contracts.get(0).getId()
+        )
+      );
+    } else {
+      commandBus.sendAndWait(
+        new CreateClaimCommand(
+          uid.toString(),
+          requestData.getUserId(),
+          requestData.getAudioURL(),
+          null
+        )
+      );
     }
 
-    @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
-    public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
-        log.info("Claim recieved!:" + requestData.toString());
-        UUID uid = UUID.randomUUID();
-        commandBus.sendAndWait(
-            new CreateClaimCommand(
-                uid.toString(),
-                requestData.getUserId(),
-                requestData.getAudioURL()));
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
+  @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)
+  public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
+    log.info("Claim recieved!:" + req.toString());
+    UUID uid = UUID.randomUUID();
 
-    @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)
-    public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
-        log.info("Claim recieved!:" + req.toString());
-        UUID uid = UUID.randomUUID();
-        commandBus.sendAndWait(new CreateBackofficeClaimCommand(uid.toString(), req.getMemberId(),
-            req.getRegistrationDate(), req.getClaimSource()));
-        return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uid));
+    List<Contract> contracts = productPricingService.getContractsByMemberId(req.getMemberId());
+
+    if(contracts.size() == 1) {
+      commandBus.sendAndWait(
+        new CreateBackofficeClaimCommand(
+          uid.toString(),
+          req.getMemberId(),
+          req.getRegistrationDate(),
+          req.getClaimSource(),
+          contracts.get(0).getId()
+        )
+      );
+    } else {
+      commandBus.sendAndWait(
+        new CreateBackofficeClaimCommand(
+          uid.toString(),
+          req.getMemberId(),
+          req.getRegistrationDate(),
+          req.getClaimSource(),
+          null
+        )
+      );
     }
+    return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uid));
+  }
 
     @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
     public ResponseEntity<List<ClaimDTO>> getClaimsList() {

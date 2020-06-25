@@ -3,14 +3,12 @@ package com.hedvig.claims.aggregates;
 import com.hedvig.claims.commands.*;
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.query.ClaimFile;
-import com.hedvig.claims.query.UploadSource;
 import com.hedvig.claims.web.dto.PaymentType;
-import java.util.List;
+
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
@@ -57,7 +55,8 @@ public class ClaimsAggregate {
   public boolean isCoveringEmployee;
 
   @NotNull
-  public AudioTranscription transcritptionResut;
+  public AudioTranscription transcriptionResult;
+  public UUID contractId;
 
   public ClaimsAggregate() {
     log.info("Instantiate ClaimsAggregate");
@@ -70,7 +69,10 @@ public class ClaimsAggregate {
       new ClaimCreatedEvent(
         command.getId(),
         command.getUserId(),
-        command.getAudioURL()));
+        command.getAudioURL(),
+        command.contactId
+      )
+    );
   }
 
   @CommandHandler
@@ -81,7 +83,10 @@ public class ClaimsAggregate {
         command.getId(),
         command.getMemberId(),
         command.getRegistrationDate(),
-        command.getClaimSource()));
+        command.getClaimSource(),
+        command.getContractId()
+      )
+    );
   }
 
   @CommandHandler
@@ -295,6 +300,7 @@ public class ClaimsAggregate {
     this.claimFiles = new ArrayList<>();
 
     this.isCoveringEmployee = false;
+    this.contractId = e.contractId;
   }
 
   @EventSourcingHandler
@@ -459,6 +465,6 @@ public class ClaimsAggregate {
 
   @EventSourcingHandler
     public void on(AudioTranscribedEvent event) {
-      this.transcritptionResut = new AudioTranscription(event.getText(), event.getConfidence(), event.getLanguageCode());
+      this.transcriptionResult = new AudioTranscription(event.getText(), event.getConfidence(), event.getLanguageCode());
   }
 }

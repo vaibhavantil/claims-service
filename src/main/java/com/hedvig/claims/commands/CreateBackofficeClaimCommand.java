@@ -6,6 +6,7 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Value
 public class CreateBackofficeClaimCommand {
@@ -14,4 +15,5 @@ public class CreateBackofficeClaimCommand {
   String memberId;
   Instant registrationDate;
   ClaimSource claimSource;
+  UUID contractId;
 }
