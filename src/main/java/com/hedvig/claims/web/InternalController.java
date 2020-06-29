@@ -1,19 +1,7 @@
 package com.hedvig.claims.web;
 
 import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
-import com.hedvig.claims.commands.AddDataItemCommand;
-import com.hedvig.claims.commands.AddNoteCommand;
-import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
-import com.hedvig.claims.commands.CreateClaimCommand;
-import com.hedvig.claims.commands.MarkClaimFileAsDeletedCommand;
-import com.hedvig.claims.commands.SetClaimFileCategoryCommand;
-import com.hedvig.claims.commands.UpdateClaimTypeCommand;
-import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
-import com.hedvig.claims.commands.UpdateClaimsStateCommand;
-import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand;
-import com.hedvig.claims.commands.UploadClaimFileCommand;
+import com.hedvig.claims.commands.*;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimFileRepository;
 import com.hedvig.claims.query.ClaimsRepository;
@@ -359,6 +347,20 @@ public class InternalController {
 
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping("/addContractIdToClaim")
+    public ResponseEntity<Void> addContractIdToClaim(@RequestBody ClaimContractInfo dto) {
+        log.info("Adding contractId {} to claim {} for member {}", dto.getContractId(), dto.getClaimId(), dto.getMemberId());
+
+        AddContractIdToClaimCommand command = new AddContractIdToClaimCommand(
+            dto.getMemberId(),
+            dto.getClaimId(),
+            dto.getContractId()
+        );
+
+        commandBus.sendAndWait(command);
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(path = "claimTypes", method = RequestMethod.GET)

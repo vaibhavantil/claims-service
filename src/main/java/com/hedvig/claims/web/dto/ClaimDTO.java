@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
@@ -31,6 +32,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
   public ClaimSource claimSource;
   public boolean coveringEmployee;
   public List<ClaimFileDTO> claimFiles = new ArrayList<>();
+  public UUID contractId;
 
   public ClaimDTO() {
   }
@@ -47,6 +49,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
     this.type = c.type;
     this.claimSource = c.claimSource;
     this.coveringEmployee = c.coveringEmployee;
+    this.contractId = c.contractId;
 
     for (Asset a : c.assets) {
       assets.add(new AssetDTO(a.id, c.id, a.date, a.userId));

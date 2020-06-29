@@ -70,7 +70,7 @@ public class ClaimsAggregate {
         command.getId(),
         command.getUserId(),
         command.getAudioURL(),
-        command.contactId
+        command.getContactId()
       )
     );
   }
@@ -228,6 +228,23 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
+  public void addContractIdToClaim(AddContractIdToClaimCommand cmd) {
+      log.info("adding contractId {} to claim {} for member {}",
+          cmd.getContractId(),
+          cmd.getClaimId(),
+          cmd.getMemberId()
+      );
+
+      ContractIdAddedToClaimEvent event = new ContractIdAddedToClaimEvent(
+          cmd.getMemberId(),
+          cmd.getClaimId(),
+          cmd.getContractId()
+      );
+
+      apply(event);
+  }
+
+  @CommandHandler
   public void on(UpdateEmployeeClaimStatusCommand cmd) {
     apply(new EmployeeClaimStatusUpdatedEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
   }
@@ -300,7 +317,7 @@ public class ClaimsAggregate {
     this.claimFiles = new ArrayList<>();
 
     this.isCoveringEmployee = false;
-    this.contractId = e.contractId;
+    this.contractId = e.getContractId();
   }
 
   @EventSourcingHandler
@@ -318,6 +335,7 @@ public class ClaimsAggregate {
     this.claimFiles = new ArrayList<>();
 
     this.isCoveringEmployee = false;
+    this.contractId = e.getContractId();
   }
 
   @EventSourcingHandler
@@ -466,5 +484,10 @@ public class ClaimsAggregate {
   @EventSourcingHandler
     public void on(AudioTranscribedEvent event) {
       this.transcriptionResult = new AudioTranscription(event.getText(), event.getConfidence(), event.getLanguageCode());
+  }
+
+  @EventSourcingHandler
+    public void on(ContractIdAddedToClaimEvent event) {
+      this.contractId = event.getContractId();
   }
 }

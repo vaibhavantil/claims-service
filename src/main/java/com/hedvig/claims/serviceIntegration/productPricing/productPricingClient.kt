@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable
     configuration = [FeignConfiguration::class]
 )
 interface ProductPricingClient {
-    @GetMapping("/members/{memberId}")
+    @GetMapping("/_/contracts/members/{memberId}")
     fun getContractsByMemberId(@PathVariable("memberId") memberId: String): ResponseEntity<List<Contract>>
 }

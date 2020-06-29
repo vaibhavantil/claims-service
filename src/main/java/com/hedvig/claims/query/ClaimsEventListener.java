@@ -74,7 +74,7 @@ public class ClaimsEventListener {
     claim.state = ClaimsAggregate.ClaimStates.OPEN;
     claim.claimSource = e.getClaimSource();
     claim.coveringEmployee = false;
-    claim.contractId = e.contractId;
+    claim.contractId = e.getContractId();
 
     // Init data structures
     claim.notes = new HashSet<Note>();
@@ -115,6 +115,15 @@ public class ClaimsEventListener {
     claim.addEvent(ev);
 
     claimRepository.save(claim);
+  }
+
+  @EventHandler
+  public void on(ContractIdAddedToClaimEvent event) {
+      log.info("ContractIdAddedToClaimEvent" + event);
+
+      ClaimEntity claim = findClaimOrThrowException(event.getClaimId());
+      claim.contractId = event.getContractId();
+      claimRepository.save(claim);
   }
 
   @EventSourcingHandler
