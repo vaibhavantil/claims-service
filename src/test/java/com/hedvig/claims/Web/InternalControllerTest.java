@@ -22,6 +22,8 @@ import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
+import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingClient;
+import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.serviceIntegration.ticketService.TicketService;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.services.LinkFileToClaimService;
@@ -79,6 +81,12 @@ public class InternalControllerTest {
 
   @MockBean
   private ClaimsQueryService claimsQueryService;
+
+  @MockBean
+  private ProductPricingService productPricingService;
+
+  @MockBean
+  private ProductPricingClient productPricingClient;
 
   @MockBean
   private Meerkat meerkat;
