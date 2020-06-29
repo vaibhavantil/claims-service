@@ -117,16 +117,21 @@ public class InternalController {
     log.info("Claim recieved!:" + req.toString());
     UUID uid = UUID.randomUUID();
 
-    List<Contract> contracts = productPricingService.getContractsByMemberId(req.getMemberId());
+    List<Contract> activeContracts =
+        productPricingService.getContractsByMemberId(
+            req.getMemberId()
+        ).stream().filter(
+            contract -> !contract.isTerminated()
+        ).collect(Collectors.toList());
 
-    if(contracts.size() == 1) {
+    if(activeContracts.size() == 1) {
       commandBus.sendAndWait(
         new CreateBackofficeClaimCommand(
           uid.toString(),
           req.getMemberId(),
           req.getRegistrationDate(),
           req.getClaimSource(),
-          contracts.get(0).getId()
+          activeContracts.get(0).getId()
         )
       );
     } else {
