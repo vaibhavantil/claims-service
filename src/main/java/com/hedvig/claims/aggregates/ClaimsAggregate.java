@@ -228,17 +228,17 @@ public class ClaimsAggregate {
   }
 
   @CommandHandler
-  public void addContractIdToClaim(AddContractIdToClaimCommand cmd) {
+  public void setContractForClaim(SetContractForClaimCommand cmd) {
       if (cmd.getContractId() == this.contractId) {
           return;
       }
-      log.info("adding contractId {} to claim {} for member {}",
+      log.info("setting contract contractId: {} to claim {} for member {}",
           cmd.getContractId(),
           cmd.getClaimId(),
           cmd.getMemberId()
       );
 
-      ContractIdAddedToClaimEvent event = new ContractIdAddedToClaimEvent(
+      ContractSetForClaimEvent event = new ContractSetForClaimEvent(
           cmd.getContractId(),
           cmd.getMemberId(),
           cmd.getClaimId()
@@ -490,7 +490,7 @@ public class ClaimsAggregate {
   }
 
   @EventSourcingHandler
-    public void on(ContractIdAddedToClaimEvent event) {
+    public void on(ContractSetForClaimEvent event) {
       this.contractId = event.getContractId();
   }
 }

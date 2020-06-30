@@ -39,7 +39,7 @@ class GetActiveContractsAtTimeOfClaimTest {
 
         every { productPricingService.getContractsByMemberId("123") } returns listOf(activeContract)
 
-        val contracts = productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), "123")
+        val contracts = productPricingFacade.getActiveContracts("123")
 
         assertThat(contracts.size).isEqualTo(1)
     }
@@ -73,7 +73,7 @@ class GetActiveContractsAtTimeOfClaimTest {
 
         every { productPricingService.getContractsByMemberId("123") } returns listOf(activeContract, terminatedContract1, terminatedContract2)
 
-        val contracts = productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), "123")
+        val contracts = productPricingFacade.getActiveContracts("123")
 
         assertThat(contracts.size).isEqualTo(1)
         assertThat(contracts[0].id).isEqualTo(UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"))
@@ -99,7 +99,7 @@ class GetActiveContractsAtTimeOfClaimTest {
 
         every { productPricingService.getContractsByMemberId("123") } returns listOf(activeContract, pendingContract)
 
-        val contracts = productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), "123")
+        val contracts = productPricingFacade.getActiveContracts("123")
 
         assertThat(contracts.size).isEqualTo(1)
         assertThat(contracts[0].id).isEqualTo(UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"))
@@ -138,7 +138,7 @@ class GetActiveContractsAtTimeOfClaimTest {
                 pendingContract
             )
 
-        val contracts = productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), "123")
+        val contracts = productPricingFacade.getActiveContracts("123")
 
         assertThat(contracts.size).isEqualTo(2)
         assertThat(contracts[0].id).isEqualTo(UUID.fromString("CB5E8298-1290-4B72-B3A3-9E546EA63153"))
@@ -169,7 +169,7 @@ class GetActiveContractsAtTimeOfClaimTest {
                     pendingContract
                 )
 
-        val contracts = productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), "123")
+        val contracts = productPricingFacade.getActiveContracts("123")
 
         assertThat(contracts.size).isEqualTo(0)
     }

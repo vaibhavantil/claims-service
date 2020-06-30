@@ -35,9 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,18 +91,16 @@ public class InternalController {
     log.info("Claim recieved!:" + requestData.toString());
     UUID uuid = UUID.randomUUID();
 
-      LocalDate claimRegistrationDate = requestData.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate();
+      List<Contract> activeContracts =
+          productPricingFacade.getActiveContracts(requestData.getUserId());
 
-      List<Contract> activeContractsAtTimeOfClaim =
-          productPricingFacade.getActiveContractAtTimeOfClaim(claimRegistrationDate, requestData.getUserId());
-
-    if(activeContractsAtTimeOfClaim.size() == 1) {
+    if(activeContracts.size() == 1) {
       commandBus.sendAndWait(
         new CreateClaimCommand(
           uuid.toString(),
           requestData.getUserId(),
           requestData.getAudioURL(),
-          activeContractsAtTimeOfClaim.get(0).getId()
+            activeContracts.get(0).getId()
         )
       );
     } else {
@@ -126,18 +122,16 @@ public class InternalController {
     log.info("Claim recieved!:" + req.toString());
     UUID uuid = UUID.randomUUID();
 
-      LocalDate claimRegistrationDate = req.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate();
-      List<Contract> activeContractsAtTimeOfClaim =
-          productPricingFacade.getActiveContractAtTimeOfClaim(claimRegistrationDate, req.getMemberId());
+    List<Contract> activeContracts = productPricingFacade.getActiveContracts(req.getMemberId());
 
-    if(activeContractsAtTimeOfClaim.size() == 1) {
+    if(activeContracts.size() == 1) {
       commandBus.sendAndWait(
         new CreateBackofficeClaimCommand(
           uuid.toString(),
           req.getMemberId(),
           req.getRegistrationDate(),
           req.getClaimSource(),
-            activeContractsAtTimeOfClaim.get(0).getId()
+            activeContracts.get(0).getId()
         )
       );
     } else {
@@ -360,9 +354,9 @@ public class InternalController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PostMapping("/addContractIdToClaim")
-    public ResponseEntity<Void> addContractIdToClaim(@RequestBody ClaimContractInfo dto) {
-        AddContractIdToClaimCommand command = new AddContractIdToClaimCommand(
+    @PostMapping("/setContractForClaim")
+    public ResponseEntity<Void> setContractForClaim(@RequestBody ClaimContractInfo dto) {
+        SetContractForClaimCommand command = new SetContractForClaimCommand(
             dto.getClaimId(),
             dto.getMemberId(),
             dto.getContractId()
@@ -375,20 +369,20 @@ public class InternalController {
     @PostMapping
     public ResponseEntity<Void> backfillAddingContractIdToClaims() {
         List<ClaimEntity> claimsWithContractIdOfNull = claimsRepository.findClaimsWithContractIdOfNull();
-
         claimsWithContractIdOfNull.forEach(claim -> {
-            LocalDate claimRegistrationDate = claim.registrationDate.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate();
+            List<Contract> contracts = productPricingService.getContractsByMemberId(claim.userId);
 
-            List<Contract> activeContractsAtTimeOfClaim =
-                productPricingFacade.getActiveContractAtTimeOfClaim(claimRegistrationDate, claim.userId);
-
-            if(activeContractsAtTimeOfClaim.size() == 1) {
-                AddContractIdToClaimCommand command = new AddContractIdToClaimCommand(
+            if (contracts.size() == 1) {
+                SetContractForClaimCommand command = new SetContractForClaimCommand(
                     claim.id,
                     claim.userId,
-                    activeContractsAtTimeOfClaim.get(0).getId()
+                    contracts.get(0).getId()
                 );
                 commandBus.sendAndWait(command);
+            } else if (contracts.size() == 0) {
+                log.error("Unable to automatically set contract to claim since no contracts are present (memberId={}, claimId={})", claim.userId, claim.id);
+            } else {
+                log.error("Unable to automatically set contract to claim since more than one contract is present (memberId={}, claimId={})", claim.userId, claim.id);
             }
         });
 

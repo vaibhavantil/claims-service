@@ -118,7 +118,7 @@ public class ClaimsEventListener {
   }
 
   @EventHandler
-  public void on(ContractIdAddedToClaimEvent event) {
+  public void on(ContractSetForClaimEvent event) {
       log.info("ContractIdAddedToClaimEvent" + event);
 
       ClaimEntity claim = findClaimOrThrowException(event.getClaimId());
