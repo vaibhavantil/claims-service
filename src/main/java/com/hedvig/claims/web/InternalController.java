@@ -366,8 +366,8 @@ public class InternalController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping
-    public ResponseEntity<Void> backfillAddingContractIdToClaims() {
+    @PostMapping("/backfillSetContractsForClaims")
+    public ResponseEntity<Void> backfillSetContractsForClaims() {
         List<ClaimEntity> claimsWithContractIdOfNull = claimsRepository.findClaimsWithContractIdOfNull();
         claimsWithContractIdOfNull.forEach(claim -> {
             List<Contract> contracts = productPricingService.getContractsByMemberId(claim.userId);
