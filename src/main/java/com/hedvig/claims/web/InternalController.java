@@ -14,6 +14,7 @@ import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
 import com.hedvig.claims.serviceIntegration.productPricing.Contract;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.services.ClaimsQueryService;
+import com.hedvig.claims.services.ProductPricingFacade;
 import com.hedvig.claims.services.LinkFileToClaimService;
 import com.hedvig.claims.web.dto.*;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +62,7 @@ public class InternalController {
     private final ClaimFileRepository claimFileRepository;
     private final LinkFileToClaimService linkFileToClaimService;
     private final ProductPricingService productPricingService;
+    private final ProductPricingFacade productPricingFacade;
 
     @Autowired
     public InternalController(
@@ -70,7 +73,8 @@ public class InternalController {
         MemberService memberService,
         ClaimFileRepository claimFileRepository,
         LinkFileToClaimService linkFileToClaimService,
-        ProductPricingService productPricingService
+        ProductPricingService productPricingService,
+        ProductPricingFacade productPricingFacade
         ) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.claimsRepository = repository;
@@ -80,28 +84,30 @@ public class InternalController {
         this.claimFileRepository = claimFileRepository;
         this.linkFileToClaimService = linkFileToClaimService;
         this.productPricingService = productPricingService;
+        this.productPricingFacade = productPricingFacade;
   }
 
   @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
   public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
     log.info("Claim recieved!:" + requestData.toString());
-    UUID uid = UUID.randomUUID();
+    UUID uuid = UUID.randomUUID();
 
-    List<Contract> contracts = productPricingService.getContractsByMemberId(requestData.getUserId());
+      List<Contract> activeContractsAtTimeOfClaim =
+          productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), requestData.getUserId());
 
-    if(contracts.size() == 1) {
+    if(activeContractsAtTimeOfClaim.size() == 1) {
       commandBus.sendAndWait(
         new CreateClaimCommand(
-          uid.toString(),
+          uuid.toString(),
           requestData.getUserId(),
           requestData.getAudioURL(),
-          contracts.get(0).getId()
+          activeContractsAtTimeOfClaim.get(0).getId()
         )
       );
     } else {
       commandBus.sendAndWait(
         new CreateClaimCommand(
-          uid.toString(),
+          uuid.toString(),
           requestData.getUserId(),
           requestData.getAudioURL(),
           null
@@ -115,29 +121,25 @@ public class InternalController {
   @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)
   public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
     log.info("Claim recieved!:" + req.toString());
-    UUID uid = UUID.randomUUID();
+    UUID uuid = UUID.randomUUID();
 
-    List<Contract> activeContracts =
-        productPricingService.getContractsByMemberId(
-            req.getMemberId()
-        ).stream().filter(
-            contract -> !contract.isTerminated()
-        ).collect(Collectors.toList());
+      List<Contract> activeContractsAtTimeOfClaim =
+          productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), req.getMemberId());
 
-    if(activeContracts.size() == 1) {
+    if(activeContractsAtTimeOfClaim.size() == 1) {
       commandBus.sendAndWait(
         new CreateBackofficeClaimCommand(
-          uid.toString(),
+          uuid.toString(),
           req.getMemberId(),
           req.getRegistrationDate(),
           req.getClaimSource(),
-          activeContracts.get(0).getId()
+            activeContractsAtTimeOfClaim.get(0).getId()
         )
       );
     } else {
       commandBus.sendAndWait(
         new CreateBackofficeClaimCommand(
-          uid.toString(),
+          uuid.toString(),
           req.getMemberId(),
           req.getRegistrationDate(),
           req.getClaimSource(),
@@ -145,7 +147,7 @@ public class InternalController {
         )
       );
     }
-    return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uid));
+    return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uuid));
   }
 
     @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
@@ -356,15 +358,34 @@ public class InternalController {
 
     @PostMapping("/addContractIdToClaim")
     public ResponseEntity<Void> addContractIdToClaim(@RequestBody ClaimContractInfo dto) {
-        log.info("Adding contractId {} to claim {} for member {}", dto.getContractId(), dto.getClaimId(), dto.getMemberId());
-
         AddContractIdToClaimCommand command = new AddContractIdToClaimCommand(
-            dto.getMemberId(),
             dto.getClaimId(),
+            dto.getMemberId(),
             dto.getContractId()
         );
 
         commandBus.sendAndWait(command);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> backfillAddingContractIdToClaims() {
+        List<ClaimEntity> claimsWithContractIdOfNull = claimsRepository.findClaimsWithContractIdOfNull();
+
+        claimsWithContractIdOfNull.forEach(claim -> {
+            List<Contract> activeContractsAtTimeOfClaim =
+                productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), claim.userId);
+
+            if(activeContractsAtTimeOfClaim.size() == 1) {
+                AddContractIdToClaimCommand command = new AddContractIdToClaimCommand(
+                    claim.id,
+                    claim.userId,
+                    activeContractsAtTimeOfClaim.get(0).getId()
+                );
+                commandBus.sendAndWait(command);
+            }
+        });
+
         return ResponseEntity.ok().build();
     }
 

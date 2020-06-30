@@ -6,6 +6,8 @@ logging:
     com:
       hedvig: DEBUG
 
+hedvig.productPricing.url:productPricing: localhost:4085
+
 spring:
   jpa:
     generate-ddl: true

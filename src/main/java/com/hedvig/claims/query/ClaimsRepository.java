@@ -24,4 +24,7 @@ public interface ClaimsRepository extends JpaRepository<ClaimEntity, String> {
 
   @Query("SELECT c from ClaimEntity c where type = :type")
   List<ClaimEntity> findByType(String type);
+
+  @Query("FROM ClaimEntity ce WHERE contract_id IS NULL")
+  List<ClaimEntity> findClaimsWithContractIdOfNull();
 }

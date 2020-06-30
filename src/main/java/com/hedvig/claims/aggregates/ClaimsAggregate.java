@@ -229,6 +229,9 @@ public class ClaimsAggregate {
 
   @CommandHandler
   public void addContractIdToClaim(AddContractIdToClaimCommand cmd) {
+      if (cmd.getContractId() == this.contractId) {
+          return;
+      }
       log.info("adding contractId {} to claim {} for member {}",
           cmd.getContractId(),
           cmd.getClaimId(),
@@ -236,9 +239,9 @@ public class ClaimsAggregate {
       );
 
       ContractIdAddedToClaimEvent event = new ContractIdAddedToClaimEvent(
+          cmd.getContractId(),
           cmd.getMemberId(),
-          cmd.getClaimId(),
-          cmd.getContractId()
+          cmd.getClaimId()
       );
 
       apply(event);
