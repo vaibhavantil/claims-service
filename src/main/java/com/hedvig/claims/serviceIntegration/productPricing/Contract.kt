@@ -4,5 +4,5 @@ import java.util.*
 
 data class Contract(
     val id: UUID,
-    val contractStatus: ContractStatus
+    val status: ContractStatus
 )

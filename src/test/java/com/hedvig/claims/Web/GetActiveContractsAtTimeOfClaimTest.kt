@@ -30,7 +30,7 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 1 contract when member had 1 active contract at the time of claim`() {
         val activeContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            contractStatus = ContractStatus.ACTIVE
+            status = ContractStatus.ACTIVE
         )
 
         every { productPricingService.getContractsByMemberId("123") } returns listOf(activeContract)
@@ -44,17 +44,17 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 1 contract when member had 1 active contract and 2 terminated contracts at the time of claim`() {
         val activeContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            contractStatus = ContractStatus.ACTIVE
+            status = ContractStatus.ACTIVE
         )
 
         val terminatedContract1 = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            contractStatus = ContractStatus.TERMINATED
+            status = ContractStatus.TERMINATED
         )
 
         val terminatedContract2 = Contract(
             id = UUID.fromString("CB5E8298-1290-4B72-B3A3-9E546EA63153"),
-            contractStatus = ContractStatus.TERMINATED
+            status = ContractStatus.TERMINATED
 
         )
 
@@ -70,12 +70,12 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 1 contract when member had 1 active contract and 1 pending contract at the time of claim`() {
         val activeContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            contractStatus = ContractStatus.ACTIVE
+            status = ContractStatus.ACTIVE
         )
 
         val pendingContract = Contract(
             id = UUID.fromString("CB5E8298-1290-4B72-B3A3-9E546EA63153"),
-            contractStatus = ContractStatus.PENDING
+            status = ContractStatus.PENDING
         )
 
         every { productPricingService.getContractsByMemberId("123") } returns listOf(activeContract, pendingContract)
@@ -90,17 +90,17 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 2 contracts when member had 2 active contracts and 1 pending contract at the time of claim`() {
         val activeContract1 = Contract(
             id = UUID.fromString("CB5E8298-1290-4B72-B3A3-9E546EA63153"),
-            contractStatus = ContractStatus.ACTIVE
+            status = ContractStatus.ACTIVE
         )
 
         val activeContract2 = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            contractStatus = ContractStatus.ACTIVE
+            status = ContractStatus.ACTIVE
         )
 
         val pendingContract = Contract(
             id = UUID.fromString("4C51F946-5096-4C32-BE92-93F6DE9EBD5D"),
-            contractStatus = ContractStatus.PENDING
+            status = ContractStatus.PENDING
         )
 
         every { productPricingService.getContractsByMemberId("123") } returns
@@ -121,12 +121,12 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return empty list when member had 0 active contracts, 1 terminated contract and 1 pending contract at the time of claim`() {
         val terminatedContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            contractStatus = ContractStatus.TERMINATED
+            status = ContractStatus.TERMINATED
         )
 
         val pendingContract = Contract(
             id = UUID.fromString("4C51F946-5096-4C32-BE92-93F6DE9EBD5D"),
-            contractStatus = ContractStatus.PENDING
+            status = ContractStatus.PENDING
         )
 
         every { productPricingService.getContractsByMemberId("123") } returns

@@ -10,10 +10,14 @@ class ProductPricingFacadeImpl(
     val productPricingService: ProductPricingService
 ): ProductPricingFacade {
     override fun getActiveContracts(memberId: String): List<Contract> {
-        val activeContractStates = listOf(ContractStatus.ACTIVE, ContractStatus.TERMINATED_TODAY, ContractStatus.TERMINATED_IN_FUTURE)
+        val activeContractStates = listOf(
+            ContractStatus.ACTIVE,
+            ContractStatus.TERMINATED_TODAY,
+            ContractStatus.TERMINATED_IN_FUTURE
+        )
 
         return productPricingService.getContractsByMemberId(memberId).filter { contract ->
-            activeContractStates.contains(contract.contractStatus)
+            activeContractStates.contains(contract.status)
         }
     }
 }
