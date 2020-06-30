@@ -1,6 +1,8 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.events.*;
+import com.hedvig.claims.serviceIntegration.productPricing.Contract;
+import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
@@ -15,10 +17,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @Component
@@ -53,7 +52,8 @@ public class ClaimReportHistoryEventListener {
         timestamp.atZone(ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate(),
         OPEN,
         false,
-        timestamp
+        timestamp,
+        e.getContractId()
       )
     );
   }
@@ -61,7 +61,6 @@ public class ClaimReportHistoryEventListener {
   @EventHandler
   public void on(BackofficeClaimCreatedEvent e, @Timestamp Instant timestamp) {
     log.info("Claim {} created from backoffice", e.getId());
-
     claimReportHistoryRepository.save(
       new ClaimReportHistoryEntity(
         e.getId(),
@@ -70,7 +69,8 @@ public class ClaimReportHistoryEventListener {
         e.getRegistrationDate().atZone(ZoneId.of(EUROPE_STOCKHOLM)).toLocalDate(),
         OPEN,
         false,
-        timestamp
+        timestamp,
+        e.getContractId()
       )
     );
   }

@@ -37,7 +37,12 @@ public class ClaimReportHistoryEventListenerTest {
 
   @Test
   public void createsClaim() {
-    final ClaimCreatedEvent e = new ClaimCreatedEvent(randomUUID().toString(), "123", "s3://blargh");
+    final ClaimCreatedEvent e = new ClaimCreatedEvent(
+      randomUUID().toString(),
+      "123",
+      "s3://blargh",
+      null
+    );
 
     listener.on(e, NOW);
 
@@ -55,7 +60,8 @@ public class ClaimReportHistoryEventListenerTest {
       randomUUID().toString(),
       "123",
       A_DAY,
-      ClaimSource.INTERCOM
+      ClaimSource.INTERCOM,
+      null
     );
 
     listener.on(e, NOW);
@@ -84,7 +90,8 @@ public class ClaimReportHistoryEventListenerTest {
       NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
       ClaimsAggregate.ClaimStates.OPEN.toString(),
       false,
-      NOW.minusSeconds(3600 * 24)
+      NOW.minusSeconds(3600 * 24),
+      null
     );
     existingEntity.setReserved(BigDecimal.TEN);
     final List<ClaimReportHistoryEntity> existingEntities = List.of(existingEntity);
@@ -119,7 +126,8 @@ public class ClaimReportHistoryEventListenerTest {
         NOW.atZone(ZoneId.of("UTC")).toLocalDate().minusDays(1),
         ClaimsAggregate.ClaimStates.OPEN.toString(),
         false,
-        NOW.minusSeconds(3600 * 24)
+        NOW.minusSeconds(3600 * 24),
+        null
       )
     );
     when(repository.findByClaimId(e.getClaimID())).thenReturn(existingEntities);

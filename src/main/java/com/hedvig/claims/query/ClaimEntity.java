@@ -3,15 +3,14 @@ package com.hedvig.claims.query;
 import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.util.EnumMapChecker;
 import com.hedvig.claims.web.dto.ClaimSortColumn;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.EnumMap;
-import java.util.Set;
 
 @Entity
 public class ClaimEntity {
@@ -23,6 +22,8 @@ public class ClaimEntity {
   public String userId;
   public String audioURL;
   public Instant registrationDate;
+
+  public UUID contractId;
 
   @Enumerated(EnumType.STRING)
   public ClaimsAggregate.ClaimStates state;

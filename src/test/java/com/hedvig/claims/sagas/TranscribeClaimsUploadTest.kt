@@ -27,7 +27,8 @@ class TranscribeClaimsUploadTest {
         val event = ClaimCreatedEvent(
             "aClaimId",
             "aUserId",
-            "theUrl:)"
+            "theUrl:)",
+            null
         )
 
         every { textToSpeechService.convertSpeechToText("theUrl:)", "aClaimId") } returns SpeechToTextResult(
@@ -46,7 +47,8 @@ class TranscribeClaimsUploadTest {
         val event = ClaimCreatedEvent(
             "aClaimId",
             "aUserId",
-            "theUrl:)"
+            "theUrl:)",
+            null
         )
 
         every { textToSpeechService.convertSpeechToText(any(), any()) } returns SpeechToTextResult(
@@ -66,7 +68,8 @@ class TranscribeClaimsUploadTest {
         val event = ClaimCreatedEvent(
             "aClaimId",
             "aUserId",
-            "theUrl:)"
+            "theUrl:)",
+            null
         )
 
         every { textToSpeechService.convertSpeechToText(any(), any()) } throws RuntimeException("Error")

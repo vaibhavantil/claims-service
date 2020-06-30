@@ -1,8 +1,6 @@
 package com.hedvig.claims.config;
 
-import com.hedvig.claims.events.upcast.ClaimCreatedEvent_v1;
-import com.hedvig.claims.events.upcast.ClaimFileUploadedEventUpcaster_v1;
-import com.hedvig.claims.events.upcast.PaymentAddedEvent_v1;
+import com.hedvig.claims.events.upcast.*;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
 import org.axonframework.messaging.StreamableMessageSource;

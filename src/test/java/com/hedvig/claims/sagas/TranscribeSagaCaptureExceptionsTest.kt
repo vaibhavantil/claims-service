@@ -15,6 +15,6 @@ class TranscribeSagaCaptureExceptionsTest {
 
         every { saga.speechToTextService.convertSpeechToText(any(), any()) } throws RuntimeException("Error")
 
-        saga.onClaimCreated(ClaimCreatedEvent("", "", ""))
+        saga.onClaimCreated(ClaimCreatedEvent("", "", "", null))
     }
 }

@@ -28,6 +28,7 @@ public class ClaimReportHistoryEntity {
   private String claimStatus;
   private boolean coveringEmployee;
   private Instant timeOfKnowledge;
+  private UUID contractId;
 
   public ClaimReportHistoryEntity(
     String claimId,
@@ -36,7 +37,8 @@ public class ClaimReportHistoryEntity {
     LocalDate dateOfLoss,
     String claimStatus,
     boolean coveringEmployee,
-    Instant timeOfKnowledge) {
+    Instant timeOfKnowledge,
+    UUID contractId) {
     this.setClaimHistoryId(UUID.randomUUID());
     this.claimId = claimId;
     this.memberId = memberId;
@@ -45,6 +47,7 @@ public class ClaimReportHistoryEntity {
     this.claimStatus = claimStatus;
     this.coveringEmployee = coveringEmployee;
     this.timeOfKnowledge = timeOfKnowledge;
+    this.contractId = contractId;
   }
 
   public static ClaimReportHistoryEntity copy(ClaimReportHistoryEntity old, Instant timeOfKnowledge) {
@@ -61,7 +64,8 @@ public class ClaimReportHistoryEntity {
       old.getCurrency(),
       old.getClaimStatus(),
       old.isCoveringEmployee(),
-      timeOfKnowledge
+      timeOfKnowledge,
+      old.getContractId()
     );
   }
 }
