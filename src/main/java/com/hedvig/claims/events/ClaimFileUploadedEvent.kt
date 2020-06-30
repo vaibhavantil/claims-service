@@ -14,5 +14,5 @@ data class ClaimFileUploadedEvent(
     val contentType: String,
     val uploadedAt: Instant,
     val fileName: String,
-    val uploadSource: UploadSource
+    val uploadSource: UploadSource?
 )

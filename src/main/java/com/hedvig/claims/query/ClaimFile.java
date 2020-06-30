@@ -11,31 +11,32 @@ import org.springframework.lang.Nullable;
 @Data
 @Table(name = "claim_file")
 public class ClaimFile {
-  @Id
-  private UUID id;
+    @Id
+    private UUID id;
 
-  private String fileName;
+    private String fileName;
 
-  private String contentType;
+    private String contentType;
 
-  private Instant uploadedAt;
+    private Instant uploadedAt;
 
-  private String bucket;
+    private String bucket;
 
-  private String key;
+    private String key;
 
-  private Boolean markedAsDeleted = false;
+    private Boolean markedAsDeleted = false;
 
-  @Nullable
-  private String markedAsDeletedBy;
+    @Nullable
+    private String markedAsDeletedBy;
 
-  @Nullable
-  private Instant markedAsDeletedAt;
+    @Nullable
+    private Instant markedAsDeletedAt;
 
-  @Nullable
-  private String category;
+    @Nullable
+    private String category;
 
-  @Enumerated(EnumType.STRING)
-  @Column(columnDefinition ="varchar(50) default 'MANUAL'")
-  private UploadSource uploadSource;
+    @Nullable
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(50) default 'MANUAL'")
+    private UploadSource uploadSource;
 }
