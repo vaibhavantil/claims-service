@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,8 +93,10 @@ public class InternalController {
     log.info("Claim recieved!:" + requestData.toString());
     UUID uuid = UUID.randomUUID();
 
+      LocalDate claimRegistrationDate = requestData.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate();
+
       List<Contract> activeContractsAtTimeOfClaim =
-          productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), requestData.getUserId());
+          productPricingFacade.getActiveContractAtTimeOfClaim(claimRegistrationDate, requestData.getUserId());
 
     if(activeContractsAtTimeOfClaim.size() == 1) {
       commandBus.sendAndWait(
@@ -123,8 +126,9 @@ public class InternalController {
     log.info("Claim recieved!:" + req.toString());
     UUID uuid = UUID.randomUUID();
 
+      LocalDate claimRegistrationDate = req.getRegistrationDate().atZone(ZoneId.of("Europe/Stockholm")).toLocalDate();
       List<Contract> activeContractsAtTimeOfClaim =
-          productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), req.getMemberId());
+          productPricingFacade.getActiveContractAtTimeOfClaim(claimRegistrationDate, req.getMemberId());
 
     if(activeContractsAtTimeOfClaim.size() == 1) {
       commandBus.sendAndWait(
@@ -373,8 +377,10 @@ public class InternalController {
         List<ClaimEntity> claimsWithContractIdOfNull = claimsRepository.findClaimsWithContractIdOfNull();
 
         claimsWithContractIdOfNull.forEach(claim -> {
+            LocalDate claimRegistrationDate = claim.registrationDate.atZone(ZoneId.of("Europe/Stockholm")).toLocalDate();
+
             List<Contract> activeContractsAtTimeOfClaim =
-                productPricingFacade.getActiveContractAtTimeOfClaim(LocalDate.now(), claim.userId);
+                productPricingFacade.getActiveContractAtTimeOfClaim(claimRegistrationDate, claim.userId);
 
             if(activeContractsAtTimeOfClaim.size() == 1) {
                 AddContractIdToClaimCommand command = new AddContractIdToClaimCommand(
