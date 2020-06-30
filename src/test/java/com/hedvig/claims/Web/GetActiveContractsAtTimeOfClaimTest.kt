@@ -10,7 +10,6 @@ import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
-import java.time.LocalDate
 import java.util.*
 
 
@@ -31,9 +30,6 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 1 contract when member had 1 active contract at the time of claim`() {
         val activeContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            masterInception = LocalDate.now().minusMonths(1),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.ACTIVE
         )
 
@@ -48,25 +44,16 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 1 contract when member had 1 active contract and 2 terminated contracts at the time of claim`() {
         val activeContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            masterInception = LocalDate.now().minusMonths(1),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.ACTIVE
         )
 
         val terminatedContract1 = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            masterInception = LocalDate.now().minusMonths(12),
-            isTerminated = true,
-            terminationDate = LocalDate.now().minusMonths(6),
             contractStatus = ContractStatus.TERMINATED
         )
 
         val terminatedContract2 = Contract(
             id = UUID.fromString("CB5E8298-1290-4B72-B3A3-9E546EA63153"),
-            masterInception = LocalDate.now().minusMonths(5),
-            isTerminated = true,
-            terminationDate = LocalDate.now().minusMonths(2),
             contractStatus = ContractStatus.TERMINATED
 
         )
@@ -83,17 +70,11 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 1 contract when member had 1 active contract and 1 pending contract at the time of claim`() {
         val activeContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            masterInception = LocalDate.now().minusMonths(1),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.ACTIVE
         )
 
         val pendingContract = Contract(
             id = UUID.fromString("CB5E8298-1290-4B72-B3A3-9E546EA63153"),
-            masterInception = LocalDate.now().plusMonths(1),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.PENDING
         )
 
@@ -109,25 +90,16 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return list with 2 contracts when member had 2 active contracts and 1 pending contract at the time of claim`() {
         val activeContract1 = Contract(
             id = UUID.fromString("CB5E8298-1290-4B72-B3A3-9E546EA63153"),
-            masterInception = LocalDate.now().minusMonths(6),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.ACTIVE
         )
 
         val activeContract2 = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            masterInception = LocalDate.now().minusMonths(1),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.ACTIVE
         )
 
         val pendingContract = Contract(
             id = UUID.fromString("4C51F946-5096-4C32-BE92-93F6DE9EBD5D"),
-            masterInception = LocalDate.now().plusMonths(1),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.PENDING
         )
 
@@ -149,17 +121,11 @@ class GetActiveContractsAtTimeOfClaimTest {
     fun `should return empty list when member had 0 active contracts, 1 terminated contract and 1 pending contract at the time of claim`() {
         val terminatedContract = Contract(
             id = UUID.fromString("E4F822DA-E7C2-40D3-B085-34D6F9B3D8CA"),
-            masterInception = LocalDate.now().minusMonths(12),
-            isTerminated = true,
-            terminationDate = LocalDate.now().minusMonths(6),
             contractStatus = ContractStatus.TERMINATED
         )
 
         val pendingContract = Contract(
             id = UUID.fromString("4C51F946-5096-4C32-BE92-93F6DE9EBD5D"),
-            masterInception = LocalDate.now().plusMonths(1),
-            isTerminated = false,
-            terminationDate = null,
             contractStatus = ContractStatus.PENDING
         )
 
