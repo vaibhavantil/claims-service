@@ -15,7 +15,7 @@ class ClaimFileUploadedEventUpcaster_v1 : SingleEventUpcaster() {
     override fun doUpcast(intermediateRepresentation: IntermediateEventRepresentation): IntermediateEventRepresentation {
 
         return intermediateRepresentation.upcastPayload(
-            targetType,
+            outputType,
             org.dom4j.Document::class.java
         ) { document ->
             val element = document.rootElement
@@ -27,6 +27,10 @@ class ClaimFileUploadedEventUpcaster_v1 : SingleEventUpcaster() {
     companion object {
         private val targetType = SimpleSerializedType(
             ClaimFileUploadedEvent::class.java.typeName, null
+        )
+
+        private val outputType = SimpleSerializedType(
+            ClaimFileUploadedEvent::class.java.typeName, "1.0"
         )
     }
 }
