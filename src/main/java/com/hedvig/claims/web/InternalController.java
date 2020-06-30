@@ -378,7 +378,11 @@ public class InternalController {
                     claim.userId,
                     contracts.get(0).getId()
                 );
-                commandBus.sendAndWait(command);
+                try {
+                    commandBus.sendAndWait(command);
+                } catch (Exception e) {
+                    log.error("Unable to automatically set contract to claim for (memberId={}, claimId={}))", claim.userId, claim.id, e);
+                }
             } else if (contracts.size() == 0) {
                 log.error("Unable to automatically set contract to claim since no contracts are present (memberId={}, claimId={})", claim.userId, claim.id);
             } else {
