@@ -74,7 +74,7 @@ public class InternalController {
         LinkFileToClaimService linkFileToClaimService,
         ProductPricingService productPricingService,
         ProductPricingFacade productPricingFacade
-        ) {
+    ) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.claimsRepository = repository;
         this.claimsQueryService = claimsQueryService;
@@ -84,69 +84,69 @@ public class InternalController {
         this.linkFileToClaimService = linkFileToClaimService;
         this.productPricingService = productPricingService;
         this.productPricingFacade = productPricingFacade;
-  }
-
-  @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
-  public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
-    log.info("Claim recieved!:" + requestData.toString());
-    UUID uuid = UUID.randomUUID();
-
-      List<Contract> activeContracts =
-          productPricingFacade.getActiveContracts(requestData.getUserId());
-
-    if(activeContracts.size() == 1) {
-      commandBus.sendAndWait(
-        new CreateClaimCommand(
-          uuid.toString(),
-          requestData.getUserId(),
-          requestData.getAudioURL(),
-            activeContracts.get(0).getId()
-        )
-      );
-    } else {
-      commandBus.sendAndWait(
-        new CreateClaimCommand(
-          uuid.toString(),
-          requestData.getUserId(),
-          requestData.getAudioURL(),
-          null
-        )
-      );
     }
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
+    @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
+    public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
+        log.info("Claim recieved!:" + requestData.toString());
+        UUID uuid = UUID.randomUUID();
 
-  @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)
-  public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
-    log.info("Claim recieved!:" + req.toString());
-    UUID uuid = UUID.randomUUID();
+        List<Contract> activeContracts =
+            productPricingFacade.getActiveContracts(requestData.getUserId());
 
-    List<Contract> activeContracts = productPricingFacade.getActiveContracts(req.getMemberId());
+        if (activeContracts.size() == 1) {
+            commandBus.sendAndWait(
+                new CreateClaimCommand(
+                    uuid.toString(),
+                    requestData.getUserId(),
+                    requestData.getAudioURL(),
+                    activeContracts.get(0).getId()
+                )
+            );
+        } else {
+            commandBus.sendAndWait(
+                new CreateClaimCommand(
+                    uuid.toString(),
+                    requestData.getUserId(),
+                    requestData.getAudioURL(),
+                    null
+                )
+            );
+        }
 
-    if(activeContracts.size() == 1) {
-      commandBus.sendAndWait(
-        new CreateBackofficeClaimCommand(
-          uuid.toString(),
-          req.getMemberId(),
-          req.getRegistrationDate(),
-          req.getClaimSource(),
-            activeContracts.get(0).getId()
-        )
-      );
-    } else {
-      commandBus.sendAndWait(
-        new CreateBackofficeClaimCommand(
-          uuid.toString(),
-          req.getMemberId(),
-          req.getRegistrationDate(),
-          req.getClaimSource(),
-          null
-        )
-      );
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-    return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uuid));
-  }
+
+    @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)
+    public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
+        log.info("Claim recieved!:" + req.toString());
+        UUID uuid = UUID.randomUUID();
+
+        List<Contract> activeContracts = productPricingFacade.getActiveContracts(req.getMemberId());
+
+        if (activeContracts.size() == 1) {
+            commandBus.sendAndWait(
+                new CreateBackofficeClaimCommand(
+                    uuid.toString(),
+                    req.getMemberId(),
+                    req.getRegistrationDate(),
+                    req.getClaimSource(),
+                    activeContracts.get(0).getId()
+                )
+            );
+        } else {
+            commandBus.sendAndWait(
+                new CreateBackofficeClaimCommand(
+                    uuid.toString(),
+                    req.getMemberId(),
+                    req.getRegistrationDate(),
+                    req.getClaimSource(),
+                    null
+                )
+            );
+        }
+        return ResponseEntity.ok(new CreateBackofficeClaimResponseDTO(uuid));
+    }
 
     @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
     public ResponseEntity<List<ClaimDTO>> getClaimsList() {
