@@ -35,7 +35,6 @@ public class ClaimFile {
     @Nullable
     private String category;
 
-    @Nullable
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(50) default 'MANUAL'")
     private UploadSource uploadSource;
