@@ -1,13 +1,17 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.*;
+import com.hedvig.claims.commands.AddDataItemCommand;
+import com.hedvig.claims.commands.SetDefaultDateOfLossCommand;
 import com.hedvig.claims.events.*;
+import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.PaymentType;
 
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -29,15 +33,18 @@ public class ClaimsEventListener {
     private final ClaimsRepository claimRepository;
     private final PaymentRepository paymentRepository;
     private final ClaimFileRepository claimFileRepository;
+    private final CommandGateway commandGateway;
 
     @Autowired
     public ClaimsEventListener(
         ClaimsRepository claimRepository,
         PaymentRepository paymentRepository,
-        ClaimFileRepository claimFileRepository) {
+        ClaimFileRepository claimFileRepository,
+        CommandGateway commandGateway) {
         this.claimRepository = claimRepository;
         this.paymentRepository = paymentRepository;
         this.claimFileRepository = claimFileRepository;
+        this.commandGateway = commandGateway;
     }
 
     @EventHandler
@@ -167,6 +174,42 @@ public class ClaimsEventListener {
         claim.addEvent(ev);
 
         claimRepository.save(claim);
+
+        SetDefaultDateOfLossCommand command = new SetDefaultDateOfLossCommand(
+          claim.id,
+          claim.userId
+        );
+
+        commandGateway.send(command);
+    }
+
+    @EventSourcingHandler
+    public void on(SetDefaultDateOfLossEvent e) {
+        ClaimEntity claimEntity = claimRepository.findById(e.getClaimId()).orElse(null);
+
+        if (claimEntity == null || claimEntity.registrationDate == null) {
+            return;
+        }
+
+        //Is there an existing date dataItem for this claim? If so, don't add one.
+        if (claimEntity.data.stream().anyMatch(dataItem -> dataItem.type == ClaimDataType.DataType.DATE)) {
+            return;
+        }
+
+        String registrationDate = claimEntity.registrationDate.toString();
+
+        AddDataItemCommand command = new AddDataItemCommand(
+            UUID.randomUUID().toString(),
+            e.getClaimId(),
+            LocalDateTime.now(),
+            e.getMemberId(),
+            ClaimDataType.DataType.DATE,
+            ClaimDataType.DataType.DATE.name(),
+            "Date",
+            null,
+            registrationDate);
+
+        commandGateway.send(command);
     }
 
     @EventSourcingHandler
