@@ -25,6 +25,11 @@ public class AxonConfiguration {
   public void configure(EventProcessingConfiguration config) {
     config.usingTrackingProcessors();
     config.registerSubscribingEventProcessor("com.hedvig.claims.query");
+
+      config.registerTrackingEventProcessor(
+          "BackFillDateOfClaim",
+          x -> TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+              .andInitialTrackingToken(StreamableMessageSource::createTailToken));
   }
 
   @Autowired
@@ -35,7 +40,4 @@ public class AxonConfiguration {
       x -> TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
         .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
   }
-
-
-
 }

@@ -2,7 +2,6 @@ package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.*;
 import com.hedvig.claims.commands.AddDataItemCommand;
-import com.hedvig.claims.commands.SetDefaultDateOfLossCommand;
 import com.hedvig.claims.events.*;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.PaymentType;
@@ -175,17 +174,11 @@ public class ClaimsEventListener {
 
         claimRepository.save(claim);
 
-        SetDefaultDateOfLossCommand command = new SetDefaultDateOfLossCommand(
-          claim.id,
-          claim.userId
-        );
-
-        commandGateway.send(command);
+        setDefaultClaimDate(claim.id);
     }
 
-    @EventSourcingHandler
-    public void on(SetDefaultDateOfLossEvent e) {
-        ClaimEntity claimEntity = claimRepository.findById(e.getClaimId()).orElse(null);
+    private void setDefaultClaimDate(String claimId) {
+        ClaimEntity claimEntity = claimRepository.findById(claimId).orElse(null);
 
         if (claimEntity == null || claimEntity.registrationDate == null) {
             return;
@@ -200,14 +193,14 @@ public class ClaimsEventListener {
 
         AddDataItemCommand command = new AddDataItemCommand(
             UUID.randomUUID().toString(),
-            e.getClaimId(),
+            claimId,
             LocalDateTime.now(),
-            e.getMemberId(),
+            claimEntity.userId,
             ClaimDataType.DataType.DATE,
             ClaimDataType.DataType.DATE.name(),
             "Date",
             null,
-            registrationDate);
+            registrationDate.replace("Z", ""));
 
         commandGateway.send(command);
     }

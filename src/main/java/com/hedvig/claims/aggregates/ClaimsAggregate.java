@@ -302,14 +302,6 @@ public class ClaimsAggregate {
         apply(new AudioTranscribedEvent(this.id, cmd.getText(), cmd.getConfidence(), cmd.getLanguageCode()));
     }
 
-    @CommandHandler
-    public void on(SetDefaultDateOfLossCommand command) {
-        apply(
-            new SetDefaultDateOfLossEvent(
-                command.getClaimId(),
-                command.getMemberId()));
-    }
-
     // ----------------- Event sourcing --------------------- //
 
     @EventSourcingHandler
