@@ -33,28 +33,26 @@ class BackFillDateOfClaimListener @Autowired constructor(
     private fun backfillDateOfClaim(claimId: String) {
         val claimEntity = claimRepository.findByIdOrNull(claimId) ?: return
 
-        //don't update if there is no claim type.
         if (claimEntity.registrationDate == null || claimEntity.type == null) {
             return
         }
 
-        //Is there an existing date dataItem for this claim? If so, don't add one.
         if (claimEntity.data.any { dataItem -> dataItem.type == ClaimDataType.DataType.DATE }) {
             return
         }
 
-        val command = AddDataItemCommand(
-            UUID.randomUUID().toString(),
-            claimId,
-            LocalDateTime.now(),
-            claimEntity.userId,
-            ClaimDataType.DataType.DATE,
-            ClaimDataType.DataType.DATE.name,
-            "Date",
-            null,
-            claimEntity.registrationDate.toString().replace("Z", "")
+        commandGateway.send<Void>(
+            AddDataItemCommand(
+                UUID.randomUUID().toString(),
+                claimId,
+                LocalDateTime.now(),
+                claimEntity.userId,
+                ClaimDataType.DataType.DATE,
+                ClaimDataType.DataType.DATE.name,
+                "Date",
+                null,
+                claimEntity.registrationDate.toString().replace("Z", "")
+            )
         )
-
-        commandGateway.send<Void>(command)
     }
 }

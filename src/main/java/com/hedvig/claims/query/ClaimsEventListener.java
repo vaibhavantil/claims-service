@@ -174,28 +174,26 @@ public class ClaimsEventListener {
 
         claimRepository.save(claim);
 
-        setDefaultClaimDate(claim.id);
+        setDefaultClaimDate(claim);
     }
 
-    private void setDefaultClaimDate(String claimId) {
-        ClaimEntity claimEntity = claimRepository.findById(claimId).orElse(null);
-
-        if (claimEntity == null || claimEntity.registrationDate == null) {
+    protected void setDefaultClaimDate(ClaimEntity claim) {
+        if (claim.registrationDate == null) {
             return;
         }
 
         //Is there an existing date dataItem for this claim? If so, don't add one.
-        if (claimEntity.data.stream().anyMatch(dataItem -> dataItem.type == ClaimDataType.DataType.DATE)) {
+        if (claim.data.stream().anyMatch(dataItem -> dataItem.type == ClaimDataType.DataType.DATE)) {
             return;
         }
 
-        String registrationDate = claimEntity.registrationDate.toString();
+        String registrationDate = claim.registrationDate.toString();
 
         AddDataItemCommand command = new AddDataItemCommand(
             UUID.randomUUID().toString(),
-            claimId,
+            claim.id,
             LocalDateTime.now(),
-            claimEntity.userId,
+            claim.userId,
             ClaimDataType.DataType.DATE,
             ClaimDataType.DataType.DATE.name(),
             "Date",
