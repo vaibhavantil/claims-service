@@ -1,13 +1,19 @@
 package com.hedvig.claims.query;
 
 import com.hedvig.claims.aggregates.*;
+import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.events.*;
+import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.PaymentType;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -29,15 +35,18 @@ public class ClaimsEventListener {
     private final ClaimsRepository claimRepository;
     private final PaymentRepository paymentRepository;
     private final ClaimFileRepository claimFileRepository;
+    private final CommandGateway commandGateway;
 
     @Autowired
     public ClaimsEventListener(
         ClaimsRepository claimRepository,
         PaymentRepository paymentRepository,
-        ClaimFileRepository claimFileRepository) {
+        ClaimFileRepository claimFileRepository,
+        CommandGateway commandGateway) {
         this.claimRepository = claimRepository;
         this.paymentRepository = paymentRepository;
         this.claimFileRepository = claimFileRepository;
+        this.commandGateway = commandGateway;
     }
 
     @EventHandler
@@ -167,6 +176,36 @@ public class ClaimsEventListener {
         claim.addEvent(ev);
 
         claimRepository.save(claim);
+
+        setDefaultClaimDate(claim);
+    }
+
+    protected void setDefaultClaimDate(ClaimEntity claim) {
+        if (claim.registrationDate == null) {
+            return;
+        }
+
+        if (claim.data.stream().anyMatch(dataItem -> dataItem.type == ClaimDataType.DataType.DATE)) {
+            return;
+        }
+
+        LocalDateTime registrationDate = LocalDate
+            .ofInstant(claim.registrationDate, Clock.systemDefaultZone().getZone())
+            .atTime(10, 0);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm");
+
+        AddDataItemCommand command = new AddDataItemCommand(
+            UUID.randomUUID().toString(),
+            claim.id,
+            LocalDateTime.now(),
+            claim.userId,
+            ClaimDataType.DataType.DATE,
+            ClaimDataType.DataType.DATE.name(),
+            "Date",
+            null,
+            formatter.format(registrationDate));
+
+        commandGateway.send(command);
     }
 
     @EventSourcingHandler
