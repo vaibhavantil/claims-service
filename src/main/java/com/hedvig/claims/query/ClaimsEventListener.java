@@ -185,7 +185,6 @@ public class ClaimsEventListener {
             return;
         }
 
-        //Is there an existing date dataItem for this claim? If so, don't add one.
         if (claim.data.stream().anyMatch(dataItem -> dataItem.type == ClaimDataType.DataType.DATE)) {
             return;
         }

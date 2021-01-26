@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Component
-@ProcessingGroup("BackFillDateOfClaim")
+@ProcessingGroup("BackfillDateOfClaim")
 class BackFillDateOfClaimListener @Autowired constructor(
     private val claimRepository: ClaimsRepository,
     private val commandGateway: CommandGateway

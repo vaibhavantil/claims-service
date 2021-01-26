@@ -27,7 +27,7 @@ public class AxonConfiguration {
     config.registerSubscribingEventProcessor("com.hedvig.claims.query");
 
       config.registerTrackingEventProcessor(
-          "BackFillDateOfClaim",
+          "BackfillDateOfClaim",
           x -> TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
               .andInitialTrackingToken(StreamableMessageSource::createTailToken));
   }
