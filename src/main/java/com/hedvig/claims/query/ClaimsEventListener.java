@@ -6,6 +6,9 @@ import com.hedvig.claims.events.*;
 import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.PaymentType;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
@@ -187,7 +190,10 @@ public class ClaimsEventListener {
             return;
         }
 
-        String registrationDate = claim.registrationDate.toString();
+        LocalDateTime registrationDate = LocalDate
+            .ofInstant(claim.registrationDate, Clock.systemDefaultZone().getZone())
+            .atTime(10, 0);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm");
 
         AddDataItemCommand command = new AddDataItemCommand(
             UUID.randomUUID().toString(),
@@ -198,7 +204,7 @@ public class ClaimsEventListener {
             ClaimDataType.DataType.DATE.name(),
             "Date",
             null,
-            registrationDate.replace("Z", ""));
+            formatter.format(registrationDate));
 
         commandGateway.send(command);
     }

@@ -10,7 +10,10 @@ import org.axonframework.eventhandling.EventHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import java.time.Clock
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Component
@@ -21,13 +24,13 @@ class BackFillDateOfClaimListener @Autowired constructor(
 ) {
 
     @EventHandler
-    fun on(e: BackofficeClaimCreatedEvent) {
-        backfillDateOfClaim(e.id)
+    fun on(event: BackofficeClaimCreatedEvent) {
+        backfillDateOfClaim(event.id)
     }
 
     @EventHandler
-    fun on(e: ClaimCreatedEvent) {
-        backfillDateOfClaim(e.id)
+    fun on(event: ClaimCreatedEvent) {
+        backfillDateOfClaim(event.id)
     }
 
     private fun backfillDateOfClaim(claimId: String) {
@@ -41,6 +44,11 @@ class BackFillDateOfClaimListener @Autowired constructor(
             return
         }
 
+        val registrationDate = LocalDate
+            .ofInstant(claimEntity.registrationDate, Clock.systemDefaultZone().zone)
+            .atTime(10, 0)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm")
+
         commandGateway.send<Void>(
             AddDataItemCommand(
                 UUID.randomUUID().toString(),
@@ -51,7 +59,7 @@ class BackFillDateOfClaimListener @Autowired constructor(
                 ClaimDataType.DataType.DATE.name,
                 "Date",
                 null,
-                claimEntity.registrationDate.toString().replace("Z", "")
+                formatter.format(registrationDate)
             )
         )
     }
