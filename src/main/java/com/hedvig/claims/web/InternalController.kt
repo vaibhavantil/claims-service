@@ -84,10 +84,9 @@ class InternalController(
 
     @PostMapping("/startClaimFromAudio")
     fun initiateClaim(@RequestBody requestData: StartClaimAudioDTO): ResponseEntity<*> {
-        val uuid = UUID.randomUUID()
         val activeContracts = productPricingFacade.getActiveContracts(requestData.userId)
         val command = CreateClaimCommand(
-            uuid.toString(),
+            UUID.randomUUID().toString(),
             requestData.userId,
             requestData.audioURL,
             if (activeContracts.size == 1) activeContracts[0].id else null
@@ -156,7 +155,7 @@ class InternalController(
     @GetMapping("/activeClaims/{userId}")
     fun getActiveClaims(@PathVariable userId: String): ActiveClaimsDTO {
         val activeClaims = claimsRepository.findByUserId(userId)
-            .count { c: ClaimEntity -> c.state == ClaimStates.OPEN }
+            .count { claim -> claim.state == ClaimStates.OPEN }
         return ActiveClaimsDTO(activeClaims)
     }
 
@@ -177,9 +176,9 @@ class InternalController(
 
     @PostMapping("/adddataitem")
     fun addDataItem(@RequestBody data: DataItemDTO): ResponseEntity<*> {
-        val uid = UUID.randomUUID()
+        val uuid = UUID.randomUUID()
         val command = AddDataItemCommand(
-            uid.toString(),
+            uuid.toString(),
             data.claimID,
             LocalDateTime.now(),
             data.userId,
@@ -195,9 +194,9 @@ class InternalController(
 
     @PostMapping("/addnote")
     fun addNote(@RequestBody note: NoteDTO): ResponseEntity<*> {
-        val uid = UUID.randomUUID()
+        val uuid = UUID.randomUUID()
         val command = AddNoteCommand(
-            uid.toString(),
+            uuid.toString(),
             note.claimID,
             LocalDateTime.now(),
             note.text,
@@ -234,7 +233,7 @@ class InternalController(
         val member = memberService.getMember(memberId) ?: return ResponseEntity.notFound().build<Any>()
 
         val memberStatus = meerkat
-            .getMemberSanctionStatus(String.format("%s %s", member.firstName, member.lastName))
+            .getMemberSanctionStatus("${member.firstName} ${member.lastName}")
         if (memberStatus == SanctionStatus.FullHit) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
         }
@@ -249,14 +248,11 @@ class InternalController(
             val claim = claimsRepository.findByIdOrNull(request.claimId.toString())
                 ?: return ResponseEntity.notFound().build<Any>()
 
-            if (request.paymentRequestNote == null
-                || request.paymentRequestNote.trim { it <= ' ' }.length < 5
-            ) {
+            if (request.paymentRequestNote == null || request.paymentRequestNote.trim().length < 5) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
             }
-            val uid = UUID.randomUUID()
             val command = AddNoteCommand(
-                uid.toString(),
+                UUID.randomUUID().toString(),
                 request.claimId.toString(),
                 LocalDateTime.now(),
                 request.paymentRequestNote,
@@ -342,23 +338,17 @@ class InternalController(
                     commandBus.sendAndWait<Any>(command)
                 } catch (e: Exception) {
                     log.error(
-                        "Unable to automatically set contract to claim for (memberId={}, claimId={}))",
-                        claim.userId,
-                        claim.id,
+                        "Unable to automatically set contract to claim for (memberId=${claim.userId}, claimId=${claim.id}))",
                         e
                     )
                 }
             } else if (contracts.isEmpty()) {
                 log.error(
-                    "Unable to automatically set contract to claim since no contracts are present (memberId={}, claimId={})",
-                    claim.userId,
-                    claim.id
+                    "Unable to automatically set contract to claim since no contracts are present (memberId=${claim.userId}, claimId=${claim.id})",
                 )
             } else {
                 log.error(
-                    "Unable to automatically set contract to claim since more than one contract is present (memberId={}, claimId={})",
-                    claim.userId,
-                    claim.id
+                    "Unable to automatically set contract to claim since more than one contract is present (memberId=${claim.userId}, claimId=${claim.id})",
                 )
             }
         }

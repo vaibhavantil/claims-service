@@ -21,7 +21,7 @@ class MemberServiceImpl(
             if (ex.rawStatusCode == 404) {
                 return null
             }
-            log.error("Could not find member {} , {}", id, ex)
+            log.error("Could not find member $id", ex)
             throw ex
         }
     }
