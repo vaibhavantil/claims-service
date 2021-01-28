@@ -53,6 +53,7 @@ import com.hedvig.claims.web.dto.StartClaimAudioDTO
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.queryhandling.QueryGateway
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -169,32 +170,28 @@ class InternalController(
         log.info("Getting claims for: {}", userId)
         return claimsRepository
             .findByUserId(userId)
-            .stream()
             .map { c: ClaimEntity ->
                 ClaimDTO(
                     c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
                     c.claimSource, c.coveringEmployee
                 )
             }
-            .collect(Collectors.toList())
     }
 
     @GetMapping("/activeClaims/{userId}")
     fun getActiveClaims(@PathVariable userId: String): ActiveClaimsDTO {
         log.info("Getting active claim status for member: {}", userId)
-        val activeClaims = claimsRepository.findByUserId(userId).stream()
-            .filter { c: ClaimEntity -> c.state == ClaimStates.OPEN }
-            .count()
-        return ActiveClaimsDTO(activeClaims.toInt())
+        val activeClaims = claimsRepository.findByUserId(userId)
+            .count { c: ClaimEntity -> c.state == ClaimStates.OPEN }
+        return ActiveClaimsDTO(activeClaims)
     }
 
     @GetMapping("/stat")
     fun claimsStatisticsByState(): Map<String, Long> {
-        val statistics: MutableMap<String, Long> = HashMap()
-        for (state in ClaimStates.values()) {
-            statistics[state.name] = claimsRepository.countByState(state)
-        }
-        return statistics
+        return ClaimStates.values().associateBy(
+            { it.name },
+            claimsRepository::countByState
+        )
     }
 
     @GetMapping("/claim")
@@ -202,8 +199,7 @@ class InternalController(
         log.info("Getting claim with ID:$claimID")
         val claim = claimsRepository.findById(claimID)
             .orElseThrow { ResourceNotFoundException("Could not find claim with id:$claimID") }
-        val cdto = ClaimDTO(claim)
-        return ResponseEntity.ok(cdto)
+        return ResponseEntity.ok(ClaimDTO(claim))
     }
 
     @PostMapping("/adddataitem")
@@ -253,28 +249,28 @@ class InternalController(
     ): ResponseEntity<*> {
         log.debug("add automatic payment: {}$request")
         val member = memberService.getMember(memberId) ?: return ResponseEntity.notFound().build<Any>()
+
         val memberStatus = meerkat
             .getMemberSanctionStatus(String.format("%s %s", member.firstName, member.lastName))
         if (memberStatus == SanctionStatus.FullHit) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
         }
+
         if (!request.sanctionCheckSkipped
             && (memberStatus == SanctionStatus.Undetermined || memberStatus == SanctionStatus.PartialHit)
         ) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
         }
+
         if (request.sanctionCheckSkipped) {
-            val claimOptional = claimsRepository
-                .findById(request.claimId.toString())
-            if (!claimOptional.isPresent) {
-                return ResponseEntity.notFound().build<Any>()
-            }
+            val claim = claimsRepository.findByIdOrNull(request.claimId.toString())
+                ?: return ResponseEntity.notFound().build<Any>()
+
             if (request.paymentRequestNote == null
                 || request.paymentRequestNote.trim { it <= ' ' }.length < 5
             ) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
             }
-            val claim = claimOptional.get()
             val uid = UUID.randomUUID()
             val command = AddNoteCommand(
                 uid.toString(),
@@ -297,6 +293,7 @@ class InternalController(
             request.sanctionCheckSkipped
         )
         commandBus.sendAndWait<Any>(addAutomaticPaymentCommand)
+
         return ResponseEntity.accepted().build<Any>()
     }
 
@@ -348,7 +345,7 @@ class InternalController(
     @PostMapping("/backfillSetContractsForClaims")
     fun backfillSetContractsForClaims(): ResponseEntity<Void> {
         val claimsWithContractIdOfNull = claimsRepository.findClaimsWithContractIdOfNull()
-        claimsWithContractIdOfNull.forEach(Consumer { claim: ClaimEntity ->
+        claimsWithContractIdOfNull.forEach { claim: ClaimEntity ->
             val contracts = productPricingService.getContractsByMemberId(claim.userId)
             if (contracts.size == 1) {
                 val command = SetContractForClaimCommand(
@@ -366,7 +363,7 @@ class InternalController(
                         e
                     )
                 }
-            } else if (contracts.size == 0) {
+            } else if (contracts.isEmpty()) {
                 log.error(
                     "Unable to automatically set contract to claim since no contracts are present (memberId={}, claimId={})",
                     claim.userId,
@@ -379,7 +376,7 @@ class InternalController(
                     claim.id
                 )
             }
-        })
+        }
         return ResponseEntity.ok().build()
     }
 
@@ -515,8 +512,7 @@ class InternalController(
 
     @PostMapping("/many")
     fun getClaimsByIds(@RequestBody dto: ClaimsByIdsDTO): ResponseEntity<Stream<ClaimDTO>> {
-        val claims = claimsRepository
-            .findAllById(dto.ids.stream().map { id: UUID -> id.toString() }.collect(Collectors.toList()))
+        val claims = claimsRepository.findAllById(dto.ids.map { it.toString() })
         if (claims.size != dto.ids.size) {
             log.error(
                 "Length mismatch on supplied claims and found claims: wanted {}, found {}",
@@ -524,22 +520,19 @@ class InternalController(
             )
             return ResponseEntity.notFound().build()
         }
-        return ResponseEntity.ok(claims.stream().map { claim: ClaimEntity? -> ClaimDTO(claim) })
+        return ResponseEntity.ok(claims.stream().map { claim: ClaimEntity -> ClaimDTO(claim) })
     }
 
     @PostMapping("/employee")
     fun markClaimAsEmployee(@RequestBody dto: EmployeeClaimRequestDTO): ResponseEntity<*> {
-        val claim = claimsRepository.findById(dto.claimId)
-        if (!claim.isPresent) {
-            return ResponseEntity.badRequest().build<Any>()
-        }
+        claimsRepository.findByIdOrNull(dto.claimId) ?: return ResponseEntity.badRequest().build<Any>()
         commandBus.sendAndWait<Any>(UpdateEmployeeClaimStatusCommand(dto.claimId, dto.coveringEmployee))
         return ResponseEntity.accepted().build<Any>()
     }
 
     @PostMapping("claimFiles")
     fun link(@RequestBody dto: ClaimsFilesUploadDTO): ResponseEntity<Void> {
-        dto.claimsFiles.stream().forEach { (claimFileId, bucket, key, claimId, contentType, uploadedAt, fileName) ->
+        dto.claimsFiles.forEach { (claimFileId, bucket, key, claimId, contentType, uploadedAt, fileName) ->
             commandBus.sendAndWait<Any>(
                 UploadClaimFileCommand(
                     claimFileId,
@@ -568,8 +561,7 @@ class InternalController(
         @PathVariable claimFileId: UUID,
         @RequestBody dto: MarkClaimFileAsDeletedDTO
     ): ResponseEntity<Void> {
-        val claimFile = claimFileRepository.findById(claimFileId)
-        if (claimFile.isPresent) {
+        claimFileRepository.findByIdOrNull(claimFileId)?.let {
             commandBus.sendAndWait<Any>(MarkClaimFileAsDeletedCommand(claimFileId, claimId!!, dto.deletedBy))
         }
         return ResponseEntity.noContent().build()
@@ -581,8 +573,7 @@ class InternalController(
         @PathVariable claimFileId: UUID,
         @RequestBody dto: ClaimFileCategoryDTO
     ): ResponseEntity<Void> {
-        val claimFile = claimFileRepository.findById(claimFileId)
-        if (claimFile.isPresent) {
+        claimFileRepository.findByIdOrNull(claimFileId)?.let {
             commandBus.sendAndWait<Any>(SetClaimFileCategoryCommand(claimFileId, claimId!!, dto.category))
         }
         return ResponseEntity.noContent().build()
