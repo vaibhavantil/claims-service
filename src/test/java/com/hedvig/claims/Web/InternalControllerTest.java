@@ -90,9 +90,6 @@ public class InternalControllerTest {
     private ProductPricingClient productPricingClient;
 
     @MockBean
-    private ProductPricingFacade productPricingFacade;
-
-    @MockBean
     private Meerkat meerkat;
 
     @Autowired

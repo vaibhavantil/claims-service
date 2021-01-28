@@ -244,7 +244,7 @@ class InternalController(
 
     @PostMapping("/{memberId}/addAutomaticPayment")
     fun addAutomaticPayment(
-        @PathVariable(name = "memberId") memberId: String,
+        @PathVariable memberId: String,
         @RequestBody request: PaymentRequestDTO
     ): ResponseEntity<*> {
         log.debug("add automatic payment: {}$request")
