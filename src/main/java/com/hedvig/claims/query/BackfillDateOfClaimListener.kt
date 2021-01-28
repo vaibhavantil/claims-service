@@ -10,15 +10,15 @@ import org.axonframework.eventhandling.EventHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
-import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.UUID
 
 @Component
 @ProcessingGroup("BackfillDateOfClaim")
-class BackFillDateOfClaimListener @Autowired constructor(
+class BackfillDateOfClaimListener(
     private val claimRepository: ClaimsRepository,
     private val commandGateway: CommandGateway
 ) {
@@ -45,7 +45,7 @@ class BackFillDateOfClaimListener @Autowired constructor(
         }
 
         val registrationDate = LocalDate
-            .ofInstant(claimEntity.registrationDate, Clock.systemDefaultZone().zone)
+            .ofInstant(claimEntity.registrationDate, ZoneId.of("Europe/Stockholm"))
             .atTime(10, 0)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm")
 

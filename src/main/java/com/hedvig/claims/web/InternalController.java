@@ -1,7 +1,21 @@
 package com.hedvig.claims.web;
 
+import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
 import com.hedvig.claims.aggregates.ClaimsAggregate;
-import com.hedvig.claims.commands.*;
+import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
+import com.hedvig.claims.commands.AddDataItemCommand;
+import com.hedvig.claims.commands.AddNoteCommand;
+import com.hedvig.claims.commands.AddPaymentCommand;
+import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
+import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.MarkClaimFileAsDeletedCommand;
+import com.hedvig.claims.commands.SetClaimFileCategoryCommand;
+import com.hedvig.claims.commands.SetContractForClaimCommand;
+import com.hedvig.claims.commands.UpdateClaimTypeCommand;
+import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
+import com.hedvig.claims.commands.UpdateClaimsStateCommand;
+import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand;
+import com.hedvig.claims.commands.UploadClaimFileCommand;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimFileRepository;
 import com.hedvig.claims.query.ClaimsRepository;
@@ -14,10 +28,42 @@ import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
 import com.hedvig.claims.serviceIntegration.productPricing.Contract;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.services.ClaimsQueryService;
-import com.hedvig.claims.services.ProductPricingFacade;
 import com.hedvig.claims.services.LinkFileToClaimService;
-import com.hedvig.claims.web.dto.*;
+import com.hedvig.claims.services.ProductPricingFacade;
+import com.hedvig.claims.web.dto.ActiveClaimsDTO;
+import com.hedvig.claims.web.dto.ClaimContractInfo;
+import com.hedvig.claims.web.dto.ClaimDTO;
+import com.hedvig.claims.web.dto.ClaimDataType;
 import com.hedvig.claims.web.dto.ClaimDataType.DataType;
+import com.hedvig.claims.web.dto.ClaimFileCategoryDTO;
+import com.hedvig.claims.web.dto.ClaimFileFromAppDTO;
+import com.hedvig.claims.web.dto.ClaimStateDTO;
+import com.hedvig.claims.web.dto.ClaimType;
+import com.hedvig.claims.web.dto.ClaimTypeDTO;
+import com.hedvig.claims.web.dto.ClaimsByIdsDTO;
+import com.hedvig.claims.web.dto.ClaimsFilesUploadDTO;
+import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO;
+import com.hedvig.claims.web.dto.ClaimsSearchResultDTO;
+import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO;
+import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO;
+import com.hedvig.claims.web.dto.DataItemDTO;
+import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO;
+import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO;
+import com.hedvig.claims.web.dto.NoteDTO;
+import com.hedvig.claims.web.dto.PaymentDTO;
+import com.hedvig.claims.web.dto.PaymentRequestDTO;
+import com.hedvig.claims.web.dto.ReserveDTO;
+import com.hedvig.claims.web.dto.StartClaimAudioDTO;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.val;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -34,19 +80,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
 
 @RestController
 @RequestMapping({"/i/claims", "/_/claims"})
@@ -88,11 +121,9 @@ public class InternalController {
 
     @RequestMapping(path = "/startClaimFromAudio", method = RequestMethod.POST)
     public ResponseEntity<?> initiateClaim(@RequestBody StartClaimAudioDTO requestData) {
-        log.info("Claim recieved!:" + requestData.toString());
         UUID uuid = UUID.randomUUID();
 
-        List<Contract> activeContracts =
-            productPricingFacade.getActiveContracts(requestData.getUserId());
+        List<Contract> activeContracts = productPricingFacade.getActiveContracts(requestData.getUserId());
 
         if (activeContracts.size() == 1) {
             commandBus.sendAndWait(
@@ -118,19 +149,18 @@ public class InternalController {
     }
 
     @RequestMapping(path = "/createFromBackOffice", method = RequestMethod.POST)
-    public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO req) {
-        log.info("Claim recieved!:" + req.toString());
+    public ResponseEntity<?> createClaim(@RequestBody CreateBackofficeClaimDTO request) {
         UUID uuid = UUID.randomUUID();
 
-        List<Contract> activeContracts = productPricingFacade.getActiveContracts(req.getMemberId());
+        List<Contract> activeContracts = productPricingFacade.getActiveContracts(request.getMemberId());
 
         if (activeContracts.size() == 1) {
             commandBus.sendAndWait(
                 new CreateBackofficeClaimCommand(
                     uuid.toString(),
-                    req.getMemberId(),
-                    req.getRegistrationDate(),
-                    req.getClaimSource(),
+                    request.getMemberId(),
+                    request.getRegistrationDate(),
+                    request.getClaimSource(),
                     activeContracts.get(0).getId()
                 )
             );
@@ -138,9 +168,9 @@ public class InternalController {
             commandBus.sendAndWait(
                 new CreateBackofficeClaimCommand(
                     uuid.toString(),
-                    req.getMemberId(),
-                    req.getRegistrationDate(),
-                    req.getClaimSource(),
+                    request.getMemberId(),
+                    request.getRegistrationDate(),
+                    request.getClaimSource(),
                     null
                 )
             );
@@ -150,36 +180,50 @@ public class InternalController {
 
     @RequestMapping(path = "/listclaims", method = RequestMethod.GET)
     public ResponseEntity<List<ClaimDTO>> getClaimsList() {
-        log.info("Getting all claims:");
         ArrayList<ClaimDTO> claims = new ArrayList<>();
-        for (ClaimEntity c : claimsRepository.findAll()) {
-
+        for (ClaimEntity claim : claimsRepository.findAll()) {
             claims.add(
-                new ClaimDTO(c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-                    c.claimSource, c.coveringEmployee));
+                new ClaimDTO(
+                    claim.id,
+                    claim.userId,
+                    claim.state,
+                    claim.reserve,
+                    claim.type,
+                    claim.audioURL,
+                    claim.registrationDate,
+                    claim.claimSource,
+                    claim.coveringEmployee
+                )
+            );
         }
 
         return ResponseEntity.ok(claims);
     }
 
     @RequestMapping(path = "/search", method = RequestMethod.GET)
-    public ClaimsSearchResultDTO search(ClaimsSearchRequestDTO req) {
-        log.info("Searching claims");
-        ClaimsSearchResultDTO res = claimsQueryService.search(req);
+    public ClaimsSearchResultDTO search(ClaimsSearchRequestDTO request) {
+        ClaimsSearchResultDTO res = claimsQueryService.search(request);
         return res;
     }
 
     @RequestMapping(path = "/listclaims/{userId}", method = RequestMethod.GET)
     public List<ClaimDTO> getClaimsByUserId(@PathVariable String userId) {
-        log.info("Getting claims for: {}", userId);
         return claimsRepository
             .findByUserId(userId)
             .stream()
-            .map(
-                c ->
-                    new ClaimDTO(
-                        c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-                        c.claimSource, c.coveringEmployee))
+            .map(claim ->
+                new ClaimDTO(
+                    claim.id,
+                    claim.userId,
+                    claim.state,
+                    claim.reserve,
+                    claim.type,
+                    claim.audioURL,
+                    claim.registrationDate,
+                    claim.claimSource,
+                    claim.coveringEmployee
+                )
+            )
             .collect(Collectors.toList());
     }
 
@@ -187,8 +231,10 @@ public class InternalController {
     public ActiveClaimsDTO getActiveClaims(@PathVariable String userId) {
         log.info("Getting active claim status for member: {}", userId);
 
-        Long activeClaims = claimsRepository.findByUserId(userId).stream()
-            .filter(c -> Objects.equals(c.state, OPEN.name()))
+        Long activeClaims = claimsRepository
+            .findByUserId(userId)
+            .stream()
+            .filter(claim -> Objects.equals(claim.state, OPEN.name()))
             .count();
 
         return new ActiveClaimsDTO(activeClaims.intValue());
@@ -206,42 +252,56 @@ public class InternalController {
 
     @RequestMapping(path = "/claim", method = RequestMethod.GET)
     public ResponseEntity<ClaimDTO> getClaim(@RequestParam String claimID) {
-        log.info("Getting claim with ID:" + claimID);
         ClaimEntity claim = claimsRepository.findById(claimID)
             .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + claimID));
-        ClaimDTO cdto = new ClaimDTO(claim);
-        return ResponseEntity.ok(cdto);
+        ClaimDTO claimDto = new ClaimDTO(claim);
+        return ResponseEntity.ok(claimDto);
     }
 
     @RequestMapping(path = "/adddataitem", method = RequestMethod.POST)
     public ResponseEntity<?> addDataItem(@RequestBody DataItemDTO data) {
-        log.info("Adding data item:" + data.toString());
-        UUID uid = UUID.randomUUID();
-        AddDataItemCommand command = new AddDataItemCommand(uid.toString(), data.claimID,
-            LocalDateTime.now(), data.userId,
-            data.type, data.name, data.title, data.received, data.value);
+        UUID uuid = UUID.randomUUID();
+        AddDataItemCommand command = new AddDataItemCommand(
+            uuid.toString(),
+            data.claimID,
+            LocalDateTime.now(),
+            data.userId,
+            data.type,
+            data.name,
+            data.title,
+            data.received,
+            data.value
+        );
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @RequestMapping(path = "/addnote", method = RequestMethod.POST)
     public ResponseEntity<?> addNote(@RequestBody NoteDTO note) {
-        log.info("Adding claim note:" + note.toString());
-        UUID uid = UUID.randomUUID();
-        AddNoteCommand command = new AddNoteCommand(uid.toString(), note.claimID, LocalDateTime.now(),
+        UUID uuid = UUID.randomUUID();
+        AddNoteCommand command = new AddNoteCommand(
+            uuid.toString(),
+            note.claimID,
+            LocalDateTime.now(),
             note.text,
-            note.userId, note.fileURL);
+            note.userId,
+            note.fileURL);
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @RequestMapping(path = "/addpayment", method = RequestMethod.POST)
     public ResponseEntity<?> addPayment(@RequestBody PaymentDTO payment) {
-        log.info("Adding manual payment note:" + payment.toString());
-        UUID uid = UUID.randomUUID();
-        AddPaymentCommand command = new AddPaymentCommand(uid.toString(), payment.claimID,
+        AddPaymentCommand command = new AddPaymentCommand(
+            UUID.randomUUID().toString(),
+            payment.claimID,
             LocalDateTime.now(),
-            payment.userId, payment.amount, payment.deductible, payment.note, payment.payoutDate, payment.exGratia,
+            payment.userId,
+            payment.amount,
+            payment.deductible,
+            payment.note,
+            payment.payoutDate,
+            payment.exGratia,
             payment.handlerReference);
 
         commandBus.sendAndWait(command);
@@ -249,10 +309,10 @@ public class InternalController {
     }
 
     @RequestMapping(path = "/{memberId}/addAutomaticPayment", method = RequestMethod.POST)
-    public ResponseEntity<?> addAutomaticPayment(@PathVariable(name = "memberId") String memberId,
-                                                 @RequestBody PaymentRequestDTO request) {
-        log.debug("add automatic payment: {}" + request.toString());
-
+    public ResponseEntity<?> addAutomaticPayment(
+        @PathVariable(name = "memberId") String memberId,
+        @RequestBody PaymentRequestDTO request
+    ) {
         Optional<Member> memberOptional = memberService.getMember(memberId);
 
         if (!memberOptional.isPresent()) {
@@ -320,11 +380,12 @@ public class InternalController {
 
     @RequestMapping(path = "/updatereserve", method = RequestMethod.POST)
     public ResponseEntity<?> updateReserve(@RequestBody ReserveDTO reserve) {
-        log.info("Updating claim reserve: " + reserve.toString());
-
-        UpdateClaimsReserveCommand command =
-            new UpdateClaimsReserveCommand(
-                reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount);
+        UpdateClaimsReserveCommand command = new UpdateClaimsReserveCommand(
+            reserve.claimID,
+            reserve.userId,
+            LocalDateTime.now(),
+            reserve.amount
+        );
 
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -332,11 +393,12 @@ public class InternalController {
 
     @RequestMapping(path = "/updatestate", method = RequestMethod.POST)
     public ResponseEntity<?> updateState(@RequestBody ClaimStateDTO state) {
-        log.info("Updating claim reserve: " + state.toString());
-
-        UpdateClaimsStateCommand command = new UpdateClaimsStateCommand(state.claimID, state.userId,
+        UpdateClaimsStateCommand command = new UpdateClaimsStateCommand(
+            state.claimID,
+            state.userId,
             LocalDateTime.now(),
-            state.state);
+            state.state
+        );
 
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -346,9 +408,12 @@ public class InternalController {
     public ResponseEntity<?> updateType(@RequestBody ClaimTypeDTO type) {
         log.info("Updating claim reserve: " + type.toString());
 
-        UpdateClaimTypeCommand command = new UpdateClaimTypeCommand(type.claimID, type.userId,
+        UpdateClaimTypeCommand command = new UpdateClaimTypeCommand(
+            type.claimID,
+            type.userId,
             LocalDateTime.now(),
-            type.type);
+            type.type
+        );
 
         commandBus.sendAndWait(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -570,7 +635,7 @@ public class InternalController {
 
     @PostMapping("claimFiles")
     public ResponseEntity<Void> link(@RequestBody ClaimsFilesUploadDTO dto) {
-        dto.getClaimsFiles().stream().forEach(claimFile -> {
+        dto.getClaimsFiles().forEach(claimFile -> {
             commandBus.sendAndWait(new UploadClaimFileCommand(
                 claimFile.getClaimFileId(),
                 claimFile.getBucket(),
