@@ -451,27 +451,6 @@ public class ClaimsAggregate {
         notes.add(n);
     }
 
-    @CommandHandler
-    public void on(UploadNotesToS3Command command) {
-        if (notes.isEmpty()) {
-            throw new IllegalStateException("Heyo stop");
-        }
-        UploadNotesToS3Event event = new UploadNotesToS3Event();
-        event.id = command.id;
-        event.urls = notes.stream().map(f -> f.fileURL).collect(Collectors.toList());
-        apply(event);
-    }
-
-    static class UploadNotesToS3Command {
-        @TargetAggregateIdentifier
-        String id;
-    }
-
-    static class UploadNotesToS3Event {
-        String id;
-        List<String> urls;
-    }
-
     @EventSourcingHandler
     public void on(EmployeeClaimStatusUpdatedEvent e) {
         this.isCoveringEmployee = e.isCoveringEmployee();
