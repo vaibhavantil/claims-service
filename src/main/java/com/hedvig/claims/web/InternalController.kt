@@ -55,6 +55,7 @@ import org.axonframework.queryhandling.QueryGateway
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -86,7 +87,7 @@ class InternalController(
 
     private val log = LoggerFactory.getLogger(InternalController::class.java)
 
-    @RequestMapping(path = ["/startClaimFromAudio"  ], method = [RequestMethod.POST])
+    @PostMapping("/startClaimFromAudio")
     fun initiateClaim(@RequestBody requestData: StartClaimAudioDTO): ResponseEntity<*> {
         log.info("Claim recieved!:$requestData")
         val uuid = UUID.randomUUID()
@@ -113,7 +114,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    @RequestMapping(path = ["/createFromBackOffice"], method = [RequestMethod.POST])
+    @PostMapping("/createFromBackOffice")
     fun createClaim(@RequestBody req: CreateBackofficeClaimDTO): ResponseEntity<*> {
         log.info("Claim recieved!:$req")
         val uuid = UUID.randomUUID()
@@ -142,7 +143,7 @@ class InternalController(
         return ResponseEntity.ok(CreateBackofficeClaimResponseDTO(uuid))
     }
 
-    @RequestMapping(path = ["/listclaims"], method = [RequestMethod.GET])
+    @GetMapping("/listclaims")
     fun claimsList(): ResponseEntity<List<ClaimDTO>> {
         log.info("Getting all claims:")
         val claims = ArrayList<ClaimDTO>()
@@ -157,13 +158,13 @@ class InternalController(
         return ResponseEntity.ok(claims)
     }
 
-    @RequestMapping(path = ["/search"], method = [RequestMethod.GET])
+    @GetMapping("/search")
     fun search(req: ClaimsSearchRequestDTO): ClaimsSearchResultDTO {
         log.info("Searching claims")
         return claimsQueryService.search(req)
     }
 
-    @RequestMapping(path = ["/listclaims/{userId}"], method = [RequestMethod.GET])
+    @GetMapping("/listclaims/{userId}")
     fun getClaimsByUserId(@PathVariable userId: String): List<ClaimDTO> {
         log.info("Getting claims for: {}", userId)
         return claimsRepository
@@ -178,7 +179,7 @@ class InternalController(
             .collect(Collectors.toList())
     }
 
-    @RequestMapping(path = ["/activeClaims/{userId}"], method = [RequestMethod.GET])
+    @GetMapping("/activeClaims/{userId}")
     fun getActiveClaims(@PathVariable userId: String): ActiveClaimsDTO {
         log.info("Getting active claim status for member: {}", userId)
         val activeClaims = claimsRepository.findByUserId(userId).stream()
@@ -187,7 +188,7 @@ class InternalController(
         return ActiveClaimsDTO(activeClaims.toInt())
     }
 
-    @RequestMapping(path = ["/stat"], method = [RequestMethod.GET])
+    @GetMapping("/stat")
     fun claimsStatisticsByState(): Map<String, Long> {
         val statistics: MutableMap<String, Long> = HashMap()
         for (state in ClaimStates.values()) {
@@ -196,7 +197,7 @@ class InternalController(
         return statistics
     }
 
-    @RequestMapping(path = ["/claim"], method = [RequestMethod.GET])
+    @GetMapping("/claim")
     fun getClaim(@RequestParam claimID: String): ResponseEntity<ClaimDTO> {
         log.info("Getting claim with ID:$claimID")
         val claim = claimsRepository.findById(claimID)
@@ -205,7 +206,7 @@ class InternalController(
         return ResponseEntity.ok(cdto)
     }
 
-    @RequestMapping(path = ["/adddataitem"], method = [RequestMethod.POST])
+    @PostMapping("/adddataitem")
     fun addDataItem(@RequestBody data: DataItemDTO): ResponseEntity<*> {
         log.info("Adding data item:$data")
         val uid = UUID.randomUUID()
@@ -218,7 +219,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    @RequestMapping(path = ["/addnote"], method = [RequestMethod.POST])
+    @PostMapping("/addnote")
     fun addNote(@RequestBody note: NoteDTO): ResponseEntity<*> {
         log.info("Adding claim note:$note")
         val uid = UUID.randomUUID()
@@ -231,7 +232,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    @RequestMapping(path = ["/addpayment"], method = [RequestMethod.POST])
+    @PostMapping("/addpayment")
     fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
         log.info("Adding manual payment note:$payment")
         val uid = UUID.randomUUID()
@@ -245,7 +246,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    @RequestMapping(path = ["/{memberId}/addAutomaticPayment"], method = [RequestMethod.POST])
+    @PostMapping("/{memberId}/addAutomaticPayment")
     fun addAutomaticPayment(
         @PathVariable(name = "memberId") memberId: String,
         @RequestBody request: PaymentRequestDTO
@@ -299,7 +300,7 @@ class InternalController(
         return ResponseEntity.accepted().build<Any>()
     }
 
-    @RequestMapping(path = ["/updatereserve"], method = [RequestMethod.POST])
+    @PostMapping("/updatereserve")
     fun updateReserve(@RequestBody reserve: ReserveDTO): ResponseEntity<*> {
         log.info("Updating claim reserve: $reserve")
         val command = UpdateClaimsReserveCommand(
@@ -309,7 +310,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    @RequestMapping(path = ["/updatestate"], method = [RequestMethod.POST])
+    @PostMapping("/updatestate")
     fun updateState(@RequestBody state: ClaimStateDTO): ResponseEntity<*> {
         log.info("Updating claim reserve: $state")
         val command = UpdateClaimsStateCommand(
@@ -321,7 +322,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    @RequestMapping(path = ["/updatetype"], method = [RequestMethod.POST])
+    @PostMapping("/updatetype")
     fun updateType(@RequestBody type: ClaimTypeDTO): ResponseEntity<*> {
         log.info("Updating claim reserve: $type")
         val command = UpdateClaimTypeCommand(
@@ -382,7 +383,7 @@ class InternalController(
         return ResponseEntity.ok().build()
     }
 
-    @RequestMapping(path = ["claimTypes"], method = [RequestMethod.GET])
+    @GetMapping("claimTypes")
     fun claimTypes(): ResponseEntity<ArrayList<ClaimType>> {
         val claimTypes = ArrayList<ClaimType>()
         val typeDate = ClaimDataType(ClaimDataType.DataType.DATE, "DATE", "Date")
