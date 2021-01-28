@@ -51,7 +51,6 @@ import com.hedvig.claims.web.dto.PaymentRequestDTO
 import com.hedvig.claims.web.dto.ReserveDTO
 import com.hedvig.claims.web.dto.StartClaimAudioDTO
 import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.queryhandling.QueryGateway
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -61,15 +60,11 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
 import java.util.ArrayList
-import java.util.HashMap
 import java.util.UUID
-import java.util.function.Consumer
-import java.util.stream.Collectors
 import java.util.stream.Stream
 
 @RestController
@@ -90,7 +85,6 @@ class InternalController(
 
     @PostMapping("/startClaimFromAudio")
     fun initiateClaim(@RequestBody requestData: StartClaimAudioDTO): ResponseEntity<*> {
-        log.info("Claim recieved!:$requestData")
         val uuid = UUID.randomUUID()
         val activeContracts = productPricingFacade.getActiveContracts(requestData.userId)
         if (activeContracts.size == 1) {
@@ -116,17 +110,16 @@ class InternalController(
     }
 
     @PostMapping("/createFromBackOffice")
-    fun createClaim(@RequestBody req: CreateBackofficeClaimDTO): ResponseEntity<*> {
-        log.info("Claim recieved!:$req")
+    fun createClaim(@RequestBody request: CreateBackofficeClaimDTO): ResponseEntity<*> {
         val uuid = UUID.randomUUID()
-        val activeContracts = productPricingFacade.getActiveContracts(req.memberId)
+        val activeContracts = productPricingFacade.getActiveContracts(request.memberId)
         if (activeContracts.size == 1) {
             commandBus.sendAndWait<Any>(
                 CreateBackofficeClaimCommand(
                     uuid.toString(),
-                    req.memberId,
-                    req.registrationDate,
-                    req.claimSource,
+                    request.memberId,
+                    request.registrationDate,
+                    request.claimSource,
                     activeContracts[0].id
                 )
             )
@@ -134,9 +127,9 @@ class InternalController(
             commandBus.sendAndWait<Any>(
                 CreateBackofficeClaimCommand(
                     uuid.toString(),
-                    req.memberId,
-                    req.registrationDate,
-                    req.claimSource,
+                    request.memberId,
+                    request.registrationDate,
+                    request.claimSource,
                     null
                 )
             )
@@ -145,14 +138,20 @@ class InternalController(
     }
 
     @GetMapping("/listclaims")
-    fun claimsList(): ResponseEntity<List<ClaimDTO>> {
-        log.info("Getting all claims:")
+    fun getClaimsList(): ResponseEntity<List<ClaimDTO>> {
         val claims = ArrayList<ClaimDTO>()
-        for (c in claimsRepository.findAll()) {
+        for (claim in claimsRepository.findAll()) {
             claims.add(
                 ClaimDTO(
-                    c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-                    c.claimSource, c.coveringEmployee
+                    claim.id,
+                    claim.userId,
+                    claim.state,
+                    claim.reserve,
+                    claim.type,
+                    claim.audioURL,
+                    claim.registrationDate,
+                    claim.claimSource,
+                    claim.coveringEmployee
                 )
             )
         }
@@ -161,26 +160,30 @@ class InternalController(
 
     @GetMapping("/search")
     fun search(req: ClaimsSearchRequestDTO): ClaimsSearchResultDTO {
-        log.info("Searching claims")
         return claimsQueryService.search(req)
     }
 
     @GetMapping("/listclaims/{userId}")
     fun getClaimsByUserId(@PathVariable userId: String): List<ClaimDTO> {
-        log.info("Getting claims for: {}", userId)
         return claimsRepository
             .findByUserId(userId)
-            .map { c: ClaimEntity ->
+            .map { claim: ClaimEntity ->
                 ClaimDTO(
-                    c.id, c.userId, c.state, c.reserve, c.type, c.audioURL, c.registrationDate,
-                    c.claimSource, c.coveringEmployee
+                    claim.id,
+                    claim.userId,
+                    claim.state,
+                    claim.reserve,
+                    claim.type,
+                    claim.audioURL,
+                    claim.registrationDate,
+                    claim.claimSource,
+                    claim.coveringEmployee
                 )
             }
     }
 
     @GetMapping("/activeClaims/{userId}")
     fun getActiveClaims(@PathVariable userId: String): ActiveClaimsDTO {
-        log.info("Getting active claim status for member: {}", userId)
         val activeClaims = claimsRepository.findByUserId(userId)
             .count { c: ClaimEntity -> c.state == ClaimStates.OPEN }
         return ActiveClaimsDTO(activeClaims)
@@ -196,7 +199,6 @@ class InternalController(
 
     @GetMapping("/claim")
     fun getClaim(@RequestParam claimID: String): ResponseEntity<ClaimDTO> {
-        log.info("Getting claim with ID:$claimID")
         val claim = claimsRepository.findById(claimID)
             .orElseThrow { ResourceNotFoundException("Could not find claim with id:$claimID") }
         return ResponseEntity.ok(ClaimDTO(claim))
@@ -204,12 +206,17 @@ class InternalController(
 
     @PostMapping("/adddataitem")
     fun addDataItem(@RequestBody data: DataItemDTO): ResponseEntity<*> {
-        log.info("Adding data item:$data")
         val uid = UUID.randomUUID()
         val command = AddDataItemCommand(
-            uid.toString(), data.claimID,
-            LocalDateTime.now(), data.userId,
-            data.type, data.name, data.title, data.received, data.value
+            uid.toString(),
+            data.claimID,
+            LocalDateTime.now(),
+            data.userId,
+            data.type,
+            data.name,
+            data.title,
+            data.received,
+            data.value
         )
         commandBus.sendAndWait<Any>(command)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
@@ -217,12 +224,14 @@ class InternalController(
 
     @PostMapping("/addnote")
     fun addNote(@RequestBody note: NoteDTO): ResponseEntity<*> {
-        log.info("Adding claim note:$note")
         val uid = UUID.randomUUID()
         val command = AddNoteCommand(
-            uid.toString(), note.claimID, LocalDateTime.now(),
+            uid.toString(),
+            note.claimID,
+            LocalDateTime.now(),
             note.text,
-            note.userId, note.fileURL
+            note.userId,
+            note.fileURL
         )
         commandBus.sendAndWait<Any>(command)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
@@ -230,12 +239,16 @@ class InternalController(
 
     @PostMapping("/addpayment")
     fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
-        log.info("Adding manual payment note:$payment")
-        val uid = UUID.randomUUID()
         val command = AddPaymentCommand(
-            uid.toString(), payment.claimID,
+            UUID.randomUUID().toString(),
+            payment.claimID,
             LocalDateTime.now(),
-            payment.userId, payment.amount, payment.deductible, payment.note, payment.payoutDate, payment.exGratia,
+            payment.userId,
+            payment.amount,
+            payment.deductible,
+            payment.note,
+            payment.payoutDate,
+            payment.exGratia,
             payment.handlerReference
         )
         commandBus.sendAndWait<Any>(command)
@@ -247,7 +260,6 @@ class InternalController(
         @PathVariable memberId: String,
         @RequestBody request: PaymentRequestDTO
     ): ResponseEntity<*> {
-        log.debug("add automatic payment: {}$request")
         val member = memberService.getMember(memberId) ?: return ResponseEntity.notFound().build<Any>()
 
         val memberStatus = meerkat
@@ -299,9 +311,11 @@ class InternalController(
 
     @PostMapping("/updatereserve")
     fun updateReserve(@RequestBody reserve: ReserveDTO): ResponseEntity<*> {
-        log.info("Updating claim reserve: $reserve")
         val command = UpdateClaimsReserveCommand(
-            reserve.claimID, reserve.userId, LocalDateTime.now(), reserve.amount
+            reserve.claimID,
+            reserve.userId,
+            LocalDateTime.now(),
+            reserve.amount
         )
         commandBus.sendAndWait<Any>(command)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
@@ -309,9 +323,9 @@ class InternalController(
 
     @PostMapping("/updatestate")
     fun updateState(@RequestBody state: ClaimStateDTO): ResponseEntity<*> {
-        log.info("Updating claim reserve: $state")
         val command = UpdateClaimsStateCommand(
-            state.claimID, state.userId,
+            state.claimID,
+            state.userId,
             LocalDateTime.now(),
             state.state
         )
@@ -321,9 +335,9 @@ class InternalController(
 
     @PostMapping("/updatetype")
     fun updateType(@RequestBody type: ClaimTypeDTO): ResponseEntity<*> {
-        log.info("Updating claim reserve: $type")
         val command = UpdateClaimTypeCommand(
-            type.claimID, type.userId,
+            type.claimID,
+            type.userId,
             LocalDateTime.now(),
             type.type
         )
