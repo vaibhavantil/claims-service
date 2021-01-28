@@ -205,7 +205,7 @@ public class InternalControllerTest {
   @Test
   public void Should_ReturnForbidden_WhenMemberIsTerrorist() throws Exception {
 
-    given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
+    given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
 
     given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
       .willReturn(SanctionStatus.FullHit);
@@ -221,7 +221,7 @@ public class InternalControllerTest {
   @Test
   public void Should_ReturnForbidden_WhenMemberIsPartialTerrorist() throws Exception {
 
-    given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
+    given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
 
     given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
       .willReturn(SanctionStatus.PartialHit);
@@ -237,7 +237,7 @@ public class InternalControllerTest {
   @Test
   public void Should_ReturnForbidden_WhenMemberStatusIsUndetermined() throws Exception {
 
-    given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
+    given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
 
     given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
       .willReturn(SanctionStatus.Undetermined);
@@ -259,7 +259,7 @@ public class InternalControllerTest {
     this.commandGateway.sendAndWait(
       new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, "TEST", null));
 
-    given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
+    given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
 
     given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
       .willReturn(SanctionStatus.PartialHit);
@@ -288,7 +288,7 @@ public class InternalControllerTest {
     this.commandGateway.sendAndWait(
       new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, "TEST", null));
 
-    given(memberService.getMember(Mockito.anyString())).willReturn(Optional.of(makeMember()));
+    given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
 
     given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
       .willReturn(SanctionStatus.PartialHit);

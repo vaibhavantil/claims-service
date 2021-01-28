@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;

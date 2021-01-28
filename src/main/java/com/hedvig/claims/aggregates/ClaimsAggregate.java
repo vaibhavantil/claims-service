@@ -5,11 +5,13 @@ import com.hedvig.claims.events.*;
 import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.web.dto.PaymentType;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
+import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
@@ -193,7 +196,7 @@ public class ClaimsAggregate {
             cmd.getNote(),
             cmd.isExGracia(),
             cmd.getHandlerReference(),
-            cmd.isSanctionCheckSkipped());
+            cmd.getSanctionCheckSkipped());
 
         apply(e);
     }
@@ -446,6 +449,27 @@ public class ClaimsAggregate {
         n.userId = e.getUserId();
         n.date = e.getDate();
         notes.add(n);
+    }
+
+    @CommandHandler
+    public void on(UploadNotesToS3Command command) {
+        if (notes.isEmpty()) {
+            throw new IllegalStateException("Heyo stop");
+        }
+        UploadNotesToS3Event event = new UploadNotesToS3Event();
+        event.id = command.id;
+        event.urls = notes.stream().map(f -> f.fileURL).collect(Collectors.toList());
+        apply(event);
+    }
+
+    static class UploadNotesToS3Command {
+        @TargetAggregateIdentifier
+        String id;
+    }
+
+    static class UploadNotesToS3Event {
+        String id;
+        List<String> urls;
     }
 
     @EventSourcingHandler

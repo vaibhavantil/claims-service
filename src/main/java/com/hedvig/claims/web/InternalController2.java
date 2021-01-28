@@ -49,10 +49,10 @@ import java.util.stream.Stream;
 import static com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates.OPEN;
 
 @RestController
-@RequestMapping({"/i/claims", "/_/claims"})
-public class InternalController {
+@RequestMapping({"/i/claims2", "/_/claims2"})
+public class InternalController2 {
 
-    private Logger log = LoggerFactory.getLogger(InternalController.class);
+    private Logger log = LoggerFactory.getLogger(InternalController2.class);
     private final ClaimsRepository claimsRepository;
     private final CommandGateway commandBus;
     private final ClaimsQueryService claimsQueryService;
@@ -64,7 +64,7 @@ public class InternalController {
     private final ProductPricingFacade productPricingFacade;
 
     @Autowired
-    public InternalController(
+    public InternalController2(
         CommandBus commandBus,
         ClaimsRepository repository,
         ClaimsQueryService claimsQueryService,
@@ -253,7 +253,7 @@ public class InternalController {
                                                  @RequestBody PaymentRequestDTO request) {
         log.debug("add automatic payment: {}" + request.toString());
 
-        Optional<Member> memberOptional = memberService.getMember(memberId);
+        Optional<Member> memberOptional = Optional.ofNullable(memberService.getMember(memberId));
 
         if (!memberOptional.isPresent()) {
             return ResponseEntity.notFound().build();
@@ -268,13 +268,13 @@ public class InternalController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        if (!request.isSanctionCheckSkipped()
+        if (!request.getSanctionCheckSkipped()
             && (memberStatus.equals(SanctionStatus.Undetermined)
             || memberStatus.equals(SanctionStatus.PartialHit))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        if (request.isSanctionCheckSkipped()) {
+        if (request.getSanctionCheckSkipped()) {
             Optional<ClaimEntity> claimOptional = claimsRepository
                 .findById(request.getClaimId().toString());
 
@@ -309,9 +309,9 @@ public class InternalController {
                 request.getAmount(),
                 request.getDeductible(),
                 request.getPaymentRequestNote(),
-                request.isExGratia(),
+                request.getExGratia(),
                 request.getHandlerReference(),
-                request.isSanctionCheckSkipped());
+                request.getSanctionCheckSkipped());
 
         commandBus.sendAndWait(addAutomaticPaymentCommand);
 
@@ -564,7 +564,7 @@ public class InternalController {
         if (!claim.isPresent()) {
             return ResponseEntity.badRequest().build();
         }
-        commandBus.sendAndWait(new UpdateEmployeeClaimStatusCommand(dto.getClaimId(), dto.isCoveringEmployee()));
+        commandBus.sendAndWait(new UpdateEmployeeClaimStatusCommand(dto.getClaimId(), dto.getCoveringEmployee()));
         return ResponseEntity.accepted().build();
     }
 
