@@ -63,7 +63,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
-import java.util.ArrayList
 import java.util.UUID
 import java.util.stream.Stream
 
@@ -87,25 +86,13 @@ class InternalController(
     fun initiateClaim(@RequestBody requestData: StartClaimAudioDTO): ResponseEntity<*> {
         val uuid = UUID.randomUUID()
         val activeContracts = productPricingFacade.getActiveContracts(requestData.userId)
-        if (activeContracts.size == 1) {
-            commandBus.sendAndWait<Any>(
-                CreateClaimCommand(
-                    uuid.toString(),
-                    requestData.userId,
-                    requestData.audioURL,
-                    activeContracts[0].id
-                )
-            )
-        } else {
-            commandBus.sendAndWait<Any>(
-                CreateClaimCommand(
-                    uuid.toString(),
-                    requestData.userId,
-                    requestData.audioURL,
-                    null
-                )
-            )
-        }
+        val command = CreateClaimCommand(
+            uuid.toString(),
+            requestData.userId,
+            requestData.audioURL,
+            if (activeContracts.size == 1) activeContracts[0].id else null
+        )
+        commandBus.sendAndWait<Any>(command)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
@@ -113,46 +100,30 @@ class InternalController(
     fun createClaim(@RequestBody request: CreateBackofficeClaimDTO): ResponseEntity<*> {
         val uuid = UUID.randomUUID()
         val activeContracts = productPricingFacade.getActiveContracts(request.memberId)
-        if (activeContracts.size == 1) {
-            commandBus.sendAndWait<Any>(
-                CreateBackofficeClaimCommand(
-                    uuid.toString(),
-                    request.memberId,
-                    request.registrationDate,
-                    request.claimSource,
-                    activeContracts[0].id
-                )
-            )
-        } else {
-            commandBus.sendAndWait<Any>(
-                CreateBackofficeClaimCommand(
-                    uuid.toString(),
-                    request.memberId,
-                    request.registrationDate,
-                    request.claimSource,
-                    null
-                )
-            )
-        }
+        val command = CreateBackofficeClaimCommand(
+            uuid.toString(),
+            request.memberId,
+            request.registrationDate,
+            request.claimSource,
+            if (activeContracts.size == 1) activeContracts[0].id else null
+        )
+        commandBus.sendAndWait<Any>(command)
         return ResponseEntity.ok(CreateBackofficeClaimResponseDTO(uuid))
     }
 
     @GetMapping("/listclaims")
     fun getClaimsList(): ResponseEntity<List<ClaimDTO>> {
-        val claims = ArrayList<ClaimDTO>()
-        for (claim in claimsRepository.findAll()) {
-            claims.add(
-                ClaimDTO(
-                    claim.id,
-                    claim.userId,
-                    claim.state,
-                    claim.reserve,
-                    claim.type,
-                    claim.audioURL,
-                    claim.registrationDate,
-                    claim.claimSource,
-                    claim.coveringEmployee
-                )
+        val claims = claimsRepository.findAll().map {
+            ClaimDTO(
+                it.id,
+                it.userId,
+                it.state,
+                it.reserve,
+                it.type,
+                it.audioURL,
+                it.registrationDate,
+                it.claimSource,
+                it.coveringEmployee
             )
         }
         return ResponseEntity.ok(claims)
@@ -395,8 +366,8 @@ class InternalController(
     }
 
     @GetMapping("claimTypes")
-    fun claimTypes(): ResponseEntity<ArrayList<ClaimType>> {
-        val claimTypes = ArrayList<ClaimType>()
+    fun claimTypes(): ResponseEntity<List<ClaimType>> {
+        val claimTypes = mutableListOf<ClaimType>()
         val typeDate = ClaimDataType(ClaimDataType.DataType.DATE, "DATE", "Date")
         val typePlace = ClaimDataType(ClaimDataType.DataType.TEXT, "PLACE", "Place")
         val typeItem = ClaimDataType(ClaimDataType.DataType.ASSET, "ITEM", "Item")
