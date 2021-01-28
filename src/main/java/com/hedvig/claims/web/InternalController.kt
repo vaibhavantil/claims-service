@@ -557,7 +557,7 @@ class InternalController(
 
     @PostMapping("/{claimId}/claimFile/{claimFileId}/delete")
     fun markClaimFileAsDeleted(
-        @PathVariable claimId: String?,
+        @PathVariable claimId: String,
         @PathVariable claimFileId: UUID,
         @RequestBody dto: MarkClaimFileAsDeletedDTO
     ): ResponseEntity<Void> {
@@ -569,7 +569,7 @@ class InternalController(
 
     @PostMapping("/{claimId}/claimFile/{claimFileId}/setClaimFileCategory")
     fun setClaimFileCategory(
-        @PathVariable claimId: String?,
+        @PathVariable claimId: String,
         @PathVariable claimFileId: UUID,
         @RequestBody dto: ClaimFileCategoryDTO
     ): ResponseEntity<Void> {
