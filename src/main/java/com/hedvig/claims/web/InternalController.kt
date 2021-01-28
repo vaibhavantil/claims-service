@@ -336,19 +336,19 @@ class InternalController(
                 )
                 try {
                     commandBus.sendAndWait<Any>(command)
-                } catch (e: Exception) {
+                } catch (exception: Exception) {
                     log.error(
                         "Unable to automatically set contract to claim for (memberId=${claim.userId}, claimId=${claim.id}))",
-                        e
+                        exception
                     )
                 }
             } else if (contracts.isEmpty()) {
                 log.error(
-                    "Unable to automatically set contract to claim since no contracts are present (memberId=${claim.userId}, claimId=${claim.id})",
+                    "Unable to automatically set contract to claim since no contracts are present (memberId=${claim.userId}, claimId=${claim.id})"
                 )
             } else {
                 log.error(
-                    "Unable to automatically set contract to claim since more than one contract is present (memberId=${claim.userId}, claimId=${claim.id})",
+                    "Unable to automatically set contract to claim since more than one contract is present (memberId=${claim.userId}, claimId=${claim.id})"
                 )
             }
         }
