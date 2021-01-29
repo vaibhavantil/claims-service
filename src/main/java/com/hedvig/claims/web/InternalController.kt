@@ -213,11 +213,9 @@ class InternalController(
             UUID.randomUUID().toString(),
             payment.claimID,
             LocalDateTime.now(),
-            payment.userId,
             payment.amount,
             payment.deductible,
             payment.note,
-            payment.payoutDate,
             payment.exGratia,
             payment.handlerReference
         )
@@ -537,7 +535,7 @@ class InternalController(
         @RequestBody dto: MarkClaimFileAsDeletedDTO
     ): ResponseEntity<Void> {
         claimFileRepository.findByIdOrNull(claimFileId)?.let {
-            commandBus.sendAndWait<Any>(MarkClaimFileAsDeletedCommand(claimFileId, claimId!!, dto.deletedBy))
+            commandBus.sendAndWait<Any>(MarkClaimFileAsDeletedCommand(claimFileId, claimId, dto.deletedBy))
         }
         return ResponseEntity.noContent().build()
     }
@@ -549,7 +547,7 @@ class InternalController(
         @RequestBody dto: ClaimFileCategoryDTO
     ): ResponseEntity<Void> {
         claimFileRepository.findByIdOrNull(claimFileId)?.let {
-            commandBus.sendAndWait<Any>(SetClaimFileCategoryCommand(claimFileId, claimId!!, dto.category))
+            commandBus.sendAndWait<Any>(SetClaimFileCategoryCommand(claimFileId, claimId, dto.category))
         }
         return ResponseEntity.noContent().build()
     }
