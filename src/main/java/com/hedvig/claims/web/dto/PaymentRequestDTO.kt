@@ -5,7 +5,6 @@ import javax.money.MonetaryAmount
 
 data class PaymentRequestDTO(
     val claimId: UUID,
-    val memberId: String,
     val amount: MonetaryAmount,
     val deductible: MonetaryAmount,
     val handlerReference: String,
