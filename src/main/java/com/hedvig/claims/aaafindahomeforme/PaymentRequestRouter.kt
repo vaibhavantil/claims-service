@@ -25,7 +25,7 @@ class PaymentRequestRouter(
     private val memberService: MemberService
 ) {
 
-    fun routePayment(createPaymentDto: CreatePaymentDto): Results {
+    fun routePayment(createPaymentDto: CreatePaymentDto): CommandCreationStatus {
         return when (createPaymentDto.type) {
             PaymentType.Automatic -> createAutomaticPaymentCommand(createPaymentDto)
             PaymentType.Manual -> createManualPaymentCommand(createPaymentDto)
@@ -34,9 +34,9 @@ class PaymentRequestRouter(
         }
     }
 
-    private fun createAutomaticPaymentCommand(request: CreatePaymentDto): Results {
-        val claim = claimsRepository.findByIdOrNull(request.claimId) ?: return Results.NOT_FOUND
-        val (memberId, firstName, lastName) = memberService.getMember(claim.userId) ?: return Results.NOT_FOUND
+    private fun createAutomaticPaymentCommand(request: CreatePaymentDto): CommandCreationStatus {
+        val claim = claimsRepository.findByIdOrNull(request.claimId) ?: return CommandCreationStatus.NOT_FOUND
+        val (memberId, firstName, lastName) = memberService.getMember(claim.userId) ?: return CommandCreationStatus.NOT_FOUND
 
         val memberStatus: SanctionStatus = meerkat
             .getMemberSanctionStatus(String.format("%s %s", firstName, lastName))
@@ -44,7 +44,7 @@ class PaymentRequestRouter(
         if (memberStatus == SanctionStatus.FullHit
             || request.note.trim().length < 5
         ) {
-            return Results.FORBIDDEN
+            return CommandCreationStatus.FORBIDDEN
         }
 
         val uid = UUID.randomUUID()
@@ -71,17 +71,17 @@ class PaymentRequestRouter(
 
         commandBus.sendAndWait<Any>(addAutomaticPaymentCommand)
 
-        return Results.ACCEPTED
+        return CommandCreationStatus.ACCEPTED
     }
 
-    enum class Results {
+    enum class CommandCreationStatus {
         ACCEPTED,
         FORBIDDEN,
         NO_CONTENT,
         NOT_FOUND,
     }
 
-    private fun createManualPaymentCommand(createPaymentDto: CreatePaymentDto): Results {
+    private fun createManualPaymentCommand(createPaymentDto: CreatePaymentDto): CommandCreationStatus {
         val command = AddPaymentCommand(
             UUID.randomUUID().toString(),
             createPaymentDto.claimId,
@@ -94,10 +94,10 @@ class PaymentRequestRouter(
         )
 
         commandBus.sendAndWait<Any>(command)
-        return Results.NO_CONTENT
+        return CommandCreationStatus.NO_CONTENT
     }
 
-    private fun createIndemnityCostPaymentCommand(createPaymentDto: CreatePaymentDto): Results {
+    private fun createIndemnityCostPaymentCommand(createPaymentDto: CreatePaymentDto): CommandCreationStatus {
         val command = AddIndemnityCostPaymentCommand(
             UUID.randomUUID().toString(),
             createPaymentDto.claimId,
@@ -110,10 +110,10 @@ class PaymentRequestRouter(
         )
 
         commandBus.sendAndWait<Any>(command)
-        return Results.NO_CONTENT
+        return CommandCreationStatus.NO_CONTENT
     }
 
-    private fun createExpensePaymentCommand(createPaymentDto: CreatePaymentDto): Results {
+    private fun createExpensePaymentCommand(createPaymentDto: CreatePaymentDto): CommandCreationStatus {
         val command = AddExpensePaymentCommand(
             UUID.randomUUID().toString(),
             createPaymentDto.claimId,
@@ -126,6 +126,6 @@ class PaymentRequestRouter(
         )
 
         commandBus.sendAndWait<Void>(command)
-        return Results.NO_CONTENT
+        return CommandCreationStatus.NO_CONTENT
     }
 }

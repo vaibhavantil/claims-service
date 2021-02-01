@@ -282,10 +282,10 @@ class InternalController(
     @PostMapping("/addClaimPayment")
     fun addClaimPayment(@RequestBody createPaymentDto: CreatePaymentDto): ResponseEntity<*> {
         return when (paymentRequestRouter.routePayment(createPaymentDto)) {
-            PaymentRequestRouter.Results.ACCEPTED -> ResponseEntity.accepted().build<Void>()
-            PaymentRequestRouter.Results.FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
-            PaymentRequestRouter.Results.NO_CONTENT -> ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
-            PaymentRequestRouter.Results.NOT_FOUND -> ResponseEntity.notFound().build<Void>()
+            PaymentRequestRouter.CommandCreationStatus.ACCEPTED -> ResponseEntity.accepted().build<Void>()
+            PaymentRequestRouter.CommandCreationStatus.FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
+            PaymentRequestRouter.CommandCreationStatus.NO_CONTENT -> ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
+            PaymentRequestRouter.CommandCreationStatus.NOT_FOUND -> ResponseEntity.notFound().build<Void>()
         }
     }
 
