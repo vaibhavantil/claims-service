@@ -175,7 +175,7 @@ public class ClaimsAggregate {
             cmd.getAmount(),
             cmd.getDeductible(),
             cmd.getNote(),
-            cmd.getPayoutDate(),
+            null, // was always null, should it be removed from the event entirely?
             cmd.getExGratia(),
             cmd.getHandlerReference()
         );

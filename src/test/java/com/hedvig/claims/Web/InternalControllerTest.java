@@ -311,7 +311,7 @@ public class InternalControllerTest {
 
     private PaymentRequestDTO makePaymentRequestDto(UUID claimId, boolean bypass,
                                                     String reason) {
-        return new PaymentRequestDTO(claimId, "12345", Money.of(1234, "SEK"), Money.of(1500, "SEK"),
+        return new PaymentRequestDTO(claimId, Money.of(1234, "SEK"), Money.of(1500, "SEK"),
             "test@hedvig.com", bypass,
             reason, false);
     }
