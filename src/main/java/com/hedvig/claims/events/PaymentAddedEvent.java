@@ -17,7 +17,6 @@ public class PaymentAddedEvent {
   Double amount;
   Double deductible;
   String note;
-  LocalDateTime payoutDate;
   Boolean exGratia;
   String handlerReference;
 }
