@@ -11,3 +11,7 @@ Additionally, the script would copy `application-development.yml` to `/src/main/
 `claims-application` should be detected by intelliJ and added to run configurations. One small tweak needs to be made in order to run properly:
 - In `Run/Debug Configurations`, edit `ClaimsAppliation` (under the `Spring Boot` tree node).
 - Update `Active Profiles:` to `development` and save.
+
+To create a claim, you also need to run `product-pricing-meta`.
+
+To make an automatic payout, you also need to run `menber-registry-service` and `meerkat`

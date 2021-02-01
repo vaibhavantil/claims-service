@@ -1,5 +1,6 @@
 package com.hedvig.claims.web
 
+import com.hedvig.claims.aaafindahomeforme.PaymentRequestRouter
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand
 import com.hedvig.claims.commands.AddDataItemCommand
@@ -42,6 +43,7 @@ import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO
 import com.hedvig.claims.web.dto.ClaimsSearchResultDTO
 import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO
 import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO
+import com.hedvig.claims.web.dto.CreatePaymentDto
 import com.hedvig.claims.web.dto.DataItemDTO
 import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO
 import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO
@@ -77,7 +79,8 @@ class InternalController(
     private val claimFileRepository: ClaimFileRepository,
     private val linkFileToClaimService: LinkFileToClaimService,
     private val productPricingService: ProductPricingService,
-    private val productPricingFacade: ProductPricingFacade
+    private val productPricingFacade: ProductPricingFacade,
+    private val paymentRequestRouter: PaymentRequestRouter
 ) {
 
     private val log = LoggerFactory.getLogger(InternalController::class.java)
@@ -207,6 +210,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
+    @Deprecated("These endpoints were merged into addClaimPayment()")
     @PostMapping("/addpayment")
     fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
         val command = AddPaymentCommand(
@@ -223,6 +227,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
+    @Deprecated("These endpoints were merged into addClaimPayment()")
     @PostMapping("/{memberId}/addAutomaticPayment")
     fun addAutomaticPayment(
         @PathVariable memberId: String,
@@ -272,6 +277,16 @@ class InternalController(
         commandBus.sendAndWait<Any>(addAutomaticPaymentCommand)
 
         return ResponseEntity.accepted().build<Any>()
+    }
+
+    @PostMapping("/addClaimPayment")
+    fun addClaimPayment(@RequestBody createPaymentDto: CreatePaymentDto): ResponseEntity<*> {
+        return when (paymentRequestRouter.routePayment(createPaymentDto)) {
+            PaymentRequestRouter.Results.ACCEPTED -> ResponseEntity.accepted().build<Void>()
+            PaymentRequestRouter.Results.FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
+            PaymentRequestRouter.Results.NO_CONTENT -> ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
+            PaymentRequestRouter.Results.NOT_FOUND -> ResponseEntity.notFound().build<Void>()
+        }
     }
 
     @PostMapping("/updatereserve")
