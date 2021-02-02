@@ -6,11 +6,11 @@ import javax.money.MonetaryAmount
 
 data class AddExpensePaymentCommand(
     val id: String,
-    @TargetAggregateIdentifier var claimID: String,
-    var date: LocalDateTime,
-    var amount: MonetaryAmount,
-    var deductible: MonetaryAmount,
-    var note: String?,
-    var exGratia: Boolean,
-    var handlerReference: String?
+    @TargetAggregateIdentifier val claimId: String,
+    val date: LocalDateTime,
+    val amount: MonetaryAmount,
+    val deductible: MonetaryAmount,
+    val note: String?,
+    val exGratia: Boolean,
+    val handlerReference: String?
 )

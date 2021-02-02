@@ -4,13 +4,13 @@ import java.time.LocalDateTime
 import javax.money.MonetaryAmount
 
 class IndemnityCostPaymentAddedEvent (
-    var id: String,
-    var claimId: String,
-    var date: LocalDateTime,
-    var userId: String,
-    var amount: MonetaryAmount,
-    var deductible: MonetaryAmount,
-    var note: String?,
-    var exGratia: Boolean,
-    var handlerReference: String?
+    val id: String,
+    val claimId: String,
+    val date: LocalDateTime,
+    val userId: String,
+    val amount: MonetaryAmount,
+    val deductible: MonetaryAmount,
+    val note: String?,
+    val exGratia: Boolean,
+    val handlerReference: String?
 )

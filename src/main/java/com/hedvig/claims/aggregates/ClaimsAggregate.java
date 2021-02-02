@@ -214,9 +214,9 @@ public class ClaimsAggregate {
 
     @CommandHandler
     public void addIndemnityCostPayment(AddIndemnityCostPaymentCommand cmd) {
-        IndemnityCostPaymentAddedEvent pe = new IndemnityCostPaymentAddedEvent(
+        apply(new IndemnityCostPaymentAddedEvent(
             cmd.getId(),
-            cmd.getClaimID(),
+            cmd.getClaimId(),
             cmd.getDate(),
             this.userId,
             cmd.getAmount(),
@@ -224,15 +224,14 @@ public class ClaimsAggregate {
             cmd.getNote(),
             cmd.getExGratia(),
             cmd.getHandlerReference()
-        );
-        apply(pe);
+        ));
     }
 
     @CommandHandler
     public void addExpensePayment(AddExpensePaymentCommand cmd) {
-        ExpensePaymentAddedEvent pe = new ExpensePaymentAddedEvent(
+        apply(new ExpensePaymentAddedEvent(
             cmd.getId(),
-            cmd.getClaimID(),
+            cmd.getClaimId(),
             cmd.getDate(),
             this.userId,
             cmd.getAmount(),
@@ -240,8 +239,7 @@ public class ClaimsAggregate {
             cmd.getNote(),
             cmd.getExGratia(),
             cmd.getHandlerReference()
-        );
-        apply(pe);
+        ));
     }
 
     @CommandHandler
