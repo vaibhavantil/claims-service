@@ -14,6 +14,7 @@ cloud:
 spring:
   datasource:
     platform: POSTGRESQL
+    driverClassName: org.postgresql.Driver
     url: ${POSTGRES_URL}/claims
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
