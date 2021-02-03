@@ -63,6 +63,12 @@ customerio.siteId: ${CUSTOMERIO_SITEID}
 
 ---
 spring:
+  profiles: production
+
+spring.datasource.url: ${POSTGRES_URL}/claims-service # database name is different in production and elsewhere
+
+---
+spring:
   profiles: staging
 
 server.port: 80 # only 80 for staging
