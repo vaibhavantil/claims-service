@@ -6,7 +6,18 @@ logging:
     com:
       hedvig: DEBUG
 
+cloud:
+  aws:
+    region.static: eu-central-1
+    stack.auto: false
+
 spring:
+  datasource:
+    platform: POSTGRESQL
+    driverClassName: org.postgresql.Driver
+    url: ${POSTGRES_URL}/claims
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     generate-ddl: true
     properties:
@@ -25,6 +36,55 @@ spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
-
   main:
     allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-file-size: 512MB
+      max-request-size: 512MB
+
+---
+spring:
+  profiles: production, staging
+
+cloud.aws.credentials.instanceProfile: true
+claims:
+  claimFileUploadBucketName: ${CLAIMS_FILE_UPLOAD_BUCKET}
+  voiceRecordingBucketName: ${CLAIMS_VOICE_RECORDING_BUCKET}
+google:
+  storage.projectId: ${GOOGLE_STORAGE_PROJECTID}
+  storage.rawAudioBucketName: ${GOOGLE_STORAGE_RAW_AUDIO_BUCKET}
+hedvig:
+  chat.s3Bucket: ${HEDVIG_CHAT_S3BUCKET}
+  productPricing.url: product-pricing
+  member-service.url: member-service
+customerio.apiKey: ${CUSTOMERIO_APIKEY}
+customerio.siteId: ${CUSTOMERIO_SITEID}
+
+---
+spring:
+  profiles: production
+
+spring.datasource.url: ${POSTGRES_URL}/claims-service # database name is different in production and elsewhere
+
+---
+spring:
+  profiles: staging
+
+server.port: 80 # only 80 for staging
+
+---
+spring:
+  profiles: development, test
+
+cloud.credentials.useDefaultAwsCredentialsChain: true
+claims:
+  claimFileUploadBucketName: com-hedvig-claims-files
+  voiceRecordingBucketName: hedvig-app-uploads-staging # why is this called staging when staging uses a different one?
+hedvig:
+  chat.s3Bucket: hedvig-app-uploads-staging
+  productPricing.url: http://localhost:4085
+  member-service.url: http://localhost:4084
+google:
+  storage.projectId: hedvig-test
+  storage.rawAudioBucketName: hedvig_speech_to_text_raw_audio
