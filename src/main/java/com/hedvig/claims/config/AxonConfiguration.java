@@ -17,6 +17,7 @@ public class AxonConfiguration {
     return new EventUpcasterChain(
       new ClaimCreatedEvent_v1(),
       new PaymentAddedEvent_v1(),
+      new PaymentAddedEvent_v2(),
       new ClaimFileUploadedEventUpcaster_v1()
     );
   }

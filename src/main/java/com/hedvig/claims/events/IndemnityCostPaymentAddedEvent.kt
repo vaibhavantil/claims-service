@@ -1,12 +1,10 @@
 package com.hedvig.claims.events
 
-import java.time.LocalDateTime
 import javax.money.MonetaryAmount
 
 class IndemnityCostPaymentAddedEvent (
     val id: String,
     val claimId: String,
-    val date: LocalDateTime,
     val userId: String,
     val amount: MonetaryAmount,
     val deductible: MonetaryAmount,

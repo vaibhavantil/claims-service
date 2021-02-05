@@ -201,7 +201,6 @@ public class ClaimsAggregate {
         PaymentAddedEvent pe = new PaymentAddedEvent(
             cmd.getId(),
             cmd.getClaimID(),
-            cmd.getDate(),
             this.userId,
             cmd.getAmount(),
             cmd.getDeductible(),
@@ -217,7 +216,6 @@ public class ClaimsAggregate {
         apply(new IndemnityCostPaymentAddedEvent(
             cmd.getId(),
             cmd.getClaimId(),
-            cmd.getDate(),
             this.userId,
             cmd.getAmount(),
             cmd.getDeductible(),
@@ -232,7 +230,6 @@ public class ClaimsAggregate {
         apply(new ExpensePaymentAddedEvent(
             cmd.getId(),
             cmd.getClaimId(),
-            cmd.getDate(),
             this.userId,
             cmd.getAmount(),
             cmd.getDeductible(),
@@ -437,7 +434,6 @@ public class ClaimsAggregate {
     public void on(PaymentAddedEvent e) {
         Payment p = new Payment();
         p.id = e.getId();
-        p.date = e.getDate();
         p.userId = e.getUserId();
         p.amount = e.getAmount();
         p.deductible = e.getDeductible();
@@ -470,7 +466,6 @@ public class ClaimsAggregate {
     public void on(IndemnityCostPaymentAddedEvent paymentAddedEvent) {
         Payment payment = new Payment();
         payment.id = paymentAddedEvent.getId();
-        payment.date = paymentAddedEvent.getDate();
         payment.amount = paymentAddedEvent.getAmount().getNumber().doubleValue();
         payment.deductible = paymentAddedEvent.getDeductible().getNumber().doubleValue();
         payment.payoutDate = null;
@@ -486,7 +481,6 @@ public class ClaimsAggregate {
     public void on(ExpensePaymentAddedEvent expensePaymentAddedEvent) {
         Payment payment = new Payment();
         payment.id = expensePaymentAddedEvent.getId();
-        payment.date = expensePaymentAddedEvent.getDate();
         payment.amount = expensePaymentAddedEvent.getAmount().getNumber().doubleValue();
         payment.deductible = expensePaymentAddedEvent.getDeductible().getNumber().doubleValue();
         payment.payoutDate = null;

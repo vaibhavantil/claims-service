@@ -267,7 +267,6 @@ public class ClaimsEventListener {
             .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + event.getClaimsId()));
         Payment payment = new Payment();
         payment.id = event.getId();
-        payment.date = event.getDate();
         payment.userId = event.getUserId();
         payment.amount = event.getAmount();
         payment.deductible = event.getDeductible();
@@ -327,7 +326,6 @@ public class ClaimsEventListener {
             .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + event.getClaimId()));
         Payment payment = new Payment();
         payment.id = event.getId();
-        payment.date = event.getDate();
         payment.userId = event.getUserId();
         payment.amount = event.getAmount().getNumber().doubleValueExact();
         payment.deductible = event.getDeductible().getNumber().doubleValueExact();
@@ -356,7 +354,6 @@ public class ClaimsEventListener {
             .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + event.getClaimId()));
         Payment payment = new Payment();
         payment.id = event.getId();
-        payment.date = event.getDate();
         payment.userId = event.getUserId();
         payment.amount = event.getAmount().getNumber().doubleValueExact();
         payment.deductible = event.getDeductible().getNumber().doubleValueExact();
