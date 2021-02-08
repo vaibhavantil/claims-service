@@ -81,7 +81,6 @@ class ClaimPaymentService(
             AddPaymentCommand(
                 UUID.randomUUID().toString(),
                 createPaymentDto.claimId,
-                LocalDateTime.now(),
                 createPaymentDto.amount.number.doubleValueExact(),
                 createPaymentDto.deductible.number.doubleValueExact(),
                 createPaymentDto.note,

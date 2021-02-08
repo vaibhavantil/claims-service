@@ -4,7 +4,7 @@ import lombok.Value;
 import org.axonframework.serialization.Revision;
 
 @Value
-@Revision("1.0")
+@Revision("2.0")
 public class PaymentAddedEvent {
 
   String id;

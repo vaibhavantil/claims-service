@@ -20,6 +20,7 @@ class PaymentAddedEvent_v2 : SingleEventUpcaster() {
         ) { document ->
             val rootElement = document.rootElement
             rootElement.element("date")?.also { rootElement.remove(it) }
+            rootElement.element("payoutDate")?.also { rootElement.remove(it) }
             document
         }
     }

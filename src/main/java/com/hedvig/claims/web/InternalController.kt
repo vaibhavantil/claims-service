@@ -218,7 +218,6 @@ class InternalController(
         val command = AddPaymentCommand(
             UUID.randomUUID().toString(),
             payment.claimID,
-            LocalDateTime.now(),
             payment.amount,
             payment.deductible,
             payment.note,
