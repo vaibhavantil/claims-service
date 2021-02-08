@@ -3,13 +3,11 @@ package com.hedvig.claims.web.dto;
 import com.hedvig.claims.aggregates.PayoutStatus;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import javax.money.MonetaryAmount;
-import org.javamoney.moneta.Money;
 
 public class PaymentDTO extends HedvigBackofficeDTO {
 
-  public MonetaryAmount amount;
-  public MonetaryAmount deductible;
+  public Double amount;
+  public Double deductible;
   public String note;
   public LocalDateTime payoutDate;
   public Boolean exGratia;
@@ -36,8 +34,8 @@ public class PaymentDTO extends HedvigBackofficeDTO {
     this.claimID = claimsId;
     this.date = registrationDate;
     this.userId = userId;
-    this.amount = Money.of(amount, "SEK");
-    this.deductible = Money.of(deductible, "SEK");
+    this.amount = amount;
+    this.deductible = deductible;
     this.note = note;
     this.payoutDate = payoutDate;
     this.exGratia = exGratia;
