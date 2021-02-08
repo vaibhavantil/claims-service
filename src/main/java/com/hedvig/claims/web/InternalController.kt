@@ -47,9 +47,9 @@ import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO
 import com.hedvig.claims.web.dto.CreatePaymentDto
 import com.hedvig.claims.web.dto.DataItemDTO
 import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO
-import com.hedvig.claims.web.dto.LegacyPaymentDTO
 import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO
 import com.hedvig.claims.web.dto.NoteDTO
+import com.hedvig.claims.web.dto.PaymentDTO
 import com.hedvig.claims.web.dto.PaymentRequestDTO
 import com.hedvig.claims.web.dto.ReserveDTO
 import com.hedvig.claims.web.dto.StartClaimAudioDTO
@@ -214,7 +214,7 @@ class InternalController(
     //When removing this, also remove LegacyPaymentDTO
     @Deprecated("These endpoints were merged into addClaimPayment()")
     @PostMapping("/addpayment")
-    fun addPayment(@RequestBody payment: LegacyPaymentDTO): ResponseEntity<*> {
+    fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
         val command = AddPaymentCommand(
             UUID.randomUUID().toString(),
             payment.claimID,
