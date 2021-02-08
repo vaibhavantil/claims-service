@@ -1,29 +1,60 @@
 package com.hedvig.claims.aggregates;
 
-import com.hedvig.claims.commands.*;
-import com.hedvig.claims.events.*;
+import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
+import com.hedvig.claims.commands.AddDataItemCommand;
+import com.hedvig.claims.commands.AddExpensePaymentCommand;
+import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand;
+import com.hedvig.claims.commands.AddIndemnityCostPaymentCommand;
+import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
+import com.hedvig.claims.commands.AddNoteCommand;
+import com.hedvig.claims.commands.AddPaymentCommand;
+import com.hedvig.claims.commands.AudioTranscribedCommand;
+import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
+import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.MarkClaimFileAsDeletedCommand;
+import com.hedvig.claims.commands.SetClaimFileCategoryCommand;
+import com.hedvig.claims.commands.SetContractForClaimCommand;
+import com.hedvig.claims.commands.UpdateClaimTypeCommand;
+import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
+import com.hedvig.claims.commands.UpdateClaimsStateCommand;
+import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand;
+import com.hedvig.claims.commands.UploadClaimFileCommand;
+import com.hedvig.claims.events.AudioTranscribedEvent;
+import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
+import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
+import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
+import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
+import com.hedvig.claims.events.ClaimCreatedEvent;
+import com.hedvig.claims.events.ClaimFileCategorySetEvent;
+import com.hedvig.claims.events.ClaimFileMarkedAsDeletedEvent;
+import com.hedvig.claims.events.ClaimFileUploadedEvent;
+import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
+import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
+import com.hedvig.claims.events.ContractSetForClaimEvent;
+import com.hedvig.claims.events.DataItemAddedEvent;
+import com.hedvig.claims.events.EmployeeClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ExpensePaymentAddedEvent;
+import com.hedvig.claims.events.IndemnityCostPaymentAddedEvent;
+import com.hedvig.claims.events.NoteAddedEvent;
+import com.hedvig.claims.events.PaymentAddedEvent;
 import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.web.dto.PaymentType;
-
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
-
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
-import org.axonframework.commandhandling.TargetAggregateIdentifier;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
@@ -170,16 +201,42 @@ public class ClaimsAggregate {
         PaymentAddedEvent pe = new PaymentAddedEvent(
             cmd.getId(),
             cmd.getClaimID(),
-            cmd.getDate(),
             this.userId,
             cmd.getAmount(),
             cmd.getDeductible(),
             cmd.getNote(),
-            null, // was always null, should it be removed from the event entirely?
             cmd.getExGratia(),
             cmd.getHandlerReference()
         );
         apply(pe);
+    }
+
+    @CommandHandler
+    public void addIndemnityCostPayment(AddIndemnityCostPaymentCommand cmd) {
+        apply(new IndemnityCostPaymentAddedEvent(
+            cmd.getId(),
+            cmd.getClaimId(),
+            this.userId,
+            cmd.getAmount(),
+            cmd.getDeductible(),
+            cmd.getNote(),
+            cmd.getExGratia(),
+            cmd.getHandlerReference()
+        ));
+    }
+
+    @CommandHandler
+    public void addExpensePayment(AddExpensePaymentCommand cmd) {
+        apply(new ExpensePaymentAddedEvent(
+            cmd.getId(),
+            cmd.getClaimId(),
+            this.userId,
+            cmd.getAmount(),
+            cmd.getDeductible(),
+            cmd.getNote(),
+            cmd.getExGratia(),
+            cmd.getHandlerReference()
+        ));
     }
 
     @CommandHandler
@@ -377,11 +434,9 @@ public class ClaimsAggregate {
     public void on(PaymentAddedEvent e) {
         Payment p = new Payment();
         p.id = e.getId();
-        p.date = e.getDate();
         p.userId = e.getUserId();
         p.amount = e.getAmount();
         p.deductible = e.getDeductible();
-        p.payoutDate = e.getPayoutDate();
         p.note = e.getNote();
         p.exGratia = e.getExGratia();
         p.type = PaymentType.Manual;
@@ -405,6 +460,36 @@ public class ClaimsAggregate {
         p.handlerReference = e.getHandlerReference();
         p.payoutStatus = PayoutStatus.PREPARED;
         payments.put(e.getId(), p);
+    }
+
+    @EventSourcingHandler
+    public void on(IndemnityCostPaymentAddedEvent paymentAddedEvent) {
+        Payment payment = new Payment();
+        payment.id = paymentAddedEvent.getId();
+        payment.amount = paymentAddedEvent.getAmount().getNumber().doubleValue();
+        payment.deductible = paymentAddedEvent.getDeductible().getNumber().doubleValue();
+        payment.payoutDate = null;
+        payment.note = paymentAddedEvent.getNote();
+        payment.exGratia = paymentAddedEvent.getExGratia();
+        payment.type = PaymentType.IndemnityCost;
+        payment.handlerReference = paymentAddedEvent.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.COMPLETED;
+        payments.put(paymentAddedEvent.getId(), payment);
+    }
+
+    @EventSourcingHandler
+    public void on(ExpensePaymentAddedEvent expensePaymentAddedEvent) {
+        Payment payment = new Payment();
+        payment.id = expensePaymentAddedEvent.getId();
+        payment.amount = expensePaymentAddedEvent.getAmount().getNumber().doubleValue();
+        payment.deductible = expensePaymentAddedEvent.getDeductible().getNumber().doubleValue();
+        payment.payoutDate = null;
+        payment.note = expensePaymentAddedEvent.getNote();
+        payment.exGratia = expensePaymentAddedEvent.getExGratia();
+        payment.type = PaymentType.Expense;
+        payment.handlerReference = expensePaymentAddedEvent.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.COMPLETED;
+        payments.put(expensePaymentAddedEvent.getId(), payment);
     }
 
     @EventSourcingHandler

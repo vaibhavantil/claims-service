@@ -1,6 +1,9 @@
 package com.hedvig.claims.query;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
+import static com.hedvig.claims.util.TzHelper.UTC;
+
+
 import com.hedvig.claims.aggregates.Asset;
 import com.hedvig.claims.aggregates.ClaimSource;
 import com.hedvig.claims.aggregates.ClaimsAggregate;
@@ -24,6 +27,8 @@ import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
 import com.hedvig.claims.events.ContractSetForClaimEvent;
 import com.hedvig.claims.events.DataItemAddedEvent;
 import com.hedvig.claims.events.EmployeeClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ExpensePaymentAddedEvent;
+import com.hedvig.claims.events.IndemnityCostPaymentAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
 import com.hedvig.claims.web.dto.ClaimDataType;
@@ -41,7 +46,6 @@ import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
-import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -155,7 +159,7 @@ public class ClaimsEventListener {
         claimRepository.save(claim);
     }
 
-    @EventSourcingHandler
+    @EventHandler
     public void on(ClaimStatusUpdatedEvent e) {
         ClaimEntity claim = claimRepository
             .findById(e.getClaimsId())
@@ -170,7 +174,7 @@ public class ClaimsEventListener {
         claimRepository.save(claim);
     }
 
-    @EventSourcingHandler
+    @EventHandler
     public void on(ClaimsTypeUpdateEvent e) {
         ClaimEntity claim = claimRepository
             .findById(e.getClaimID())
@@ -218,7 +222,7 @@ public class ClaimsEventListener {
         commandGateway.send(command);
     }
 
-    @EventSourcingHandler
+    @EventHandler
     public void on(ClaimsReserveUpdateEvent e) {
         ClaimEntity claim = claimRepository
             .findById(e.getClaimID())
@@ -233,7 +237,7 @@ public class ClaimsEventListener {
         claimRepository.save(claim);
     }
 
-    @EventSourcingHandler
+    @EventHandler
     public void on(DataItemAddedEvent e) {
         log.info("DattaItemAddedEvent: " + e);
         ClaimEntity claim = claimRepository
@@ -258,68 +262,126 @@ public class ClaimsEventListener {
         claimRepository.save(claim);
     }
 
-    @EventSourcingHandler
-    public void on(PaymentAddedEvent e, @Timestamp Instant timestamp) {
-        log.info("PaymentAddedEvent: " + e);
+    @EventHandler
+    public void on(PaymentAddedEvent event, @Timestamp Instant timestamp) {
+        log.info("PaymentAddedEvent: " + event);
         ClaimEntity claim = claimRepository
-            .findById(e.getClaimsId())
-            .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimsId()));
-        Payment p = new Payment();
-        p.id = e.getId();
-        p.date = e.getDate();
-        p.userId = e.getUserId();
-        p.amount = e.getAmount();
-        p.deductible = e.getDeductible();
-        p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-        p.note = e.getNote();
-        p.exGratia = e.getExGratia();
-        p.type = PaymentType.Manual;
-        p.handlerReference = e.getHandlerReference();
-        p.payoutStatus = PayoutStatus.COMPLETED;
-        claim.addPayment(p);
+            .findById(event.getClaimsId())
+            .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + event.getClaimsId()));
+        Payment payment = new Payment();
+        payment.id = event.getId();
+        payment.date = LocalDateTime.ofInstant(timestamp, UTC);
+        payment.userId = event.getUserId();
+        payment.amount = event.getAmount();
+        payment.deductible = event.getDeductible();
+        payment.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
+        payment.note = event.getNote();
+        payment.exGratia = event.getExGratia();
+        payment.type = PaymentType.Manual;
+        payment.handlerReference = event.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.COMPLETED;
+        claim.addPayment(payment);
 
-        Event ev = createEvent(e, String.format(
+        Event claimEvent = createEvent(event, String.format(
             "A manual payment (%s) was executed. The amount is %s \nThe payment was added by %s on %s",
-            p.id, p.amount.toString(), p.handlerReference, p.payoutDate.toString()));
-        ev.userId = e.getUserId();
+            payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutDate.toString()));
+        claimEvent.userId = event.getUserId();
 
-        claim.addEvent(ev);
+        claim.addEvent(claimEvent);
 
         claimRepository.save(claim);
     }
 
-    @EventSourcingHandler
-    public void on(AutomaticPaymentAddedEvent e, @Timestamp Instant timestamp) {
-        log.info("PaymentExecutedEvent: {}" + e);
+    @EventHandler
+    public void on(AutomaticPaymentAddedEvent event, @Timestamp Instant timestamp) {
+        log.info("PaymentExecutedEvent: {}" + event);
 
         ClaimEntity claim = claimRepository
-            .findById(e.getClaimId())
-            .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + e.getClaimId()));
-        Payment p = new Payment();
-        p.id = e.getId();
-        p.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-        p.userId = e.getMemberId();
-        p.amount = e.getAmount().getNumber().doubleValueExact();
-        p.deductible = e.getDeductible().getNumber().doubleValueExact();
-        p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-        p.note = e.getNote();
-        p.exGratia = e.isExGracia();
-        p.type = PaymentType.Automatic;
-        p.handlerReference = e.getHandlerReference();
-        p.payoutStatus = PayoutStatus.PREPARED;
-        claim.addPayment(p);
+            .findById(event.getClaimId())
+            .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + event.getClaimId()));
+        Payment payment = new Payment();
+        payment.id = event.getId();
+        payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
+        payment.userId = event.getMemberId();
+        payment.amount = event.getAmount().getNumber().doubleValueExact();
+        payment.deductible = event.getDeductible().getNumber().doubleValueExact();
+        payment.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
+        payment.note = event.getNote();
+        payment.exGratia = event.isExGracia();
+        payment.type = PaymentType.Automatic;
+        payment.handlerReference = event.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.PREPARED;
+        claim.addPayment(payment);
 
-        Event ev = createEvent(e, String.format(
+        Event claimEvent = createEvent(event, String.format(
             "An automatic payment (%s) was executed. The amount is %s \nThe payment was initiated by %s on %s",
-            p.id, p.amount.toString(), p.handlerReference, p.payoutDate.toString()));
-        ev.userId = e.getMemberId();
+            payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutDate.toString()));
+        claimEvent.userId = event.getMemberId();
 
-        claim.addEvent(ev);
+        claim.addEvent(claimEvent);
 
         claimRepository.save(claim);
     }
 
-    @EventSourcingHandler
+    @EventHandler
+    public void on(IndemnityCostPaymentAddedEvent event, @Timestamp Instant timestamp) {
+        ClaimEntity claim = claimRepository
+            .findById(event.getClaimId())
+            .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + event.getClaimId()));
+        Payment payment = new Payment();
+        payment.id = event.getId();
+        payment.date = LocalDateTime.ofInstant(timestamp, UTC);
+        payment.userId = event.getUserId();
+        payment.amount = event.getAmount().getNumber().doubleValueExact();
+        payment.deductible = event.getDeductible().getNumber().doubleValueExact();
+        payment.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
+        payment.note = event.getNote();
+        payment.exGratia = event.getExGratia();
+        payment.type = PaymentType.IndemnityCost;
+        payment.handlerReference = event.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.COMPLETED;
+        claim.addPayment(payment);
+
+        Event claimEvent = createEvent(event, String.format(
+            "An indemnity cost payment (%s) was executed. The amount is %s \nThe payment was added by %s on %s",
+            payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutDate.toString()));
+        claimEvent.userId = event.getUserId();
+
+        claim.addEvent(claimEvent);
+
+        claimRepository.save(claim);
+    }
+
+    @EventHandler
+    public void on(ExpensePaymentAddedEvent event, @Timestamp Instant timestamp) {
+        ClaimEntity claim = claimRepository
+            .findById(event.getClaimId())
+            .orElseThrow(() -> new ResourceNotFoundException("Could not find claim with id:" + event.getClaimId()));
+        Payment payment = new Payment();
+        payment.id = event.getId();
+        payment.date = LocalDateTime.ofInstant(timestamp, UTC);
+        payment.userId = event.getUserId();
+        payment.amount = event.getAmount().getNumber().doubleValueExact();
+        payment.deductible = event.getDeductible().getNumber().doubleValueExact();
+        payment.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
+        payment.note = event.getNote();
+        payment.exGratia = event.getExGratia();
+        payment.type = PaymentType.Expense;
+        payment.handlerReference = event.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.COMPLETED;
+        claim.addPayment(payment);
+
+        Event claimEvent = createEvent(event, String.format(
+            "An expense payment (%s) was executed. The amount is %s \nThe payment was added by %s on %s",
+            payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutDate.toString()));
+        claimEvent.userId = event.getUserId();
+
+        claim.addEvent(claimEvent);
+
+        claimRepository.save(claim);
+    }
+
+    @EventHandler
     public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
         log.info("PaymentInitiatedEvent: {}" + e);
 
@@ -345,18 +407,18 @@ public class ClaimsEventListener {
                             new ResourceNotFoundException(
                                 "Could not find claim with id:" + e.getClaimId()));
 
-            Event ev = createEvent(e, String.format(
+            Event claimEvent = createEvent(e, String.format(
                 "An automatic payment (%s) with the amount %s was successfully initiated.\nThe payment was initiated by %s with referenceId %s",
                 payment.id, payment.amount.toString(), payment.handlerReference, payment.payoutReference));
-            ev.userId = e.getMemberId();
+            claimEvent.userId = e.getMemberId();
 
-            claim.addEvent(ev);
+            claim.addEvent(claimEvent);
 
             claimRepository.save(claim);
         }
     }
 
-    @EventSourcingHandler
+    @EventHandler
     public void on(AutomaticPaymentFailedEvent e, @Timestamp Instant timestamp) {
         log.info("PayoutFailedEvent: {}" + e);
 

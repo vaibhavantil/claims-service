@@ -15,6 +15,7 @@ import com.hedvig.claims.commands.UpdateClaimsReserveCommand
 import com.hedvig.claims.commands.UpdateClaimsStateCommand
 import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand
 import com.hedvig.claims.commands.UploadClaimFileCommand
+import com.hedvig.claims.payments.ClaimPaymentService
 import com.hedvig.claims.query.ClaimEntity
 import com.hedvig.claims.query.ClaimFileRepository
 import com.hedvig.claims.query.ClaimsRepository
@@ -27,6 +28,7 @@ import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService
 import com.hedvig.claims.services.ClaimsQueryService
 import com.hedvig.claims.services.LinkFileToClaimService
 import com.hedvig.claims.services.ProductPricingFacade
+import com.hedvig.claims.util.CreatePaymentOutcome
 import com.hedvig.claims.web.dto.ActiveClaimsDTO
 import com.hedvig.claims.web.dto.ClaimContractInfo
 import com.hedvig.claims.web.dto.ClaimDTO
@@ -42,14 +44,18 @@ import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO
 import com.hedvig.claims.web.dto.ClaimsSearchResultDTO
 import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO
 import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO
+import com.hedvig.claims.web.dto.CreatePaymentDto
 import com.hedvig.claims.web.dto.DataItemDTO
 import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO
+import com.hedvig.claims.web.dto.LegacyPaymentDTO
 import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO
 import com.hedvig.claims.web.dto.NoteDTO
-import com.hedvig.claims.web.dto.PaymentDTO
 import com.hedvig.claims.web.dto.PaymentRequestDTO
 import com.hedvig.claims.web.dto.ReserveDTO
 import com.hedvig.claims.web.dto.StartClaimAudioDTO
+import java.time.LocalDateTime
+import java.util.UUID
+import java.util.stream.Stream
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -62,9 +68,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDateTime
-import java.util.UUID
-import java.util.stream.Stream
 
 @RestController
 @RequestMapping(value = ["/i/claims", "/_/claims"])
@@ -77,7 +80,8 @@ class InternalController(
     private val claimFileRepository: ClaimFileRepository,
     private val linkFileToClaimService: LinkFileToClaimService,
     private val productPricingService: ProductPricingService,
-    private val productPricingFacade: ProductPricingFacade
+    private val productPricingFacade: ProductPricingFacade,
+    private val claimPaymentService: ClaimPaymentService
 ) {
 
     private val log = LoggerFactory.getLogger(InternalController::class.java)
@@ -207,12 +211,13 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
+    //When removing this, also remove LegacyPaymentDTO
+    @Deprecated("These endpoints were merged into addClaimPayment()")
     @PostMapping("/addpayment")
-    fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
+    fun addPayment(@RequestBody payment: LegacyPaymentDTO): ResponseEntity<*> {
         val command = AddPaymentCommand(
             UUID.randomUUID().toString(),
             payment.claimID,
-            LocalDateTime.now(),
             payment.amount,
             payment.deductible,
             payment.note,
@@ -223,6 +228,7 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
+    @Deprecated("These endpoints were merged into addClaimPayment()")
     @PostMapping("/{memberId}/addAutomaticPayment")
     fun addAutomaticPayment(
         @PathVariable memberId: String,
@@ -272,6 +278,16 @@ class InternalController(
         commandBus.sendAndWait<Any>(addAutomaticPaymentCommand)
 
         return ResponseEntity.accepted().build<Any>()
+    }
+
+    @PostMapping("/addClaimPayment")
+    fun addClaimPayment(@RequestBody createPaymentDto: CreatePaymentDto): ResponseEntity<Void> {
+        return when (claimPaymentService.createPayment(createPaymentDto)) {
+            CreatePaymentOutcome.COMPLETED -> ResponseEntity.noContent().build()
+            CreatePaymentOutcome.FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            CreatePaymentOutcome.MEMBER_NOT_FOUND  -> ResponseEntity.notFound().build()
+            CreatePaymentOutcome.CLAIM_NOT_FOUND -> ResponseEntity.notFound().build()
+        }
     }
 
     @PostMapping("/updatereserve")
