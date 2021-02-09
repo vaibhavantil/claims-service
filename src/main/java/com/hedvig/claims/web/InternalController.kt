@@ -211,7 +211,6 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    //When removing this, also remove LegacyPaymentDTO
     @Deprecated("These endpoints were merged into addClaimPayment()")
     @PostMapping("/addpayment")
     fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
@@ -285,7 +284,7 @@ class InternalController(
         return when (claimPaymentService.createPayment(createPaymentDto)) {
             CreatePaymentOutcome.COMPLETED -> ResponseEntity.noContent().build()
             CreatePaymentOutcome.FORBIDDEN -> ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-            CreatePaymentOutcome.MEMBER_NOT_FOUND  -> ResponseEntity.notFound().build()
+            CreatePaymentOutcome.MEMBER_NOT_FOUND -> ResponseEntity.notFound().build()
             CreatePaymentOutcome.CLAIM_NOT_FOUND -> ResponseEntity.notFound().build()
         }
     }
