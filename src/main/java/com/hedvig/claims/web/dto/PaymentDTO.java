@@ -1,12 +1,19 @@
 package com.hedvig.claims.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.hedvig.claims.aggregates.PayoutStatus;
+import com.hedvig.claims.util.DoubleOrMonetaryAmountToDoubleDeserializer;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class PaymentDTO extends HedvigBackofficeDTO {
 
+  @JsonDeserialize(using = DoubleOrMonetaryAmountToDoubleDeserializer.class)
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
   public Double amount;
+  @JsonDeserialize(using = DoubleOrMonetaryAmountToDoubleDeserializer.class)
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
   public Double deductible;
   public String note;
   public LocalDateTime payoutDate;
