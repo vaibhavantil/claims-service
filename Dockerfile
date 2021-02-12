@@ -12,6 +12,7 @@ FROM dependencies AS build
 
 # Copy application source and build it
 COPY src/main /src/main
+COPY lombok.config /
 RUN mvn clean package
 
 
