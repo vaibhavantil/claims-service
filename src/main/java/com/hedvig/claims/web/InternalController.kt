@@ -53,9 +53,6 @@ import com.hedvig.claims.web.dto.PaymentDTO
 import com.hedvig.claims.web.dto.PaymentRequestDTO
 import com.hedvig.claims.web.dto.ReserveDTO
 import com.hedvig.claims.web.dto.StartClaimAudioDTO
-import java.time.LocalDateTime
-import java.util.UUID
-import java.util.stream.Stream
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -68,6 +65,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
+import java.util.UUID
+import java.util.stream.Stream
 
 @RestController
 @RequestMapping(value = ["/i/claims", "/_/claims"])
@@ -241,8 +241,8 @@ class InternalController(
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
         }
 
-        if (!request.sanctionCheckSkipped
-            && (memberStatus == SanctionStatus.Undetermined || memberStatus == SanctionStatus.PartialHit)
+        if (!request.sanctionCheckSkipped &&
+            (memberStatus == SanctionStatus.Undetermined || memberStatus == SanctionStatus.PartialHit)
         ) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
         }

@@ -10,13 +10,13 @@ import com.hedvig.claims.serviceIntegration.meerkat.Meerkat
 import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus
 import com.hedvig.claims.serviceIntegration.memberService.MemberService
 import com.hedvig.claims.util.CreatePaymentOutcome
-import com.hedvig.claims.web.dto.PaymentType
 import com.hedvig.claims.web.dto.CreatePaymentDto
-import java.time.LocalDateTime
-import java.util.UUID
+import com.hedvig.claims.web.dto.PaymentType
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class ClaimPaymentService(
@@ -43,9 +43,13 @@ class ClaimPaymentService(
         val memberStatus: SanctionStatus = meerkat
             .getMemberSanctionStatus("$firstName $lastName")
 
-        if (memberStatus == SanctionStatus.FullHit
-            || request.note.trim().length < 5
+        if (memberStatus == SanctionStatus.FullHit ||
+            request.note.trim().length < 5
         ) {
+            return CreatePaymentOutcome.FORBIDDEN
+        }
+
+        if (!request.sanctionCheckSkipped && (memberStatus == SanctionStatus.Undetermined || memberStatus == SanctionStatus.PartialHit)) {
             return CreatePaymentOutcome.FORBIDDEN
         }
 

@@ -17,29 +17,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Saga
 public class PayoutAddSaga {
 
-  @Autowired
-  transient PaymentService paymentService;
+    @Autowired
+    transient PaymentService paymentService;
 
-  @Autowired
-  transient CommandGateway commandGateway;
+    @Autowired
+    transient CommandGateway commandGateway;
 
-  @StartSaga
-  @SagaEventHandler(associationProperty = "memberId")
-  @EndSaga
-  public void on(AutomaticPaymentAddedEvent e) {
-    PaymentResponse response = paymentService.executePayment(e.getMemberId(),
-      new PayoutRequest(e.getAmount(), e.isSanctionCheckSkipped()));
+    @StartSaga
+    @SagaEventHandler(associationProperty = "memberId")
+    @EndSaga
+    public void on(AutomaticPaymentAddedEvent e) {
+        PaymentResponse response = paymentService.executePayment(
+            e.getMemberId(),
+            new PayoutRequest(
+                e.getAmount(),
+                e.isSanctionCheckSkipped()
+            )
+        );
 
-    if (response.getTransactionStatus().equals(TransactionStatus.INITIATED)) {
-      commandGateway.sendAndWait(
-        new AddInitiatedAutomaticPaymentCommand(e.getId(), e.getClaimId(), e.getMemberId(),
-          response.getTransactionReference(), response.getTransactionStatus()));
-    } else {
-      commandGateway
-        .sendAndWait(
-          new AddFailedAutomaticPaymentCommand(e.getId(), e.getClaimId(), e.getMemberId(),
-            response.getTransactionStatus()));
+        if (response.getTransactionStatus().equals(TransactionStatus.INITIATED)) {
+            commandGateway.sendAndWait(
+                new AddInitiatedAutomaticPaymentCommand(
+                    e.getId(),
+                    e.getClaimId(),
+                    e.getMemberId(),
+                    response.getTransactionReference(),
+                    response.getTransactionStatus()
+                )
+            );
+        } else {
+            commandGateway.sendAndWait(
+                new AddFailedAutomaticPaymentCommand(
+                    e.getId(),
+                    e.getClaimId(),
+                    e.getMemberId(),
+                    response.getTransactionStatus()
+                )
+            );
+        }
     }
-  }
 
 }
