@@ -49,7 +49,7 @@ class ClaimPaymentService(
             return CreatePaymentOutcome.FORBIDDEN
         }
 
-        if (!request.sanctionCheckSkipped && (memberStatus == SanctionStatus.Undetermined || memberStatus == SanctionStatus.PartialHit)) {
+        if (!request.sanctionListSkipped && (memberStatus == SanctionStatus.Undetermined || memberStatus == SanctionStatus.PartialHit)) {
             return CreatePaymentOutcome.FORBIDDEN
         }
 
@@ -73,7 +73,7 @@ class ClaimPaymentService(
                 request.note,
                 request.exGratia,
                 request.handlerReference,
-                request.sanctionCheckSkipped
+                request.sanctionListSkipped
             )
         )
 

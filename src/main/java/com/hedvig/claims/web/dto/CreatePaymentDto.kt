@@ -10,5 +10,5 @@ data class CreatePaymentDto(
     val exGratia: Boolean,
     val type: PaymentType,
     val handlerReference: String,
-    val sanctionCheckSkipped: Boolean
+    val sanctionListSkipped: Boolean
 )
