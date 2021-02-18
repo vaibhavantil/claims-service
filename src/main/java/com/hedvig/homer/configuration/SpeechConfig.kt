@@ -18,7 +18,7 @@ class SpeechConfig {
         .build()
 
     @Bean(destroyMethod = "close")
-    open fun createSpeechClient(): SpeechClient {
+    fun createSpeechClient(): SpeechClient {
         return SpeechClient.create()
     }
 
