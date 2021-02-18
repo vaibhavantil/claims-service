@@ -22,4 +22,6 @@ interface ClaimsRepository : JpaRepository<ClaimEntity, String> {
 
     @Query("FROM ClaimEntity ce WHERE ce.contractId IS NULL")
     fun findClaimsWithContractIdOfNull(): List<ClaimEntity>
+
+    fun findAllByTranscriptionsIsNull() : List<ClaimEntity>
 }
