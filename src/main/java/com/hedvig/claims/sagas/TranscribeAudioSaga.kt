@@ -1,6 +1,6 @@
 package com.hedvig.claims.sagas
 
-import com.hedvig.claims.commands.AudioTranscribedCommand
+import com.hedvig.claims.commands.TranscribeAudioCommand
 import com.hedvig.claims.events.ClaimCreatedEvent
 import com.hedvig.homer.SpeechToTextService
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -30,7 +30,7 @@ class TranscribeAudioSaga {
     try {
       val result = speechToTextService.convertSpeechToText(evt.audioURL, evt.id)
       if (result.text.isNotBlank() && result.languageCode.isNotBlank() && result.confidence != 0f) {
-        commandGateway.send<Void>(AudioTranscribedCommand(evt.id, result.text, result.confidence, result.languageCode))
+        commandGateway.send<Void>(TranscribeAudioCommand(evt.id, result.text, result.confidence, result.languageCode))
       }
     } catch (e: Exception) {
       logger.error("Caught exception transcribing audio", e)

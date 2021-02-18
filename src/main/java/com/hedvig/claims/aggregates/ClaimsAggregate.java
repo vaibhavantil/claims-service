@@ -8,7 +8,7 @@ import com.hedvig.claims.commands.AddIndemnityCostPaymentCommand;
 import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.AudioTranscribedCommand;
+import com.hedvig.claims.commands.TranscribeAudioCommand;
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.MarkClaimFileAsDeletedCommand;
@@ -358,7 +358,7 @@ public class ClaimsAggregate {
     }
 
     @CommandHandler
-    public void on(AudioTranscribedCommand cmd) {
+    public void on(TranscribeAudioCommand cmd) {
         apply(new AudioTranscribedEvent(this.id, cmd.getText(), cmd.getConfidence(), cmd.getLanguageCode()));
     }
 

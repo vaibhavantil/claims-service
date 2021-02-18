@@ -1,7 +1,7 @@
 package com.hedvig.claims.aggregate
 
 import com.hedvig.claims.aggregates.ClaimsAggregate
-import com.hedvig.claims.commands.AudioTranscribedCommand
+import com.hedvig.claims.commands.TranscribeAudioCommand
 import com.hedvig.claims.events.AudioTranscribedEvent
 import com.hedvig.claims.events.ClaimCreatedEvent
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +16,7 @@ class TranscribeAudioTest {
 
         fixture
             .given(ClaimCreatedEvent("id", "userId", "audioUrl", null))
-            .`when`(AudioTranscribedCommand("id","A text", 1.0f, "sv-EN"))
+            .`when`(TranscribeAudioCommand("id","A text", 1.0f, "sv-EN"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(AudioTranscribedEvent("id", "A text", 1.0f, "sv-EN"))
             .expectState {
@@ -32,8 +32,8 @@ class TranscribeAudioTest {
         fixture
             .given(
                 ClaimCreatedEvent("id", "userId", "audioUrl", null),
-                AudioTranscribedCommand("id","A text", 1.0f, "sv-EN"))
-            .`when`(AudioTranscribedCommand("id","A new text", 0.7f, "sv-EN"))
+                TranscribeAudioCommand("id","A text", 1.0f, "sv-EN"))
+            .`when`(TranscribeAudioCommand("id","A new text", 0.7f, "sv-EN"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(AudioTranscribedEvent("id", "A new text", 0.7f, "sv-EN"))
             .expectState {
