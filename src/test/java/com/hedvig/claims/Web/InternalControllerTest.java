@@ -22,6 +22,7 @@ import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
+import com.hedvig.claims.serviceIntegration.predictor.Predictor;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingClient;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.serviceIntegration.ticketService.TicketService;
@@ -109,6 +110,9 @@ public class InternalControllerTest {
 
     @MockBean
     private SpeechToTextService speechToTextService;
+
+    @MockBean
+    private Predictor predictor;
 
     @Test
     public void Should_ReturnAnInitiatedPaymentEvent_WhenPaymentSuccessfullyCompletedFromPaymentService() {

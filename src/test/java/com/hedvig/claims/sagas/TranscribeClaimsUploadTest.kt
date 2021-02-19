@@ -1,6 +1,6 @@
 package com.hedvig.claims.sagas
 
-import com.hedvig.claims.commands.AudioTranscribedCommand
+import com.hedvig.claims.commands.TranscribeAudioCommand
 import com.hedvig.claims.events.ClaimCreatedEvent
 import com.hedvig.homer.SpeechToTextService
 import com.hedvig.homer.handlers.SpeechToTextResult
@@ -39,7 +39,7 @@ class TranscribeClaimsUploadTest {
 
         sagaFixture
             .whenPublishingA(event)
-            .expectDispatchedCommands(AudioTranscribedCommand("aClaimId","A weird text", 1.0f, "se-SV"))
+            .expectDispatchedCommands(TranscribeAudioCommand("aClaimId","A weird text", 1.0f, "se-SV"))
     }
 
     @Test
