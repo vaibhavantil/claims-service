@@ -2,7 +2,7 @@ package com.hedvig.claims.commands
 
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-data class AudioTranscribedCommand(
+data class TranscribeAudioCommand(
     @TargetAggregateIdentifier
     val claimId: String,
     val text: String,
