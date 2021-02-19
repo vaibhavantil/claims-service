@@ -1,3 +1,6 @@
+# Fake maven's dependencies stage so we can use the same pipelne.
+FROM scratch as dependencies
+
 ##### Copy files and build #####
 FROM gradle:6.8.2-jdk11 AS build
 WORKDIR /claims-service
