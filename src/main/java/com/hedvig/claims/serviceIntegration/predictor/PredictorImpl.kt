@@ -10,8 +10,9 @@ class PredictorImpl(
 
     override fun predictIfItsAccidentClaim(input: String): Boolean {
         return try {
-            predictorClient.predict(PredictionRequest(input)).body?.response == DRULLE
-        } catch (e: Exception) {
+            val test  = predictorClient.predict(PredictionRequest(input)).body
+            test?.contains(DRULLE) ?: false
+        } catch (e : Exception){
             logger.error("Something went wrong with the predictor while predicting $input Exception $e")
             false
         }

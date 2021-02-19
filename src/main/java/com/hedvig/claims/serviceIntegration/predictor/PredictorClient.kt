@@ -13,6 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod
     configuration = [FeignConfiguration::class]
 )
 interface PredictorClient {
-    @RequestMapping(value = ["/predict"], method = [RequestMethod.POST])
-    fun predict(@RequestBody request: PredictionRequest): ResponseEntity<PredictionResponse>
+    @RequestMapping(value = ["/predict"], method = [RequestMethod.POST], produces = ["text/html;charset=utf-8"])
+    fun predict(@RequestBody request: PredictionRequest): ResponseEntity<String>
 }

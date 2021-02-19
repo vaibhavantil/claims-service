@@ -7,6 +7,7 @@ import com.hedvig.homer.SpeechToTextService
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -43,9 +44,9 @@ class BackfillController(
         }
     }
 
-    @PostMapping("/test")
+    @GetMapping("/test")
     fun testPredictor(): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(predictor.predictIfItsAccidentClaim("Jag tappade min iPhone"))
+        return ResponseEntity.ok(predictor.predictIfItsAccidentClaim("Min mobil gick sönder"))
     }
 
     companion object {
