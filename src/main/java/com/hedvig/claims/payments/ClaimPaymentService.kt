@@ -5,6 +5,7 @@ import com.hedvig.claims.commands.AddExpensePaymentCommand
 import com.hedvig.claims.commands.AddIndemnityCostPaymentCommand
 import com.hedvig.claims.commands.AddNoteCommand
 import com.hedvig.claims.commands.AddPaymentCommand
+import com.hedvig.claims.commands.SelectedPayoutDetails
 import com.hedvig.claims.query.ClaimsRepository
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat
 import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus
@@ -12,7 +13,6 @@ import com.hedvig.claims.serviceIntegration.memberService.MemberService
 import com.hedvig.claims.util.CreatePaymentOutcome
 import com.hedvig.claims.web.dto.CreatePaymentDto
 import com.hedvig.claims.web.dto.PaymentType
-import com.hedvig.claims.web.dto.SelectedPayoutDetails
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -38,7 +38,7 @@ class ClaimPaymentService(
 
     private fun createAutomaticPaymentCommand(request: CreatePaymentDto): CreatePaymentOutcome {
         val claim = claimsRepository.findByIdOrNull(request.claimId) ?: return CreatePaymentOutcome.CLAIM_NOT_FOUND
-        val (memberId, firstName, lastName) = memberService.getMember(claim.userId)
+        val (memberId, firstName, lastName, ssn) = memberService.getMember(claim.userId)
             ?: return CreatePaymentOutcome.MEMBER_NOT_FOUND
 
         val memberStatus: SanctionStatus = meerkat
@@ -75,7 +75,7 @@ class ClaimPaymentService(
                 request.exGratia,
                 request.handlerReference,
                 request.sanctionListSkipped,
-                request.payoutDetails ?: SelectedPayoutDetails.NotSelected
+                request.payoutDetails?.let { SelectedPayoutDetails.fromRequest(it, ssn!!) } ?: SelectedPayoutDetails.NotSelected
             )
         )
 

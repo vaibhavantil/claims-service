@@ -1,6 +1,5 @@
 package com.hedvig.claims.commands
 
-import com.hedvig.claims.web.dto.SelectedPayoutDetails
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 import javax.money.MonetaryAmount
 
