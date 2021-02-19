@@ -99,3 +99,8 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+// I don't think this is needed, but we can remove later. Rather "belt and braces" in prod at first.
+bootJar {
+    enabled = true
+}
