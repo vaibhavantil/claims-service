@@ -36,6 +36,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
 
+import com.hedvig.claims.web.dto.SelectedPayoutDetails;
 import com.hedvig.homer.SpeechToTextService;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -130,7 +131,8 @@ public class InternalControllerTest {
             null,
             false,
             HEDVIG_HANDLER,
-            false
+            false,
+            SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
@@ -161,7 +163,8 @@ public class InternalControllerTest {
             null,
             false,
             HEDVIG_HANDLER,
-            false
+            false,
+            SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
@@ -192,7 +195,8 @@ public class InternalControllerTest {
             null,
             false,
             HEDVIG_HANDLER,
-            false
+            false,
+            SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());

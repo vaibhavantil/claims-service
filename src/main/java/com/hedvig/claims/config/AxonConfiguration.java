@@ -18,7 +18,8 @@ public class AxonConfiguration {
       new ClaimCreatedEvent_v1(),
       new PaymentAddedEvent_v1(),
       new PaymentAddedEvent_v2(),
-      new ClaimFileUploadedEventUpcaster_v1()
+      new ClaimFileUploadedEventUpcaster_v1(),
+      new AutomaticPaymentAddedEventUpcaster()
     );
   }
 

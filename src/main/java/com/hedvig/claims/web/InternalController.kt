@@ -29,30 +29,7 @@ import com.hedvig.claims.services.ClaimsQueryService
 import com.hedvig.claims.services.LinkFileToClaimService
 import com.hedvig.claims.services.ProductPricingFacade
 import com.hedvig.claims.util.CreatePaymentOutcome
-import com.hedvig.claims.web.dto.ActiveClaimsDTO
-import com.hedvig.claims.web.dto.ClaimContractInfo
-import com.hedvig.claims.web.dto.ClaimDTO
-import com.hedvig.claims.web.dto.ClaimDataType
-import com.hedvig.claims.web.dto.ClaimFileCategoryDTO
-import com.hedvig.claims.web.dto.ClaimFileFromAppDTO
-import com.hedvig.claims.web.dto.ClaimStateDTO
-import com.hedvig.claims.web.dto.ClaimType
-import com.hedvig.claims.web.dto.ClaimTypeDTO
-import com.hedvig.claims.web.dto.ClaimsByIdsDTO
-import com.hedvig.claims.web.dto.ClaimsFilesUploadDTO
-import com.hedvig.claims.web.dto.ClaimsSearchRequestDTO
-import com.hedvig.claims.web.dto.ClaimsSearchResultDTO
-import com.hedvig.claims.web.dto.CreateBackofficeClaimDTO
-import com.hedvig.claims.web.dto.CreateBackofficeClaimResponseDTO
-import com.hedvig.claims.web.dto.CreatePaymentDto
-import com.hedvig.claims.web.dto.DataItemDTO
-import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO
-import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO
-import com.hedvig.claims.web.dto.NoteDTO
-import com.hedvig.claims.web.dto.PaymentDTO
-import com.hedvig.claims.web.dto.PaymentRequestDTO
-import com.hedvig.claims.web.dto.ReserveDTO
-import com.hedvig.claims.web.dto.StartClaimAudioDTO
+import com.hedvig.claims.web.dto.*
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -272,7 +249,8 @@ class InternalController(
             request.paymentRequestNote,
             request.exGratia,
             request.handlerReference,
-            request.sanctionCheckSkipped
+            request.sanctionCheckSkipped,
+            SelectedPayoutDetails.NotSelected
         )
         commandBus.sendAndWait<Any>(addAutomaticPaymentCommand)
 

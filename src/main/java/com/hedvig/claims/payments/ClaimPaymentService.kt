@@ -12,6 +12,7 @@ import com.hedvig.claims.serviceIntegration.memberService.MemberService
 import com.hedvig.claims.util.CreatePaymentOutcome
 import com.hedvig.claims.web.dto.CreatePaymentDto
 import com.hedvig.claims.web.dto.PaymentType
+import com.hedvig.claims.web.dto.SelectedPayoutDetails
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -73,7 +74,8 @@ class ClaimPaymentService(
                 request.note,
                 request.exGratia,
                 request.handlerReference,
-                request.sanctionListSkipped
+                request.sanctionListSkipped,
+                request.payoutDetails ?: SelectedPayoutDetails.NotSelected
             )
         )
 

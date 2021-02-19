@@ -7,6 +7,7 @@ import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
+import com.hedvig.claims.web.dto.SelectedPayoutDetails;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.saga.EndSaga;
 import org.axonframework.eventhandling.saga.SagaEventHandler;
@@ -31,7 +32,11 @@ public class PayoutAddSaga {
             e.getMemberId(),
             new PayoutRequest(
                 e.getAmount(),
-                e.isSanctionCheckSkipped()
+                e.getSanctionCheckSkipped(),
+                e.getHandlerReference(),
+                e.getNote(),
+                null,
+                SelectedPayoutDetails.Companion.fromEvent(e.getPayoutDetails())
             )
         );
 
