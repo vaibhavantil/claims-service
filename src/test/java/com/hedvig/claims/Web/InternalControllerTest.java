@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.claims.ClaimServiceTestConfiguration;
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.SelectedPayoutDetails;
 import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
 import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.query.ClaimEntity;
@@ -36,7 +37,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
 
-import com.hedvig.claims.web.dto.SelectedPayoutDetails;
 import com.hedvig.homer.SpeechToTextService;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -324,11 +324,13 @@ public class InternalControllerTest {
         return new Member("12345",
             "Kikos",
             "Kikou",
+            "191212121212",
             LocalDate.of(1989, 02, 17),
             "street",
             "city",
             "12345",
-            "SE");
+            "SE"
+            );
     }
 
     private ClaimEntity makeClaimEntity(String id) {

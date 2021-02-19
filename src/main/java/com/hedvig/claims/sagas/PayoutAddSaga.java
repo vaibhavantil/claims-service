@@ -2,12 +2,12 @@ package com.hedvig.claims.sagas;
 
 import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
+import com.hedvig.claims.commands.SelectedPayoutDetails;
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
 import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
-import com.hedvig.claims.web.dto.SelectedPayoutDetails;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.saga.EndSaga;
 import org.axonframework.eventhandling.saga.SagaEventHandler;

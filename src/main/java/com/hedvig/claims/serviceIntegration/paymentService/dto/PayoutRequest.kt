@@ -1,6 +1,6 @@
 package com.hedvig.claims.serviceIntegration.paymentService.dto
 
-import com.hedvig.claims.web.dto.SelectedPayoutDetails
+import com.hedvig.claims.commands.SelectedPayoutDetails
 import javax.money.MonetaryAmount
 
 class PayoutRequest(
