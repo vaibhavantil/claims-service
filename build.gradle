@@ -1,12 +1,13 @@
 plugins {
+    id "io.freefair.lombok" version "5.3.0" //is this needed?
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
     id "java"
     id "maven-publish"
     id "org.jetbrains.kotlin.jvm" version "1.4.30"
     id "org.springframework.boot" version "2.3.4.RELEASE" //any higher breaks spring-cloud compatibility
-    id "io.spring.dependency-management" version "1.0.11.RELEASE"
-    id "io.freefair.lombok" version "5.3.0" //is this needed?
+    id "org.jetbrains.kotlin.plugin.allopen" version "1.4.30"
+    id "org.jetbrains.kotlin.plugin.noarg" version "1.4.30"
 }
-
 
 group = "com.hedvig.generic"
 version = "0.0.1-SNAPSHOT"
@@ -77,8 +78,8 @@ dependencies {
     implementation "org.javassist:javassist:3.27.0-GA"
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.30"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.30"
-    compileOnly 'org.projectlombok:lombok:1.18.18'
-    annotationProcessor 'org.projectlombok:lombok:1.18.18'
+    compileOnly "org.projectlombok:lombok:1.18.18"
+    annotationProcessor "org.projectlombok:lombok:1.18.18"
     implementation "org.springframework.cloud:spring-cloud-starter-bootstrap:3.0.1"
     implementation "org.zalando:jackson-datatype-money:1.2.1"
 
@@ -88,6 +89,8 @@ dependencies {
     testImplementation "org.axonframework:axon-test:3.3.7"
     testImplementation "org.jetbrains.kotlin:kotlin-test:1.4.30"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:1.4.30"
+    testCompileOnly "org.projectlombok:lombok:1.18.18"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.18"
     testImplementation("org.springframework.boot:spring-boot-starter-test:2.3.5.RELEASE") {
         exclude group: 'org.assertj', module: 'assertj-core'
     }
@@ -107,4 +110,12 @@ compileTestKotlin {
 // I don't think this is needed, but we can remove later. Rather "belt and braces" in prod at first.
 bootJar {
     enabled = true
+}
+
+allOpen {
+    annotation("org.springframework.context.annotation.Configuration")
+    annotation("javax.persistence.Entity")
+}
+noArg {
+    annotation("javax.persistence.Entity")
 }
