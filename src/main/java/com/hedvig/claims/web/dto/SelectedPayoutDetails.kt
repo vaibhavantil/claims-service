@@ -2,7 +2,6 @@ package com.hedvig.claims.web.dto
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.hedvig.claims.commands.SelectedPayoutDetails as SelectedPayoutDetailsCommand
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
