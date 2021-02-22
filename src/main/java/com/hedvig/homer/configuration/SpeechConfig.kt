@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class SpeechConfig {
+class SpeechConfig {
     val speechClientConfig = RecognitionConfig.newBuilder()
         .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
         .setSampleRateHertz(SpeechToTextServiceImpl.RATE)
@@ -18,7 +18,7 @@ open class SpeechConfig {
         .build()
 
     @Bean(destroyMethod = "close")
-    open fun createSpeechClient(): SpeechClient {
+    fun createSpeechClient(): SpeechClient {
         return SpeechClient.create()
     }
 
