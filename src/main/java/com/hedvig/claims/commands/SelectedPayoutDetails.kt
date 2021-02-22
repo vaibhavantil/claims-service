@@ -5,13 +5,19 @@ import com.hedvig.claims.web.dto.SelectedPayoutDetails as SelectedPayoutDetailsR
 
 sealed class SelectedPayoutDetails {
 
+    abstract val type: String
+
     data class Swish(
         val phoneNumber: String,
         val ssn: String,
         val message: String
-    ) : SelectedPayoutDetails()
+    ) : SelectedPayoutDetails() {
+        override val type = "swish"
+    }
 
-    object NotSelected : SelectedPayoutDetails()
+    object NotSelected : SelectedPayoutDetails() {
+        override val type = "notSelected"
+    }
 
     companion object {
         fun toEvent(selectedPayoutDetails: SelectedPayoutDetails) = when (selectedPayoutDetails) {
