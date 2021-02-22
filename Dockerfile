@@ -1,32 +1,35 @@
+# Fake maven's dependencies stage so we can use the same pipelne.
+FROM scratch as dependencies
 
-##### Dependencies stage #####
-FROM maven:3.6.3-amazoncorretto-11 AS dependencies
+##### Copy files and build #####
+FROM gradle:6.8.2-jdk11 AS build
+WORKDIR /claims-service
 
-# Resolve dependencies and cache them
-COPY pom.xml /
-RUN mvn dependency:go-offline
+# set gradle cache
+RUN mkdir -p /gradle-cache
+ENV GRADLE_USER_HOME /home/gradle
 
+# copy files
+COPY build.gradle .
+COPY settings.gradle .
+COPY lombok.config .
+COPY src/main src/main
 
-##### Build stage #####
-FROM dependencies AS build
+# build app
+RUN gradle --no-daemon build --stacktrace
 
-# Copy application source and build it
-COPY src/main /src/main
-COPY lombok.config /
-RUN mvn clean package
+##### Run tests #####
+FROM build AS test
+COPY src/test src/test
+RUN gradle --no-daemon test --stacktrace
 
-
-##### Test stage #####
-FROM dependencies AS test
-
-# Copy test source and build+run tests
-COPY src/test /src/test
-COPY --from=build /target /target
-RUN mvn test
-
+##### Build jar #####
+FROM build AS bootjar
+RUN gradle --no-daemon bootjar --stacktrace
 
 ##### Assemble artifact #####
 FROM amazoncorretto:11-alpine AS assemble
+WORKDIR /
 
 # Fetch the datadog agent
 RUN apk --no-cache add curl
@@ -36,7 +39,7 @@ RUN curl -o dd-java-agent.jar -L 'https://repository.sonatype.org/service/local/
 RUN apk --no-cache add ffmpeg
 
 # Copy the jar from build stage to this one
-COPY --from=build /target/claims-service-0.0.1-SNAPSHOT.jar /
+COPY --from=bootjar claims-service/build/libs/claims-service-0.0.1-SNAPSHOT.jar /app/target/claims-service-0.0.1-SNAPSHOT.jar
 
 # Define entry point
-ENTRYPOINT java -javaagent:/dd-java-agent.jar -jar claims-service-0.0.1-SNAPSHOT.jar
+ENTRYPOINT java -javaagent:/dd-java-agent.jar -jar /app/target/claims-service-0.0.1-SNAPSHOT.jar

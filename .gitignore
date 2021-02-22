@@ -14,3 +14,7 @@ target
 
 # jEnv
 .java-version
+
+# Gradle
+.gradle
+/build/*
