@@ -10,14 +10,14 @@ import org.axonframework.serialization.Revision;
 @AllArgsConstructor
 @Revision("1.0")
 public class AutomaticPaymentAddedEvent {
-    String Id;
-    String claimId;
-    String memberId;
-    MonetaryAmount amount;
-    MonetaryAmount deductible;
-    String note;
-    boolean isExGracia;
-    String handlerReference;
-    boolean sanctionCheckSkipped;
-    Carrier carrier;
+    public String Id;
+    public String claimId;
+    public String memberId;
+    public MonetaryAmount amount;
+    public MonetaryAmount deductible;
+    public String note;
+    public boolean isExGracia;
+    public String handlerReference;
+    public boolean sanctionCheckSkipped;
+    public Carrier carrier;
 }
