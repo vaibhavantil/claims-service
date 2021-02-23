@@ -5,13 +5,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.claims.ClaimServiceTestConfiguration;
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
 import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
+import com.hedvig.claims.query.Carrier;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
@@ -28,16 +28,13 @@ import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService
 import com.hedvig.claims.serviceIntegration.ticketService.TicketService;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.services.LinkFileToClaimService;
-import com.hedvig.claims.services.ProductPricingFacade;
 import com.hedvig.claims.web.dto.PaymentRequestDTO;
-
+import com.hedvig.homer.SpeechToTextService;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
-
-import com.hedvig.homer.SpeechToTextService;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -134,7 +131,8 @@ public class InternalControllerTest {
             null,
             false,
             HEDVIG_HANDLER,
-            false
+            false,
+            Carrier.HDI
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
@@ -165,7 +163,8 @@ public class InternalControllerTest {
             null,
             false,
             HEDVIG_HANDLER,
-            false
+            false,
+            Carrier.HDI
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
@@ -196,7 +195,8 @@ public class InternalControllerTest {
             null,
             false,
             HEDVIG_HANDLER,
-            false
+            false,
+            Carrier.HDI
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
