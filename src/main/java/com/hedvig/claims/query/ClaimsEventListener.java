@@ -311,6 +311,7 @@ public class ClaimsEventListener {
         payment.type = PaymentType.Automatic;
         payment.handlerReference = event.getHandlerReference();
         payment.payoutStatus = PayoutStatus.PREPARED;
+        payment.carrier = event.getCarrier();
         claim.addPayment(payment);
 
         Event claimEvent = createEvent(event, String.format(

@@ -1,5 +1,7 @@
 package com.hedvig.claims.aggregates;
 
+import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddExpensePaymentCommand;
@@ -54,10 +56,6 @@ import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.jetbrains.annotations.NotNull;
-
-
-import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
-import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @Aggregate
 @Slf4j
@@ -253,7 +251,9 @@ public class ClaimsAggregate {
             cmd.getNote(),
             cmd.isExGracia(),
             cmd.getHandlerReference(),
-            cmd.getSanctionCheckSkipped());
+            cmd.getSanctionCheckSkipped(),
+            cmd.getCarrier()
+        );
 
         apply(e);
     }
