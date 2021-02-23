@@ -4,7 +4,7 @@ import com.hedvig.claims.query.Carrier
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 import javax.money.MonetaryAmount
 
-class AddAutomaticPaymentCommand(
+data class AddAutomaticPaymentCommand(
     @TargetAggregateIdentifier
     val claimId: String,
     val memberId: String,

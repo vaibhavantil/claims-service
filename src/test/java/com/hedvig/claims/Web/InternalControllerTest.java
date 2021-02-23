@@ -324,7 +324,7 @@ public class InternalControllerTest {
         return new Member("12345",
             "Kikos",
             "Kikou",
-            LocalDate.of(1989, 02, 17),
+            LocalDate.of(1989, 2, 17),
             "street",
             "city",
             "12345",
