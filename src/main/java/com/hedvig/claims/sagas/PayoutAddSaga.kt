@@ -39,17 +39,17 @@ class PayoutAddSaga {
         if (response.transactionStatus == TransactionStatus.INITIATED) {
             commandGateway.sendAndWait<Void>(
                 AddInitiatedAutomaticPaymentCommand(
-                    event.id,
-                    event.claimId,
-                    event.memberId,
-                    response.transactionReference!!,
-                    response.transactionStatus
+                    id = event.Id,
+                    claimId = event.claimId,
+                    memberId = event.memberId,
+                    transactionReference = response.transactionReference!!,
+                    transactionStatus = response.transactionStatus
                 )
             )
         } else {
             commandGateway.sendAndWait<Void>(
                 AddFailedAutomaticPaymentCommand(
-                    id = event.id,
+                    id = event.Id,
                     claimId = event.claimId,
                     memberId = event.memberId,
                     transactionStatus = response.transactionStatus
