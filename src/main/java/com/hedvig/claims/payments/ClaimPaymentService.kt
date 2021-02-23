@@ -73,7 +73,8 @@ class ClaimPaymentService(
                 request.note,
                 request.exGratia,
                 request.handlerReference,
-                request.sanctionListSkipped
+                request.sanctionListSkipped,
+                request.carrier
             )
         )
 

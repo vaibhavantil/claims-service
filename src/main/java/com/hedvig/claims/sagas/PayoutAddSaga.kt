@@ -31,7 +31,7 @@ class PayoutAddSaga {
             memberId = event.memberId,
             request = PayoutRequest(
                 amount = event.amount,
-                sanctionBypassed = event.isSanctionCheckSkipped,
+                sanctionBypassed = event.sanctionCheckSkipped,
                 carrier = event.carrier,
                 handler = event.handlerReference
             )
