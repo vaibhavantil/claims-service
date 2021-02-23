@@ -194,97 +194,98 @@ public class ClaimsAggregate {
     }
 
     @CommandHandler
-    public void addPayment(AddPaymentCommand cmd) {
+    public void addPayment(AddPaymentCommand command) {
         log.info("adding payment to claim");
         PaymentAddedEvent pe = new PaymentAddedEvent(
-            cmd.getId(),
-            cmd.getClaimID(),
+            command.getId(),
+            command.getClaimID(),
             this.userId,
-            cmd.getAmount(),
-            cmd.getDeductible(),
-            cmd.getNote(),
-            cmd.getExGratia(),
-            cmd.getHandlerReference()
+            command.getAmount(),
+            command.getDeductible(),
+            command.getNote(),
+            command.getExGratia(),
+            command.getHandlerReference(),
+            command.getCarrier()
         );
         apply(pe);
     }
 
     @CommandHandler
-    public void addIndemnityCostPayment(AddIndemnityCostPaymentCommand cmd) {
+    public void addIndemnityCostPayment(AddIndemnityCostPaymentCommand command) {
         apply(new IndemnityCostPaymentAddedEvent(
-            cmd.getId(),
-            cmd.getClaimId(),
+            command.getId(),
+            command.getClaimId(),
             this.userId,
-            cmd.getAmount(),
-            cmd.getDeductible(),
-            cmd.getNote(),
-            cmd.getExGratia(),
-            cmd.getHandlerReference()
+            command.getAmount(),
+            command.getDeductible(),
+            command.getNote(),
+            command.getExGratia(),
+            command.getHandlerReference(),
+            command.getCarrier()
         ));
     }
 
     @CommandHandler
-    public void addExpensePayment(AddExpensePaymentCommand cmd) {
+    public void addExpensePayment(AddExpensePaymentCommand command) {
         apply(new ExpensePaymentAddedEvent(
-            cmd.getId(),
-            cmd.getClaimId(),
+            command.getId(),
+            command.getClaimId(),
             this.userId,
-            cmd.getAmount(),
-            cmd.getDeductible(),
-            cmd.getNote(),
-            cmd.getExGratia(),
-            cmd.getHandlerReference()
+            command.getAmount(),
+            command.getDeductible(),
+            command.getNote(),
+            command.getExGratia(),
+            command.getHandlerReference(),
+            command.getCarrier()
         ));
     }
 
     @CommandHandler
-    public void addAutomaticPayment(AddAutomaticPaymentCommand cmd) {
-        log.info("add automatic payment to claim {} for member {}", cmd.getClaimId(),
-            cmd.getMemberId());
+    public void addAutomaticPayment(AddAutomaticPaymentCommand command) {
+        log.info("add automatic payment to claim {} for member {}", command.getClaimId(),
+            command.getMemberId());
 
         AutomaticPaymentAddedEvent e = new AutomaticPaymentAddedEvent(
             UUID.randomUUID().toString(),
-            cmd.getClaimId(),
+            command.getClaimId(),
             this.userId,
-            cmd.getAmount(),
-            cmd.getDeductible(),
-            cmd.getNote(),
-            cmd.isExGracia(),
-            cmd.getHandlerReference(),
-            cmd.getSanctionCheckSkipped(),
-            cmd.getCarrier()
+            command.getAmount(),
+            command.getDeductible(),
+            command.getNote(),
+            command.isExGracia(),
+            command.getHandlerReference(),
+            command.getSanctionCheckSkipped(),
+            command.getCarrier()
         );
 
         apply(e);
     }
 
     @CommandHandler
-    public void addInitiatedAutomaticPayment(AddInitiatedAutomaticPaymentCommand cmd) {
-        log.info("add initiated automatic payment to member {} for claim {}", cmd.getMemberId(),
-            cmd.getClaimId());
+    public void addInitiatedAutomaticPayment(AddInitiatedAutomaticPaymentCommand command) {
+        log.info("add initiated automatic payment to member {} for claim {}", command.getMemberId(),
+            command.getClaimId());
 
         AutomaticPaymentInitiatedEvent e = new AutomaticPaymentInitiatedEvent(
-            cmd.getId(),
-            cmd.getClaimId(),
+            command.getId(),
+            command.getClaimId(),
             this.userId,
-            cmd.getTransactionReference(),
-            cmd.getTransactionStatus());
+            command.getTransactionReference(),
+            command.getTransactionStatus());
 
         apply(e);
     }
 
     @CommandHandler
-    public void addFailedAutomaticPayment(AddFailedAutomaticPaymentCommand cmd) {
-        log.info("payment failed to be processed to member {} for claim {}", cmd.getMemberId(),
-            cmd.getClaimId());
+    public void addFailedAutomaticPayment(AddFailedAutomaticPaymentCommand command) {
+        log.info("payment failed to be processed to member {} for claim {}", command.getMemberId(), command.getClaimId());
 
-        AutomaticPaymentFailedEvent e = new AutomaticPaymentFailedEvent(
-            cmd.getId(),
-            cmd.getClaimId(),
+        apply(new AutomaticPaymentFailedEvent(
+            command.getId(),
+            command.getClaimId(),
             this.userId,
-            cmd.getTransactionStatus());
-
-        apply(e);
+            command.getTransactionStatus()
+        ));
     }
 
     @CommandHandler
@@ -298,78 +299,77 @@ public class ClaimsAggregate {
             cmd.getMemberId()
         );
 
-        ContractSetForClaimEvent event = new ContractSetForClaimEvent(
+        apply(new ContractSetForClaimEvent(
             this.id,
             cmd.getContractId(),
             this.userId
-        );
-
-        apply(event);
-    }
-
-    @CommandHandler
-    public void on(UpdateEmployeeClaimStatusCommand cmd) {
-        apply(new EmployeeClaimStatusUpdatedEvent(cmd.getClaimId(), cmd.isCoveringEmployee()));
-    }
-
-    @CommandHandler
-    public void on(UploadClaimFileCommand cmd) {
-        log.info("add claim file to claim {}", cmd.getClaimId());
-
-        apply(new ClaimFileUploadedEvent(
-            cmd.getClaimFileId(),
-            cmd.getBucket(),
-            cmd.getKey(),
-            cmd.getClaimId(),
-            cmd.getContentType(),
-            cmd.getUploadedAt(),
-            cmd.getFileName(),
-            cmd.getUploadSource()
         ));
     }
 
     @CommandHandler
-    public void on(MarkClaimFileAsDeletedCommand cmd) {
+    public void on(UpdateEmployeeClaimStatusCommand command) {
+        apply(new EmployeeClaimStatusUpdatedEvent(command.getClaimId(), command.isCoveringEmployee()));
+    }
+
+    @CommandHandler
+    public void on(UploadClaimFileCommand command) {
+        log.info("add claim file to claim {}", command.getClaimId());
+
+        apply(new ClaimFileUploadedEvent(
+            command.getClaimFileId(),
+            command.getBucket(),
+            command.getKey(),
+            command.getClaimId(),
+            command.getContentType(),
+            command.getUploadedAt(),
+            command.getFileName(),
+            command.getUploadSource()
+        ));
+    }
+
+    @CommandHandler
+    public void on(MarkClaimFileAsDeletedCommand command) {
         Optional<ClaimFile> claimFileMaybe = claimFiles.stream()
-            .filter(claimFile -> claimFile.getId().equals(cmd.getClaimFileId()))
+            .filter(claimFile -> claimFile.getId().equals(command.getClaimFileId()))
             .findAny();
 
         if (!claimFileMaybe.isPresent()) {
             throw new RuntimeException(
-                "Cannot find claim file with an id of " + cmd.getClaimFileId());
+                "Cannot find claim file with an id of " + command.getClaimFileId());
         }
 
         if (claimFileMaybe.get().getMarkedAsDeleted()) {
             throw new RuntimeException(
-                "Cannot delete claim file " + claimFileMaybe.get().getId() + " it has already been marked as deleted");
+                "Cannot delete claim file " + claimFileMaybe.get().getId() + " it has already been marked as deleted"
+            );
         }
         apply(new ClaimFileMarkedAsDeletedEvent(
-            cmd.getClaimFileId(),
-            cmd.getClaimId(),
-            cmd.getDeletedBy(),
+            command.getClaimFileId(),
+            command.getClaimId(),
+            command.getDeletedBy(),
             Instant.now())
         );
     }
 
 
     @CommandHandler
-    public void on(SetClaimFileCategoryCommand cmd) {
-        apply(new ClaimFileCategorySetEvent(cmd.getClaimFileId(), cmd.getClaimId(), cmd.getCategory()));
+    public void on(SetClaimFileCategoryCommand command) {
+        apply(new ClaimFileCategorySetEvent(command.getClaimFileId(), command.getClaimId(), command.getCategory()));
     }
 
     @CommandHandler
-    public void on(TranscribeAudioCommand cmd) {
-        apply(new AudioTranscribedEvent(this.id, cmd.getText(), cmd.getConfidence(), cmd.getLanguageCode()));
+    public void on(TranscribeAudioCommand command) {
+        apply(new AudioTranscribedEvent(this.id, command.getText(), command.getConfidence(), command.getLanguageCode()));
     }
 
     // ----------------- Event sourcing --------------------- //
 
     @EventSourcingHandler
-    public void on(ClaimCreatedEvent e, @Timestamp Instant timestamp) {
-        this.id = e.getId();
-        this.userId = e.getUserId();
+    public void on(ClaimCreatedEvent event, @Timestamp Instant timestamp) {
+        this.id = event.getId();
+        this.userId = event.getUserId();
         this.registrationDate = timestamp;
-        this.audioURL = e.getAudioURL();
+        this.audioURL = event.getAudioURL();
 
         // Init data structures
         this.notes = new ArrayList<Note>();
@@ -380,15 +380,15 @@ public class ClaimsAggregate {
         this.claimFiles = new ArrayList<>();
 
         this.isCoveringEmployee = false;
-        this.contractId = e.getContractId();
+        this.contractId = event.getContractId();
     }
 
     @EventSourcingHandler
-    public void on(BackofficeClaimCreatedEvent e) {
-        this.id = e.getId();
-        this.userId = e.getMemberId();
-        this.registrationDate = e.getRegistrationDate();
-        this.claimSource = e.getClaimSource();
+    public void on(BackofficeClaimCreatedEvent event) {
+        this.id = event.getId();
+        this.userId = event.getMemberId();
+        this.registrationDate = event.getRegistrationDate();
+        this.claimSource = event.getClaimSource();
 
         // Init data structures
         this.notes = new ArrayList<Note>();
@@ -398,114 +398,117 @@ public class ClaimsAggregate {
         this.claimFiles = new ArrayList<>();
 
         this.isCoveringEmployee = false;
-        this.contractId = e.getContractId();
+        this.contractId = event.getContractId();
     }
 
     @EventSourcingHandler
-    public void on(ClaimStatusUpdatedEvent e) {
-        this.state = e.getState();
+    public void on(ClaimStatusUpdatedEvent event) {
+        this.state = event.getState();
     }
 
     @EventSourcingHandler
-    public void on(ClaimsReserveUpdateEvent e) {
-        this.reserve = e.amount;
+    public void on(ClaimsReserveUpdateEvent event) {
+        this.reserve = event.amount;
     }
 
     @EventSourcingHandler
-    public void on(ClaimsTypeUpdateEvent e) {
-        this.type = e.type;
+    public void on(ClaimsTypeUpdateEvent event) {
+        this.type = event.type;
     }
 
     @EventSourcingHandler
-    public void on(DataItemAddedEvent e) {
-        DataItem d = new DataItem();
-        d.id = e.getId();
-        d.date = e.getDate();
-        d.userId = e.getUserId();
-        d.name = e.getName();
-        d.received = e.getReceived();
-        d.title = e.getTitle();
-        d.type = e.getType();
-        d.value = e.getValue();
-        data.add(d);
+    public void on(DataItemAddedEvent event) {
+        DataItem dataItem = new DataItem();
+        dataItem.id = event.getId();
+        dataItem.date = event.getDate();
+        dataItem.userId = event.getUserId();
+        dataItem.name = event.getName();
+        dataItem.received = event.getReceived();
+        dataItem.title = event.getTitle();
+        dataItem.type = event.getType();
+        dataItem.value = event.getValue();
+        data.add(dataItem);
     }
 
     @EventSourcingHandler
-    public void on(PaymentAddedEvent e) {
-        Payment p = new Payment();
-        p.id = e.getId();
-        p.userId = e.getUserId();
-        p.amount = e.getAmount();
-        p.deductible = e.getDeductible();
-        p.note = e.getNote();
-        p.exGratia = e.getExGratia();
-        p.type = PaymentType.Manual;
-        p.handlerReference = e.getHandlerReference();
-        p.payoutStatus = PayoutStatus.COMPLETED;
-        payments.put(e.getId(), p);
-    }
-
-    @EventSourcingHandler
-    public void on(AutomaticPaymentAddedEvent e, @Timestamp Instant timestamp) {
-        Payment p = new Payment();
-        p.id = e.getId();
-        p.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-        p.userId = e.getMemberId();
-        p.amount = e.getAmount().getNumber().doubleValueExact();
-        p.deductible = e.getDeductible().getNumber().doubleValueExact();
-        p.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-        p.note = e.getNote();
-        p.exGratia = e.isExGracia();
-        p.type = PaymentType.Automatic;
-        p.handlerReference = e.getHandlerReference();
-        p.payoutStatus = PayoutStatus.PREPARED;
-        payments.put(e.getId(), p);
-    }
-
-    @EventSourcingHandler
-    public void on(IndemnityCostPaymentAddedEvent paymentAddedEvent) {
+    public void on(PaymentAddedEvent event) {
         Payment payment = new Payment();
-        payment.id = paymentAddedEvent.getId();
-        payment.amount = paymentAddedEvent.getAmount().getNumber().doubleValue();
-        payment.deductible = paymentAddedEvent.getDeductible().getNumber().doubleValue();
+        payment.id = event.getId();
+        payment.userId = event.getUserId();
+        payment.amount = event.getAmount();
+        payment.deductible = event.getDeductible();
+        payment.note = event.getNote();
+        payment.exGratia = event.getExGratia();
+        payment.type = PaymentType.Manual;
+        payment.handlerReference = event.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.COMPLETED;
+        payment.carrier = event.getCarrier();
+        payments.put(event.getId(), payment);
+    }
+
+    @EventSourcingHandler
+    public void on(AutomaticPaymentAddedEvent event, @Timestamp Instant timestamp) {
+        Payment payment = new Payment();
+        payment.id = event.getId();
+        payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
+        payment.userId = event.getMemberId();
+        payment.amount = event.getAmount().getNumber().doubleValueExact();
+        payment.deductible = event.getDeductible().getNumber().doubleValueExact();
+        payment.payoutDate = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
+        payment.note = event.getNote();
+        payment.exGratia = event.isExGracia();
+        payment.type = PaymentType.Automatic;
+        payment.handlerReference = event.getHandlerReference();
+        payment.payoutStatus = PayoutStatus.PREPARED;
+        payment.carrier = event.getCarrier();
+        payments.put(event.getId(), payment);
+    }
+
+    @EventSourcingHandler
+    public void on(IndemnityCostPaymentAddedEvent event) {
+        Payment payment = new Payment();
+        payment.id = event.getId();
+        payment.amount = event.getAmount().getNumber().doubleValue();
+        payment.deductible = event.getDeductible().getNumber().doubleValue();
         payment.payoutDate = null;
-        payment.note = paymentAddedEvent.getNote();
-        payment.exGratia = paymentAddedEvent.getExGratia();
+        payment.note = event.getNote();
+        payment.exGratia = event.getExGratia();
         payment.type = PaymentType.IndemnityCost;
-        payment.handlerReference = paymentAddedEvent.getHandlerReference();
+        payment.handlerReference = event.getHandlerReference();
         payment.payoutStatus = PayoutStatus.COMPLETED;
-        payments.put(paymentAddedEvent.getId(), payment);
+        payment.carrier = event.getCarrier();
+        payments.put(event.getId(), payment);
     }
 
     @EventSourcingHandler
-    public void on(ExpensePaymentAddedEvent expensePaymentAddedEvent) {
+    public void on(ExpensePaymentAddedEvent event) {
         Payment payment = new Payment();
-        payment.id = expensePaymentAddedEvent.getId();
-        payment.amount = expensePaymentAddedEvent.getAmount().getNumber().doubleValue();
-        payment.deductible = expensePaymentAddedEvent.getDeductible().getNumber().doubleValue();
+        payment.id = event.getId();
+        payment.amount = event.getAmount().getNumber().doubleValue();
+        payment.deductible = event.getDeductible().getNumber().doubleValue();
         payment.payoutDate = null;
-        payment.note = expensePaymentAddedEvent.getNote();
-        payment.exGratia = expensePaymentAddedEvent.getExGratia();
+        payment.note = event.getNote();
+        payment.exGratia = event.getExGratia();
         payment.type = PaymentType.Expense;
-        payment.handlerReference = expensePaymentAddedEvent.getHandlerReference();
+        payment.handlerReference = event.getHandlerReference();
         payment.payoutStatus = PayoutStatus.COMPLETED;
-        payments.put(expensePaymentAddedEvent.getId(), payment);
+        payment.carrier = event.getCarrier();
+        payments.put(event.getId(), payment);
     }
 
     @EventSourcingHandler
-    public void on(AutomaticPaymentInitiatedEvent e, @Timestamp Instant timestamp) {
-        if (!payments.containsKey(e.getId())) {
+    public void on(AutomaticPaymentInitiatedEvent event, @Timestamp Instant timestamp) {
+        if (!payments.containsKey(event.getId())) {
             log.error("AutomaticPaymentInitiatedEvent - Cannot find payment with id {} for claim {}",
-                e.getId(),
-                e.getClaimId());
+                event.getId(),
+                event.getClaimId()
+            );
         } else {
-            Payment payment = payments.get(e.getId());
-
+            Payment payment = payments.get(event.getId());
             payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
-            payment.payoutReference = e.getTransactionReference();
+            payment.payoutReference = event.getTransactionReference();
             payment.payoutStatus = PayoutStatus.INITIATED;
-
-            payments.put(e.getId(), payment);
+            payments.put(event.getId(), payment);
         }
     }
 
@@ -514,31 +517,30 @@ public class ClaimsAggregate {
         if (!payments.containsKey(e.getId())) {
             log.error("AutomaticPaymentFailedEvent - Cannot find payment with id {} for claim {}",
                 e.getId(),
-                e.getClaimId());
+                e.getClaimId()
+            );
         } else {
             Payment payment = payments.get(e.getId());
-
             payment.date = LocalDateTime.ofInstant(timestamp, SWEDEN_TZ);
             payment.payoutStatus = PayoutStatus.parseToPayoutStatus(e.getTransactionStatus());
-
             payments.put(e.getId(), payment);
         }
     }
 
     @EventSourcingHandler
-    public void on(NoteAddedEvent e) {
-        Note n = new Note();
-        n.id = e.getId();
-        n.fileURL = e.getFileURL();
-        n.text = e.getText();
-        n.userId = e.getUserId();
-        n.date = e.getDate();
-        notes.add(n);
+    public void on(NoteAddedEvent event) {
+        Note note = new Note();
+        note.id = event.getId();
+        note.fileURL = event.getFileURL();
+        note.text = event.getText();
+        note.userId = event.getUserId();
+        note.date = event.getDate();
+        notes.add(note);
     }
 
     @EventSourcingHandler
-    public void on(EmployeeClaimStatusUpdatedEvent e) {
-        this.isCoveringEmployee = e.isCoveringEmployee();
+    public void on(EmployeeClaimStatusUpdatedEvent event) {
+        this.isCoveringEmployee = event.isCoveringEmployee();
     }
 
     @EventSourcingHandler
