@@ -212,22 +212,6 @@ class InternalController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
     }
 
-    @Deprecated("These endpoints were merged into addClaimPayment()")
-    @PostMapping("/addpayment")
-    fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
-        val command = AddPaymentCommand(
-            UUID.randomUUID().toString(),
-            payment.claimID,
-            payment.amount,
-            payment.deductible,
-            payment.note,
-            payment.exGratia,
-            payment.handlerReference
-        )
-        commandBus.sendAndWait<Any>(command)
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
-    }
-
     @PostMapping("/addClaimPayment")
     fun addClaimPayment(@RequestBody createPaymentDto: CreatePaymentDto): ResponseEntity<Void> {
         return when (claimPaymentService.createPayment(createPaymentDto)) {
