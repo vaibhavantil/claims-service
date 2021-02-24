@@ -4,7 +4,7 @@ import com.hedvig.claims.query.Carrier
 import org.axonframework.serialization.Revision
 import javax.money.MonetaryAmount
 
-@Revision("1.0")
+@Revision("2.0")
 class IndemnityCostPaymentAddedEvent (
     val id: String,
     val claimId: String,

@@ -8,7 +8,7 @@ import org.axonframework.serialization.Revision;
 
 @Value
 @AllArgsConstructor
-@Revision("1.0")
+@Revision("2.0")
 public class AutomaticPaymentAddedEvent {
     public String Id;
     public String claimId;
