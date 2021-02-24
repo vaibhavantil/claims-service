@@ -10,12 +10,12 @@ import com.hedvig.claims.commands.AddIndemnityCostPaymentCommand;
 import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddNoteCommand;
 import com.hedvig.claims.commands.AddPaymentCommand;
-import com.hedvig.claims.commands.TranscribeAudioCommand;
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.MarkClaimFileAsDeletedCommand;
 import com.hedvig.claims.commands.SetClaimFileCategoryCommand;
 import com.hedvig.claims.commands.SetContractForClaimCommand;
+import com.hedvig.claims.commands.TranscribeAudioCommand;
 import com.hedvig.claims.commands.UpdateClaimTypeCommand;
 import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
@@ -40,6 +40,7 @@ import com.hedvig.claims.events.ExpensePaymentAddedEvent;
 import com.hedvig.claims.events.IndemnityCostPaymentAddedEvent;
 import com.hedvig.claims.events.NoteAddedEvent;
 import com.hedvig.claims.events.PaymentAddedEvent;
+import com.hedvig.claims.query.Carrier;
 import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.web.dto.PaymentType;
 import java.time.Instant;
@@ -181,7 +182,7 @@ public class ClaimsAggregate {
     }
 
     @CommandHandler
-    public void addNote(AddNoteCommand command) {
+    public void handle(AddNoteCommand command) {
         log.info("adding note to claim");
         NoteAddedEvent ne = new NoteAddedEvent();
         ne.setClaimsId(command.getClaimID());
@@ -194,8 +195,8 @@ public class ClaimsAggregate {
     }
 
     @CommandHandler
-    public void addPayment(AddPaymentCommand command) {
-        log.info("adding payment to claim");
+    public void handle(AddPaymentCommand command) {
+        ensureSamePaymentCarrierOrThrow(command.getCarrier());
         PaymentAddedEvent pe = new PaymentAddedEvent(
             command.getId(),
             command.getClaimID(),
@@ -211,7 +212,8 @@ public class ClaimsAggregate {
     }
 
     @CommandHandler
-    public void addIndemnityCostPayment(AddIndemnityCostPaymentCommand command) {
+    public void handle(AddIndemnityCostPaymentCommand command) {
+        ensureSamePaymentCarrierOrThrow(command.getCarrier());
         apply(new IndemnityCostPaymentAddedEvent(
             command.getId(),
             command.getClaimId(),
@@ -226,7 +228,8 @@ public class ClaimsAggregate {
     }
 
     @CommandHandler
-    public void addExpensePayment(AddExpensePaymentCommand command) {
+    public void handle(AddExpensePaymentCommand command) {
+        ensureSamePaymentCarrierOrThrow(command.getCarrier());
         apply(new ExpensePaymentAddedEvent(
             command.getId(),
             command.getClaimId(),
@@ -241,11 +244,9 @@ public class ClaimsAggregate {
     }
 
     @CommandHandler
-    public void addAutomaticPayment(AddAutomaticPaymentCommand command) {
-        log.info("add automatic payment to claim {} for member {}", command.getClaimId(),
-            command.getMemberId());
-
-        AutomaticPaymentAddedEvent e = new AutomaticPaymentAddedEvent(
+    public void handle(AddAutomaticPaymentCommand command) {
+        ensureSamePaymentCarrierOrThrow(command.getCarrier());
+        apply(new AutomaticPaymentAddedEvent(
             UUID.randomUUID().toString(),
             command.getClaimId(),
             this.userId,
@@ -256,9 +257,7 @@ public class ClaimsAggregate {
             command.getHandlerReference(),
             command.getSanctionCheckSkipped(),
             command.getCarrier()
-        );
-
-        apply(e);
+        ));
     }
 
     @CommandHandler
@@ -582,5 +581,15 @@ public class ClaimsAggregate {
     @EventSourcingHandler
     public void on(ContractSetForClaimEvent event) {
         this.contractId = event.getContractId();
+    }
+
+
+    private void ensureSamePaymentCarrierOrThrow(Carrier carrier) {
+        if (this.payments.isEmpty()){
+            return;
+        }
+        if (this.payments.values().stream().anyMatch((payment -> payment.carrier != carrier))) {
+            throw new IllegalArgumentException(String.format("Invalid carrier %s (claimId=%s)", carrier, this.id));
+        }
     }
 }
