@@ -20,7 +20,7 @@ class ExpensePaymentAddedEvent_v1 : SingleEventUpcaster() {
             Document::class.java
         ) { document ->
             val rootElement = document.rootElement
-            rootElement.element("carrier").text = Carrier.HDI.name
+            rootElement.addElement("carrier").text = Carrier.HDI.name
             document
         }
     }

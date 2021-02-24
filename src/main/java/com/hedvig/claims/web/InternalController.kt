@@ -1,10 +1,8 @@
 package com.hedvig.claims.web
 
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates
-import com.hedvig.claims.commands.AddAutomaticPaymentCommand
 import com.hedvig.claims.commands.AddDataItemCommand
 import com.hedvig.claims.commands.AddNoteCommand
-import com.hedvig.claims.commands.AddPaymentCommand
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand
 import com.hedvig.claims.commands.CreateClaimCommand
 import com.hedvig.claims.commands.MarkClaimFileAsDeletedCommand
@@ -16,14 +14,12 @@ import com.hedvig.claims.commands.UpdateClaimsStateCommand
 import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand
 import com.hedvig.claims.commands.UploadClaimFileCommand
 import com.hedvig.claims.payments.ClaimPaymentService
-import com.hedvig.claims.query.Carrier
 import com.hedvig.claims.query.ClaimEntity
 import com.hedvig.claims.query.ClaimFileRepository
 import com.hedvig.claims.query.ClaimsRepository
 import com.hedvig.claims.query.ResourceNotFoundException
 import com.hedvig.claims.query.UploadSource
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat
-import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus
 import com.hedvig.claims.serviceIntegration.memberService.MemberService
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService
 import com.hedvig.claims.services.ClaimsQueryService
@@ -50,8 +46,6 @@ import com.hedvig.claims.web.dto.DataItemDTO
 import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO
 import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO
 import com.hedvig.claims.web.dto.NoteDTO
-import com.hedvig.claims.web.dto.PaymentDTO
-import com.hedvig.claims.web.dto.PaymentRequestDTO
 import com.hedvig.claims.web.dto.ReserveDTO
 import com.hedvig.claims.web.dto.StartClaimAudioDTO
 import org.axonframework.commandhandling.gateway.CommandGateway
