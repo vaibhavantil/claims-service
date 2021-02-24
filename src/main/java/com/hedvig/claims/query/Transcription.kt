@@ -1,6 +1,6 @@
 package com.hedvig.claims.query
 
-import java.util.*
+import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id

@@ -1,9 +1,10 @@
 package com.hedvig.claims.commands
 
+import com.hedvig.claims.query.Carrier
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 import javax.money.MonetaryAmount
 
-class AddAutomaticPaymentCommand(
+data class AddAutomaticPaymentCommand(
     @TargetAggregateIdentifier
     val claimId: String,
     val memberId: String,
@@ -12,5 +13,6 @@ class AddAutomaticPaymentCommand(
     val note: String?,
     val isExGracia: Boolean,
     val handlerReference: String,
-    val sanctionCheckSkipped: Boolean
+    val sanctionCheckSkipped: Boolean,
+    val carrier: Carrier
 )

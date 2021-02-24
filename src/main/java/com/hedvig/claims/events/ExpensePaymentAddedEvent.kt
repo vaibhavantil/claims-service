@@ -1,5 +1,6 @@
 package com.hedvig.claims.events
 
+import com.hedvig.claims.query.Carrier
 import javax.money.MonetaryAmount
 
 class ExpensePaymentAddedEvent(
@@ -10,5 +11,6 @@ class ExpensePaymentAddedEvent(
     val deductible: MonetaryAmount,
     val note: String?,
     val exGratia: Boolean,
-    val handlerReference: String?
+    val handlerReference: String?,
+    val carrier: Carrier
 )

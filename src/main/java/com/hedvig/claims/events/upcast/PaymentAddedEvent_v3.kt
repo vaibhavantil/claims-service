@@ -1,36 +1,37 @@
 package com.hedvig.claims.events.upcast
 
-import com.hedvig.claims.events.ClaimFileUploadedEvent
-import com.hedvig.claims.query.UploadSource
+import com.hedvig.claims.events.PaymentAddedEvent
+import com.hedvig.claims.query.Carrier
+import lombok.Value
 import org.axonframework.serialization.SimpleSerializedType
 import org.axonframework.serialization.upcasting.event.IntermediateEventRepresentation
 import org.axonframework.serialization.upcasting.event.SingleEventUpcaster
+import org.dom4j.Document
 
-class ClaimFileUploadedEventUpcaster_v1 : SingleEventUpcaster() {
-
+@Value
+class PaymentAddedEvent_v3 : SingleEventUpcaster() {
     override fun canUpcast(intermediateRepresentation: IntermediateEventRepresentation): Boolean {
         return intermediateRepresentation.type == targetType
     }
 
     override fun doUpcast(intermediateRepresentation: IntermediateEventRepresentation): IntermediateEventRepresentation {
-
         return intermediateRepresentation.upcastPayload(
             outputType,
-            org.dom4j.Document::class.java
+            Document::class.java
         ) { document ->
             val rootElement = document.rootElement
-            rootElement.addElement("uploadSource").text = UploadSource.MANUAL.name
+            rootElement.element("carrier").text = Carrier.HDI.name
             document
         }
     }
 
     companion object {
         private val targetType = SimpleSerializedType(
-            ClaimFileUploadedEvent::class.java.typeName, null
+            PaymentAddedEvent::class.java.typeName, "2.0"
         )
 
         private val outputType = SimpleSerializedType(
-            ClaimFileUploadedEvent::class.java.typeName, "1.0"
+            PaymentAddedEvent::class.java.typeName, "3.0"
         )
     }
 }

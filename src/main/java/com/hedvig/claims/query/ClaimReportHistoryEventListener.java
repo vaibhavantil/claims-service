@@ -1,9 +1,27 @@
 package com.hedvig.claims.query;
 
-import com.hedvig.claims.events.*;
-import com.hedvig.claims.serviceIntegration.productPricing.Contract;
-import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
+import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
+import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
+import com.hedvig.claims.events.BackofficeClaimCreatedEvent;
+import com.hedvig.claims.events.ClaimCreatedEvent;
+import com.hedvig.claims.events.ClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ClaimsReserveUpdateEvent;
+import com.hedvig.claims.events.ClaimsTypeUpdateEvent;
+import com.hedvig.claims.events.DataItemAddedEvent;
+import com.hedvig.claims.events.EmployeeClaimStatusUpdatedEvent;
+import com.hedvig.claims.events.ExpensePaymentAddedEvent;
+import com.hedvig.claims.events.IndemnityCostPaymentAddedEvent;
+import com.hedvig.claims.events.PaymentAddedEvent;
 import com.hedvig.claims.web.dto.ClaimDataType;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -11,13 +29,6 @@ import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
 
 
 @Component
@@ -144,6 +155,34 @@ public class ClaimReportHistoryEventListener {
         .add(BigDecimal.valueOf(e.getAmount())));
 
       claimReportHistoryRepository.save(claimHistoryEntry);
+    }
+  }
+
+  @EventHandler
+  public void on(IndemnityCostPaymentAddedEvent e, @Timestamp Instant timestamp) {
+    log.info("Indemnity Cost Payment added for claim {}", e.getClaimId());
+
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimId(), timestamp);
+    if (!e.getExGratia() || EX_GRACIA_TO_INCLUDE_ALWAYS.contains(e.getClaimId())) {
+      claimHistoryEntry.setCurrency(SEK);
+      claimHistoryEntry.setGrossPaid((claimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : claimHistoryEntry.getGrossPaid())
+        .add(e.getAmount().getNumber().numberValueExact(BigDecimal.class)));
+
+      claimReportHistoryRepository.save(claimHistoryEntry);
+    }
+  }
+
+  @EventHandler
+  public void on(ExpensePaymentAddedEvent e, @Timestamp Instant timestamp) {
+    log.info("Expense Payment added for claim {}", e.getClaimId());
+
+    ClaimReportHistoryEntity claimHistoryEntry = copyLatestClaimHistoryEntity(e.getClaimId(), timestamp);
+    if (!e.getExGratia() || EX_GRACIA_TO_INCLUDE_ALWAYS.contains(e.getClaimId())) {
+      claimHistoryEntry.setCurrency(SEK);
+      claimHistoryEntry.setGrossPaid((claimHistoryEntry.getGrossPaid() == null ? BigDecimal.ZERO : claimHistoryEntry.getGrossPaid())
+          .add(e.getAmount().getNumber().numberValueExact(BigDecimal.class)));
+
+        claimReportHistoryRepository.save(claimHistoryEntry);
     }
   }
 
