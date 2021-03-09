@@ -13,6 +13,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.javamoney.moneta.Money;
+
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 
@@ -56,8 +58,20 @@ public class ClaimDTO extends HedvigBackofficeDTO {
         }
         for (Payment p : c.payments) {
             payments.add(
-                new PaymentDTO(p.id, c.id, p.date, c.userId, p.amount, p.deductible, p.note, p.payoutDate, p.exGratia,
-                    p.type, p.handlerReference, p.payoutReference, p.payoutStatus));
+                new PaymentDTO(
+                    p.id,
+                    c.id,
+                    p.date,
+                    c.userId,
+                    Money.of(p.amount, "SEK"),
+                    Money.of(p.deductible, "SEK"),
+                    p.note,
+                    p.payoutDate,
+                    p.exGratia,
+                    p.type,
+                    p.handlerReference,
+                    p.payoutReference,
+                    p.payoutStatus));
         }
         for (Note n : c.notes) {
             notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
