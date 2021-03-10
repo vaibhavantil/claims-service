@@ -2,6 +2,8 @@ package com.hedvig.claims.aggregates;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
+
+
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddExpensePaymentCommand;
@@ -585,7 +587,7 @@ public class ClaimsAggregate {
 
 
     private void ensureSamePaymentCarrierOrThrow(Carrier carrier) {
-        if (this.payments.isEmpty()){
+        if (this.payments.isEmpty()) {
             return;
         }
         if (this.payments.values().stream().anyMatch((payment -> payment.carrier != carrier))) {
