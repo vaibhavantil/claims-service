@@ -35,6 +35,7 @@ RUN ./gradlew test --no-daemon
 FROM amazoncorretto:11-alpine AS assemble
 
 # Fetch the datadog agent
+RUN apk --no-cache add curl
 RUN curl -o dd-java-agent.jar -L 'https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.datadoghq&a=dd-java-agent&v=LATEST'
 
 # Install ffmpeg
