@@ -41,7 +41,7 @@ RUN curl -o dd-java-agent.jar -L 'https://repository.sonatype.org/service/local/
 RUN apk --no-cache add ffmpeg
 
 # Copy the jar from build stage to this one
-COPY --from=bootjar /usr/app/build/libs/claims-service-0.0.1-SNAPSHOT.jar /app/target/claims-service-0.0.1-SNAPSHOT.jar
+COPY --from=build /usr/app/build/libs/claims-service-0.0.1-SNAPSHOT.jar /app/target/claims-service-0.0.1-SNAPSHOT.jar
 
 # Define entry point
 ENTRYPOINT java -javaagent:/dd-java-agent.jar -jar /app/target/claims-service-0.0.1-SNAPSHOT.jar
