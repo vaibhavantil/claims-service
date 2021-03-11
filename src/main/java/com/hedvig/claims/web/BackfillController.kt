@@ -26,7 +26,7 @@ class BackfillController(
         log.info("Backfilling ${list.size} claims")
         var numTranscribed = 0
         list.forEach {
-            Thread.sleep(5)
+            Thread.sleep(50)
             try {
                 log.info("Backfilling audio for claim ${it.id} -  Started")
                 val result = speechToTextService.convertSpeechToText(it.audioURL, it.id)
@@ -46,7 +46,8 @@ class BackfillController(
                 log.error("Backfilling audio for claim ${it.id} - Caught exception transcribing audio", e)
             }
         }
-        log.info("Backfilling finished with $numTranscribed successfully transcribed recordings")
+        log.info("Backfilling finished with $numTranscribed successfully transcribed recordings " +
+                "and ${list.size - numTranscribed} exceptions")
     }
 
     @GetMapping("/test")
