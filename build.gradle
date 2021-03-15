@@ -1,0 +1,122 @@
+// Version numbers live in gradle.properties
+plugins {
+    id "io.freefair.lombok" version "${lombokPluginVersion}" //is this needed?
+    id "io.spring.dependency-management" version "${springDependencyManagementPluginVersion}"
+    id "java"
+    id "maven-publish"
+    id "org.jetbrains.kotlin.jvm" version "${kotlinVersion}"
+    id "org.springframework.boot" version "${springFrameworkBootPluginVersion}"
+    id "org.jetbrains.kotlin.plugin.allopen" version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.plugin.noarg" version "${kotlinVersion}"
+}
+
+group = "com.hedvig.generic"
+version = "0.0.1-SNAPSHOT"
+description = "Hedvig's claims management service"
+sourceCompatibility = JavaVersion.VERSION_1_9
+targetCompatibility = JavaVersion.VERSION_1_9
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudDependenciesManagementPluginVersion}"
+    }
+}
+
+repositories {
+    // if you have a dependency that's locally-built using maven, uncomment this to use local .m2 directory cache:
+    // mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://repository.apache.org/content/repositories/releases"
+    }
+}
+
+dependencies {
+    // Google cloud libraries BOM:
+    api platform("com.google.cloud:libraries-bom:${googleLibrariesBomVersion}")
+    // Dependencies that use this BOM:
+    api "com.google.cloud:google-cloud-speech"
+    api "com.google.cloud:google-cloud-storage"
+
+    // Dependencies that are managed by io.spring.dependency-management (defined in plugins):
+    implementation "ch.qos.logback:logback-access"
+    implementation "com.fasterxml.jackson.core:jackson-databind"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
+    implementation "org.springframework.boot:spring-boot-configuration-processor"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.retry:spring-retry"
+    runtimeOnly "org.postgresql:postgresql"
+
+    //Dependencies that are managed by io.springframework.cloud:spring-cloud-dependencies
+    implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
+    implementation "org.springframework.cloud:spring-cloud-starter-kubernetes"
+    implementation "org.springframework.cloud:spring-cloud-kubernetes-config"
+    implementation "org.springframework.cloud:spring-cloud-kubernetes-ribbon"
+
+    // Normal dependencies:
+    implementation "com.amazonaws:aws-java-sdk-s3:${awsVersion}"
+    //The following AWS dependencies are not directly used, but the aws-java-sdk pulls older versions, resulting in prod issues.
+    implementation "com.amazonaws:aws-java-sdk-kms:${awsVersion}"
+    implementation "com.amazonaws:aws-java-sdk-core:${awsVersion}"
+    implementation "com.amazonaws:jmespath-java:${awsVersion}"
+    implementation "com.h2database:h2:${hibernateVersion}"
+    implementation "com.vladmihalcea:hibernate-types-52:${hibernateTypesVersion}"
+    implementation "javax.xml.bind:jaxb-api:${jaxbApiVersion}"
+    implementation "io.sentry:sentry-spring:${sentryVersion}"
+    implementation "io.sentry:sentry-logback:${sentryVersion}"
+    implementation "io.springfox:springfox-swagger2:${springfoxVersion}"
+    implementation "io.springfox:springfox-swagger-ui:${springfoxVersion}"
+    implementation "net.bramp.ffmpeg:ffmpeg:${ffmpegVersion}"
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}"
+    implementation "org.axonframework:axon-core:${axonVersion}"
+    implementation "org.axonframework:axon-spring-boot-starter:${axonVersion}"
+    implementation "org.hibernate:hibernate-java8:${hibernateJava8Version}"
+    implementation "org.javamoney:moneta:${monetaVersion}"
+    implementation "org.javassist:javassist:${javassistVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-bootstrap:${springCloudStarterVersion}"
+    implementation "org.zalando:jackson-datatype-money:${jacksonDatatypeMoneyVersion}"
+
+    // Test-only dependencies:
+    testImplementation "io.mockk:mockk:${mockkVersion}"
+    testImplementation "org.assertj:assertj-core:${assertJVersion}"
+    testImplementation "org.axonframework:axon-test:${axonVersion}"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:${kotlinVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootStarterTestVersion}") {
+        exclude group: 'org.assertj', module: 'assertj-core'
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "9"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "9"
+}
+
+// I don't think this is needed, but we can remove later. Rather "belt and braces" in prod at first.
+bootJar {
+    enabled = true
+}
+
+allOpen {
+    annotation("org.springframework.context.annotation.Configuration")
+    annotation("javax.persistence.Entity")
+}
+noArg {
+    annotation("javax.persistence.Entity")
+}

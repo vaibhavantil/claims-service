@@ -6,7 +6,7 @@ import org.axonframework.serialization.upcasting.event.IntermediateEventRepresen
 import org.axonframework.serialization.upcasting.event.SingleEventUpcaster
 import org.dom4j.Document
 
-class AutomaticPaymentAddedEventUpcaster : SingleEventUpcaster() {
+class AutomaticPaymentAddedEventUpcaster_v3 : SingleEventUpcaster() {
 
     private val targetType = SimpleSerializedType(
         AutomaticPaymentAddedEvent::class.java.typeName, null
@@ -19,7 +19,7 @@ class AutomaticPaymentAddedEventUpcaster : SingleEventUpcaster() {
         return intermediateEventRepresentation.upcastPayload(
             SimpleSerializedType(
                 targetType.name,
-                "1.0"),
+                "3.0"),
             Document::class.java
         ) { document: Document ->
             val element = document.rootElement

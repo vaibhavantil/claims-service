@@ -280,6 +280,7 @@ public class ClaimsEventListener {
         payment.type = PaymentType.Manual;
         payment.handlerReference = event.getHandlerReference();
         payment.payoutStatus = PayoutStatus.COMPLETED;
+        payment.carrier = event.getCarrier();
         claim.addPayment(payment);
 
         Event claimEvent = createEvent(event, String.format(
@@ -311,6 +312,7 @@ public class ClaimsEventListener {
         payment.type = PaymentType.Automatic;
         payment.handlerReference = event.getHandlerReference();
         payment.payoutStatus = PayoutStatus.PREPARED;
+        payment.carrier = event.getCarrier();
         claim.addPayment(payment);
 
         Event claimEvent = createEvent(event, String.format(
@@ -340,6 +342,7 @@ public class ClaimsEventListener {
         payment.type = PaymentType.IndemnityCost;
         payment.handlerReference = event.getHandlerReference();
         payment.payoutStatus = PayoutStatus.COMPLETED;
+        payment.carrier = event.getCarrier();
         claim.addPayment(payment);
 
         Event claimEvent = createEvent(event, String.format(
@@ -369,6 +372,7 @@ public class ClaimsEventListener {
         payment.type = PaymentType.Expense;
         payment.handlerReference = event.getHandlerReference();
         payment.payoutStatus = PayoutStatus.COMPLETED;
+        payment.carrier = event.getCarrier();
         claim.addPayment(payment);
 
         Event claimEvent = createEvent(event, String.format(

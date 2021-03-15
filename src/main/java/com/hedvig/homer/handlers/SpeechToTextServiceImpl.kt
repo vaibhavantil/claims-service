@@ -27,6 +27,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.UUID
+import kotlin.jvm.Throws
 
 @Component
 class SpeechToTextServiceImpl(

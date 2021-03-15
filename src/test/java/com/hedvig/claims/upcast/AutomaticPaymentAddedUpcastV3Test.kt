@@ -2,10 +2,8 @@ package com.hedvig.claims.upcast
 
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent
 import com.hedvig.claims.events.PayoutDetails
-import com.hedvig.claims.events.upcast.AutomaticPaymentAddedEventUpcaster
+import com.hedvig.claims.events.upcast.AutomaticPaymentAddedEventUpcaster_v3
 import org.assertj.core.api.Assertions.assertThat
-import org.javamoney.moneta.Money
-import javax.money.MonetaryAmount
 
 import java.util.stream.Collectors.toList
 import java.util.stream.Stream
@@ -20,10 +18,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Test
 import org.springframework.test.util.ReflectionTestUtils
 
-class AutomaticPaymentAddedUpcastTest {
+class AutomaticPaymentAddedUpcastV3Test {
 
     @Test
-    fun `upcast AutomaticPaymentAdded null to v1`() {
+    fun `upcast AutomaticPaymentAdded null to v3`() {
 
         val serializer = XStreamSerializer()
         val metaData = MetaData.with("key", "value")
@@ -45,12 +43,12 @@ class AutomaticPaymentAddedUpcastTest {
 
 
         val result =
-            AutomaticPaymentAddedEventUpcaster().upcast(Stream.of(InitialEventRepresentation(eventData, serializer)))
+            AutomaticPaymentAddedEventUpcaster_v3().upcast(Stream.of(InitialEventRepresentation(eventData, serializer)))
                 .collect(toList())
         assertFalse(result.isEmpty())
 
         val firstEvent = result.get(0)
-        assertEquals("1.0", firstEvent.getType().getRevision())
+        assertEquals("3.0", firstEvent.getType().getRevision())
 
         val upcastedEvent =
             serializer.deserialize<AutomaticPaymentAddedEvent, AutomaticPaymentAddedEvent>(firstEvent.getData() as SerializedObject<AutomaticPaymentAddedEvent>)

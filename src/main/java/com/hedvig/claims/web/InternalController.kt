@@ -1,10 +1,8 @@
 package com.hedvig.claims.web
 
 import com.hedvig.claims.aggregates.ClaimsAggregate.ClaimStates
-import com.hedvig.claims.commands.AddAutomaticPaymentCommand
 import com.hedvig.claims.commands.AddDataItemCommand
 import com.hedvig.claims.commands.AddNoteCommand
-import com.hedvig.claims.commands.AddPaymentCommand
 import com.hedvig.claims.commands.CreateBackofficeClaimCommand
 import com.hedvig.claims.commands.CreateClaimCommand
 import com.hedvig.claims.commands.MarkClaimFileAsDeletedCommand
@@ -23,7 +21,6 @@ import com.hedvig.claims.query.ClaimsRepository
 import com.hedvig.claims.query.ResourceNotFoundException
 import com.hedvig.claims.query.UploadSource
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat
-import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus
 import com.hedvig.claims.serviceIntegration.memberService.MemberService
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService
 import com.hedvig.claims.services.ClaimsQueryService
@@ -50,8 +47,6 @@ import com.hedvig.claims.web.dto.DataItemDTO
 import com.hedvig.claims.web.dto.EmployeeClaimRequestDTO
 import com.hedvig.claims.web.dto.MarkClaimFileAsDeletedDTO
 import com.hedvig.claims.web.dto.NoteDTO
-import com.hedvig.claims.web.dto.PaymentDTO
-import com.hedvig.claims.web.dto.PaymentRequestDTO
 import com.hedvig.claims.web.dto.ReserveDTO
 import com.hedvig.claims.web.dto.StartClaimAudioDTO
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -210,75 +205,6 @@ class InternalController(
         )
         commandBus.sendAndWait<Any>(command)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
-    }
-
-    @Deprecated("These endpoints were merged into addClaimPayment()")
-    @PostMapping("/addpayment")
-    fun addPayment(@RequestBody payment: PaymentDTO): ResponseEntity<*> {
-        val command = AddPaymentCommand(
-            UUID.randomUUID().toString(),
-            payment.claimID,
-            payment.amount,
-            payment.deductible,
-            payment.note,
-            payment.exGratia,
-            payment.handlerReference
-        )
-        commandBus.sendAndWait<Any>(command)
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
-    }
-
-    @Deprecated("These endpoints were merged into addClaimPayment()")
-    @PostMapping("/{memberId}/addAutomaticPayment")
-    fun addAutomaticPayment(
-        @PathVariable memberId: String,
-        @RequestBody request: PaymentRequestDTO
-    ): ResponseEntity<*> {
-        val member = memberService.getMember(memberId) ?: return ResponseEntity.notFound().build<Any>()
-
-        val memberStatus = meerkat
-            .getMemberSanctionStatus("${member.firstName} ${member.lastName}")
-        if (memberStatus == SanctionStatus.FullHit) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
-        }
-
-        if (!request.sanctionCheckSkipped &&
-            (memberStatus == SanctionStatus.Undetermined || memberStatus == SanctionStatus.PartialHit)
-        ) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
-        }
-
-        if (request.sanctionCheckSkipped) {
-            val claim = claimsRepository.findByIdOrNull(request.claimId.toString())
-                ?: return ResponseEntity.notFound().build<Any>()
-
-            if (request.paymentRequestNote == null || request.paymentRequestNote.trim().length < 5) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build<Any>()
-            }
-            val command = AddNoteCommand(
-                UUID.randomUUID().toString(),
-                request.claimId.toString(),
-                LocalDateTime.now(),
-                request.paymentRequestNote,
-                memberId,
-                claim.audioURL
-            )
-            commandBus.sendAndWait<Any>(command)
-        }
-        val addAutomaticPaymentCommand = AddAutomaticPaymentCommand(
-            request.claimId.toString(),
-            memberId,
-            request.amount,
-            request.deductible,
-            request.paymentRequestNote,
-            request.exGratia,
-            request.handlerReference,
-            request.sanctionCheckSkipped,
-            SelectedPayoutDetails.NotSelected
-        )
-        commandBus.sendAndWait<Any>(addAutomaticPaymentCommand)
-
-        return ResponseEntity.accepted().build<Any>()
     }
 
     @PostMapping("/addClaimPayment")

@@ -1,15 +1,14 @@
 package com.hedvig.claims.serviceIntegration.paymentService.dto
 
 import com.hedvig.claims.commands.SelectedPayoutDetails
+import com.hedvig.claims.query.Carrier
 import javax.money.MonetaryAmount
 
-class PayoutRequest(
+data class PayoutRequest(
     val amount: MonetaryAmount,
+    val category: TransactionCategory = TransactionCategory.CLAIM,
     val sanctionBypassed: Boolean,
-    val referenceId: String?,
-    val note: String?,
-    val handler: String?,
+    val carrier: Carrier,
+    val handler: String,
     val payoutDetails: SelectedPayoutDetails?
-) {
-    val category = "CLAIM"
-}
+)

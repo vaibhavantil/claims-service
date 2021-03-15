@@ -75,6 +75,7 @@ class ClaimPaymentService(
                 request.exGratia,
                 request.handlerReference,
                 request.sanctionListSkipped,
+                request.carrier,
                 request.payoutDetails?.let { SelectedPayoutDetails.fromRequest(it, ssn!!) } ?: SelectedPayoutDetails.NotSelected
             )
         )
@@ -91,7 +92,8 @@ class ClaimPaymentService(
                 createPaymentDto.deductible.number.doubleValueExact(),
                 createPaymentDto.note,
                 createPaymentDto.exGratia,
-                createPaymentDto.handlerReference
+                createPaymentDto.handlerReference,
+                createPaymentDto.carrier
             )
         )
         return CreatePaymentOutcome.COMPLETED
@@ -108,7 +110,8 @@ class ClaimPaymentService(
                 createPaymentDto.deductible,
                 createPaymentDto.note,
                 createPaymentDto.exGratia,
-                createPaymentDto.handlerReference
+                createPaymentDto.handlerReference,
+                createPaymentDto.carrier
             )
         )
         return CreatePaymentOutcome.COMPLETED
@@ -124,7 +127,8 @@ class ClaimPaymentService(
                 createPaymentDto.deductible,
                 createPaymentDto.note,
                 createPaymentDto.exGratia,
-                createPaymentDto.handlerReference
+                createPaymentDto.handlerReference,
+                createPaymentDto.carrier
             )
         )
         return CreatePaymentOutcome.COMPLETED

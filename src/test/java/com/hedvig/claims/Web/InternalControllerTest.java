@@ -3,9 +3,6 @@ package com.hedvig.claims.Web;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.claims.ClaimServiceTestConfiguration;
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
@@ -13,31 +10,28 @@ import com.hedvig.claims.commands.CreateClaimCommand;
 import com.hedvig.claims.commands.SelectedPayoutDetails;
 import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
 import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
+import com.hedvig.claims.query.Carrier;
 import com.hedvig.claims.query.ClaimEntity;
 import com.hedvig.claims.query.ClaimsRepository;
 import com.hedvig.claims.serviceIntegration.meerkat.Meerkat;
-import com.hedvig.claims.serviceIntegration.meerkat.dto.SanctionStatus;
 import com.hedvig.claims.serviceIntegration.memberService.MemberService;
 import com.hedvig.claims.serviceIntegration.memberService.dto.Member;
 import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
+import com.hedvig.claims.serviceIntegration.predictor.Predictor;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingClient;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.serviceIntegration.ticketService.TicketService;
 import com.hedvig.claims.services.ClaimsQueryService;
 import com.hedvig.claims.services.LinkFileToClaimService;
-import com.hedvig.claims.services.ProductPricingFacade;
 import com.hedvig.claims.web.dto.PaymentRequestDTO;
-
+import com.hedvig.homer.SpeechToTextService;
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.money.MonetaryAmount;
-
-import com.hedvig.homer.SpeechToTextService;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -49,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -111,6 +104,9 @@ public class InternalControllerTest {
     @MockBean
     private SpeechToTextService speechToTextService;
 
+    @MockBean
+    private Predictor predictor;
+
     @Test
     public void Should_ReturnAnInitiatedPaymentEvent_WhenPaymentSuccessfullyCompletedFromPaymentService() {
 
@@ -132,6 +128,7 @@ public class InternalControllerTest {
             false,
             HEDVIG_HANDLER,
             false,
+            Carrier.HDI,
             SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
@@ -164,6 +161,7 @@ public class InternalControllerTest {
             false,
             HEDVIG_HANDLER,
             false,
+            Carrier.HDI,
             SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
@@ -196,6 +194,7 @@ public class InternalControllerTest {
             false,
             HEDVIG_HANDLER,
             false,
+            Carrier.HDI,
             SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
@@ -205,112 +204,6 @@ public class InternalControllerTest {
             events.stream()
                 .filter(e -> e.getPayload().getClass().equals(AutomaticPaymentFailedEvent.class))
                 .count()).isEqualTo(1);
-    }
-
-    @Test
-    public void Should_ReturnForbidden_WhenMemberIsTerrorist() throws Exception {
-
-        given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
-
-        given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
-            .willReturn(SanctionStatus.FullHit);
-
-        mockMvc
-            .perform(post("/i/claims/12345/addAutomaticPayment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(
-                    makePaymentRequestDto(UUID.randomUUID(), false, null))))
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    public void Should_ReturnForbidden_WhenMemberIsPartialTerrorist() throws Exception {
-
-        given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
-
-        given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
-            .willReturn(SanctionStatus.PartialHit);
-
-        mockMvc
-            .perform(post("/i/claims/12345/addAutomaticPayment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(
-                    makePaymentRequestDto(UUID.randomUUID(), false, null))))
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    public void Should_ReturnForbidden_WhenMemberStatusIsUndetermined() throws Exception {
-
-        given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
-
-        given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
-            .willReturn(SanctionStatus.Undetermined);
-
-        mockMvc
-            .perform(post("/i/claims/12345/addAutomaticPayment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(
-                    makePaymentRequestDto(UUID.randomUUID(), false, null))))
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    public void Should_ReturnSuccess_WhenMemberSeemsLikeTerroristButWeWantToBypassMeerkat()
-        throws Exception {
-
-        UUID CLAIM_ID = UUID.fromString("733c5cbe-f7d5-11e8-a18f-4b0bf766f99d");
-
-        this.commandGateway.sendAndWait(
-            new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, "TEST", null));
-
-        given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
-
-        given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
-            .willReturn(SanctionStatus.PartialHit);
-
-        given(
-            paymentService.executePayment(Mockito.anyString(), Mockito.any(PayoutRequest.class)))
-            .willReturn(new PaymentResponse(TRANSACTION_ID, TransactionStatus.INITIATED));
-
-        given(claimsRepository.findById(Mockito.anyString()))
-            .willReturn(Optional.of(makeClaimEntity(CLAIM_ID.toString())));
-
-        mockMvc
-            .perform(post("/i/claims/12345/addAutomaticPayment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(
-                    makePaymentRequestDto(CLAIM_ID, true, "its not a terrorist, its a developer"))))
-            .andExpect(status().is2xxSuccessful());
-    }
-
-    @Test
-    public void Should_ReturnForbidden_WhenWeWantToBypassWithoutReason()
-        throws Exception {
-
-        UUID CLAIM_ID = UUID.fromString("f5145de8-f7d7-11e8-a3a7-0bfc9d610820");
-
-        this.commandGateway.sendAndWait(
-            new CreateClaimCommand(CLAIM_ID.toString(), MEMBER_ID, "TEST", null));
-
-        given(memberService.getMember(Mockito.anyString())).willReturn(makeMember());
-
-        given(meerkat.getMemberSanctionStatus(Mockito.anyString()))
-            .willReturn(SanctionStatus.PartialHit);
-
-        given(
-            paymentService.executePayment(Mockito.anyString(), Mockito.any(PayoutRequest.class)))
-            .willReturn(new PaymentResponse(TRANSACTION_ID, TransactionStatus.INITIATED));
-
-        given(claimsRepository.findById(Mockito.anyString()))
-            .willReturn(Optional.of(makeClaimEntity(CLAIM_ID.toString())));
-
-        mockMvc
-            .perform(post("/i/claims/12345/addAutomaticPayment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(
-                    makePaymentRequestDto(CLAIM_ID, true, " "))))
-            .andExpect(status().isForbidden());
     }
 
     private PaymentRequestDTO makePaymentRequestDto(UUID claimId, boolean bypass,
@@ -325,7 +218,7 @@ public class InternalControllerTest {
             "Kikos",
             "Kikou",
             "191212121212",
-            LocalDate.of(1989, 02, 17),
+            LocalDate.of(1989, 2, 17),
             "street",
             "city",
             "12345",

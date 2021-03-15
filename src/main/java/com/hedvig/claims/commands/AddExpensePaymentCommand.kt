@@ -1,5 +1,6 @@
 package com.hedvig.claims.commands
 
+import com.hedvig.claims.query.Carrier
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 import java.time.LocalDateTime
 import javax.money.MonetaryAmount
@@ -12,5 +13,6 @@ data class AddExpensePaymentCommand(
     val deductible: MonetaryAmount,
     val note: String?,
     val exGratia: Boolean,
-    val handlerReference: String?
+    val handlerReference: String?,
+    val carrier: Carrier
 )

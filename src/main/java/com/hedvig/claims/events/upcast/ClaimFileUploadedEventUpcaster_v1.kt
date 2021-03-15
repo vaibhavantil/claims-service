@@ -18,8 +18,8 @@ class ClaimFileUploadedEventUpcaster_v1 : SingleEventUpcaster() {
             outputType,
             org.dom4j.Document::class.java
         ) { document ->
-            val element = document.rootElement
-            element.addElement("uploadSource").data = UploadSource.MANUAL
+            val rootElement = document.rootElement
+            rootElement.addElement("uploadSource").text = UploadSource.MANUAL.name
             document
         }
     }

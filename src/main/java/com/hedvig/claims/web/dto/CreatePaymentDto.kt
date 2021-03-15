@@ -1,5 +1,6 @@
 package com.hedvig.claims.web.dto
 
+import com.hedvig.claims.query.Carrier
 import javax.money.MonetaryAmount
 
 data class CreatePaymentDto(
@@ -11,5 +12,6 @@ data class CreatePaymentDto(
     val type: PaymentType,
     val handlerReference: String,
     val sanctionListSkipped: Boolean,
+    val carrier: Carrier,
     val payoutDetails: SelectedPayoutDetails?
 )
