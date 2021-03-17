@@ -13,6 +13,7 @@ import com.hedvig.claims.commands.UpdateClaimsReserveCommand
 import com.hedvig.claims.commands.UpdateClaimsStateCommand
 import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand
 import com.hedvig.claims.commands.UploadClaimFileCommand
+import com.hedvig.claims.commands.SelectedPayoutDetails
 import com.hedvig.claims.payments.ClaimPaymentService
 import com.hedvig.claims.query.ClaimEntity
 import com.hedvig.claims.query.ClaimFileRepository
