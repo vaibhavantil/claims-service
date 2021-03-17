@@ -26,16 +26,16 @@ sealed class SelectedPayoutDetails {
                 selectedPayoutDetails.ssn,
                 selectedPayoutDetails.message
             )
-            NotSelected -> PayoutDetails.NotSelected
+            is NotSelected -> PayoutDetails.NotSelected
         }
 
         fun fromEvent(payoutDetails: PayoutDetails) = when (payoutDetails) {
-            is PayoutDetails.Swish -> SelectedPayoutDetails.Swish(
+            is PayoutDetails.Swish -> Swish(
                 payoutDetails.phoneNumber,
                 payoutDetails.ssn,
                 payoutDetails.message
             )
-            PayoutDetails.NotSelected -> SelectedPayoutDetails.NotSelected
+            is PayoutDetails.NotSelected -> NotSelected
         }
 
         fun fromRequest(selectedPayoutDetails: SelectedPayoutDetailsRequest, ssn: String) = when (selectedPayoutDetails) {
@@ -44,7 +44,7 @@ sealed class SelectedPayoutDetails {
                 ssn,
                 selectedPayoutDetails.message
             )
-            SelectedPayoutDetailsRequest.NotSelected -> NotSelected
+            is SelectedPayoutDetailsRequest.NotSelected -> NotSelected
         }
     }
 }
