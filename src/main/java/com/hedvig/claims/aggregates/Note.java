@@ -12,4 +12,5 @@ public class Note {
   public String text;
   public String userId;
   public String fileURL;
+  public String handlerReference;
 }

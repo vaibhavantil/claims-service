@@ -13,7 +13,6 @@ import com.hedvig.claims.commands.UpdateClaimsReserveCommand
 import com.hedvig.claims.commands.UpdateClaimsStateCommand
 import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand
 import com.hedvig.claims.commands.UploadClaimFileCommand
-import com.hedvig.claims.commands.SelectedPayoutDetails
 import com.hedvig.claims.payments.ClaimPaymentService
 import com.hedvig.claims.query.ClaimEntity
 import com.hedvig.claims.query.ClaimFileRepository
@@ -58,6 +57,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -193,7 +193,7 @@ class InternalController(
     }
 
     @PostMapping("/addnote")
-    fun addNote(@RequestBody note: NoteDTO): ResponseEntity<*> {
+    fun addNote(@RequestBody note: NoteDTO, @RequestHeader("Authorization") handlerReferenceEmail: String?): ResponseEntity<*> {
         val uuid = UUID.randomUUID()
         val command = AddNoteCommand(
             uuid.toString(),
@@ -201,7 +201,8 @@ class InternalController(
             LocalDateTime.now(),
             note.text,
             note.userId,
-            note.fileURL
+            note.fileURL,
+            handlerReferenceEmail
         )
         commandBus.sendAndWait<Any>(command)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()

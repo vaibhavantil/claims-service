@@ -196,6 +196,7 @@ public class ClaimsAggregate {
         ne.setId(command.getId());
         ne.setText(command.getText());
         ne.setUserId(this.userId);
+        ne.setHandlerReference(command.getHandlerReference());
         apply(ne);
     }
 
@@ -540,6 +541,7 @@ public class ClaimsAggregate {
         note.text = event.getText();
         note.userId = event.getUserId();
         note.date = event.getDate();
+        note.handlerReference = event.getHandlerReference();
         notes.add(note);
     }
 

@@ -140,6 +140,7 @@ public class ClaimsEventListener {
         n.fileURL = e.getFileURL();
         n.text = e.getText();
         n.userId = e.getUserId();
+        n.handlerReference = e.getHandlerReference();
         claim.addNote(n);
 
         Event ev = createEvent(e, "Note added:" + n.text);
