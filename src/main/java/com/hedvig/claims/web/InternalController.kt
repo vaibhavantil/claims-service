@@ -193,7 +193,7 @@ class InternalController(
     }
 
     @PostMapping("/addnote")
-    fun addNote(@RequestBody note: NoteDTO, @RequestHeader("Authorization") handlerReferenceEmail: String?): ResponseEntity<*> {
+    fun addNote(@RequestBody note: NoteDTO ): ResponseEntity<*> {
         val uuid = UUID.randomUUID()
         val command = AddNoteCommand(
             uuid.toString(),
@@ -202,7 +202,7 @@ class InternalController(
             note.text,
             note.userId,
             note.fileURL,
-            handlerReferenceEmail
+            note.handlerReference
         )
         commandBus.sendAndWait<Any>(command)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build<Any>()
