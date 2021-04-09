@@ -61,7 +61,8 @@ class ClaimPaymentService(
                 LocalDateTime.now(),
                 request.note,
                 memberId,
-                claim.audioURL
+                claim.audioURL,
+                request.handlerReference
             )
         )
 
