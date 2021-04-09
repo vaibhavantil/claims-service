@@ -193,7 +193,7 @@ class InternalController(
     }
 
     @PostMapping("/addnote")
-    fun addNote(@RequestBody note: NoteDTO ): ResponseEntity<*> {
+    fun addNote(@RequestBody note: NoteDTO): ResponseEntity<*> {
         val uuid = UUID.randomUUID()
         val command = AddNoteCommand(
             uuid.toString(),
