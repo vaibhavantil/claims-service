@@ -74,7 +74,7 @@ public class ClaimDTO extends HedvigBackofficeDTO {
                     p.payoutStatus));
         }
         for (Note n : c.notes) {
-            notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL));
+            notes.add(new NoteDTO(n.id, c.id, n.date, n.userId, n.text, n.fileURL, n.handlerReference));
         }
 
         for (Transcription t : c.transcriptions) {
