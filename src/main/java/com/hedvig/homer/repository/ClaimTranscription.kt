@@ -18,7 +18,7 @@ class ClaimTranscription (
     var claimId: String? = null
 
     @OneToMany(cascade = [(CascadeType.ALL)])
-    var alternative: MutableList<ClaimTranscriptionAlternative> = arrayListOf()
+    var alternatives_list: MutableList<ClaimTranscriptionAlternative> = arrayListOf()
 
     @Nullable
     @Column(columnDefinition = "TEXT")
@@ -26,4 +26,7 @@ class ClaimTranscription (
 
     @Nullable
     var confidenceScore: Float? = null
+
+    @Nullable
+    var languageCode: String? = null
 }

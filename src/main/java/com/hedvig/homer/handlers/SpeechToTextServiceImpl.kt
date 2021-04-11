@@ -68,9 +68,9 @@ class SpeechToTextServiceImpl(
 
     results.forEach { result ->
       val bestAlternative = result.getAlternatives(0)
-      logger.info("Best transcription: ${bestAlternative.transcript}]\n")
+      logger.info("Best transcription: ${bestAlternative.transcript}\n")
       result.alternativesList.forEach { alternative ->
-        logger.info("Alternative transcription: ${alternative.transcript}]\n")
+        logger.info("Alternative transcription: ${alternative.transcript}\n")
         alternativesList.add(alternative.transcript)
       }
       finalTranscript += bestAlternative.transcript + "\n"

@@ -34,11 +34,12 @@ class TranscriptAlternativeController(
 						claimTranscriptionRepository.save(
 							ClaimTranscription().also {
 								it.bestTranscript = result.text
-								it.alternative = result.alternatives.map {
+								it.alternatives_list = result.alternatives.map {
 									ClaimTranscriptionAlternative.from(it)
 								}.toMutableList()
 								it.claimId = claimId
 								it.confidenceScore = result.confidence
+								it.languageCode = result.languageCode
 							}
 						)
 
