@@ -40,7 +40,7 @@ class SpeechToTextServiceImpl(
 ) : SpeechToTextService {
 
   @Throws
-  override fun convertSpeechToText(audioURL: String, requestId: String): SpeechToTextResult {
+  override fun convertSpeechToText(audioURL: String, requestId: String, nAlternatives: Int): SpeechToTextResult {
     val filename: String = extractFileFromURL(audioURL)
     val file = convert(filename)
     val uploadedRawAudio = storageService.uploadObjectAndGetUri(file.toPath())
@@ -58,16 +58,23 @@ class SpeechToTextServiceImpl(
     var finalTranscript = ""
     var addedConfidenceScore = 0f
     var languageCode = ""
+    val alternativesList: MutableList<String> = mutableListOf()
 
-    val response = speechClient.longRunningRecognizeAsync(speechConfig.speechClientConfig, audio)
+    val speechClientConfig = speechConfig.createSpeechClientConfig(nAlternatives)
+
+    val response = speechClient.longRunningRecognizeAsync(speechClientConfig, audio)
 
     val results: List<SpeechRecognitionResult> = response.get().resultsList
 
     results.forEach { result ->
-      val alternative = result.getAlternatives(0)
-      logger.info("Transcription: ${alternative.transcript}]\n")
-      finalTranscript += alternative.transcript + "\n"
-      addedConfidenceScore += alternative.confidence
+      val bestAlternative = result.getAlternatives(0)
+      logger.info("Best transcription: ${bestAlternative.transcript}]\n")
+      result.alternativesList.forEach { alternative ->
+        logger.info("Alternative transcription: ${alternative.transcript}]\n")
+        alternativesList.add(alternative.transcript)
+      }
+      finalTranscript += bestAlternative.transcript + "\n"
+      addedConfidenceScore += bestAlternative.confidence
       if (!languageCode.contains(result.languageCode)) {
         if (languageCode.isEmpty()) {
           languageCode = result.languageCode
@@ -91,7 +98,7 @@ class SpeechToTextServiceImpl(
     dao.confidenceScore = averageConfidenceScore
 
     speechToTextRepository.save(dao)
-    return SpeechToTextResult(finalTranscript, averageConfidenceScore, languageCode)
+    return SpeechToTextResult(finalTranscript, averageConfidenceScore, languageCode, alternativesList)
   }
 
   private fun extractFileFromURL(audioURL: String): String {

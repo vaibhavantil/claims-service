@@ -9,13 +9,16 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class SpeechConfig {
-    val speechClientConfig = RecognitionConfig.newBuilder()
-        .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
-        .setSampleRateHertz(SpeechToTextServiceImpl.RATE)
-        .setLanguageCode(LanguageCode.SWEDISH.value)
-        .addAllAlternativeLanguageCodes(supportedLanguages)
-        .setAudioChannelCount(1)
-        .build()
+    fun createSpeechClientConfig(nAlternatives: Int): RecognitionConfig {
+        return  RecognitionConfig.newBuilder()
+            .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
+            .setSampleRateHertz(SpeechToTextServiceImpl.RATE)
+            .setLanguageCode(LanguageCode.SWEDISH.value)
+            .addAllAlternativeLanguageCodes(supportedLanguages)
+            .setMaxAlternatives(nAlternatives)
+            .setAudioChannelCount(1)
+            .build()
+    }
 
     @Bean(destroyMethod = "close")
     fun createSpeechClient(): SpeechClient {
