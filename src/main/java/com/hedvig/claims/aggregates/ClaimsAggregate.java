@@ -252,6 +252,7 @@ public class ClaimsAggregate {
     @CommandHandler
     public void handle(AddAutomaticPaymentCommand command) {
         ensureSamePaymentCarrierOrThrow(command.getCarrier());
+
         apply(new AutomaticPaymentAddedEvent(
             UUID.randomUUID().toString(),
             command.getClaimId(),
