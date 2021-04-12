@@ -21,17 +21,23 @@ class TranscriptAlternativeController(
 	)
 	fun fillAlternatives() {
 		val list = claimsRepository.findAll()
+        val transcribed = claimTranscriptionRepository.findAll()
+
+        transcribed.forEach {
+            list.remove(it.claim)
+        }
 		log.info("Filling ${list.size} claims")
+        
 		var numTranscribed = 0
 		var numNull = 0
 
-		list.forEach {
+		list.forEach { claimEntity ->
 			Thread.sleep(50)
-			if (it.audioURL != null) {
+			if (claimEntity.audioURL != null) {
 				try {
-					log.info("Backfilling audio for claim ${it.id} -  Started")
-					val claimId = it.id
-					val result = speechToTextService.convertSpeechToText(it.audioURL, claimId, 5)
+					log.info("Backfilling audio for claim ${claimEntity.id} -  Started")
+					val result = speechToTextService.convertSpeechToText(
+                        claimEntity.audioURL, claimEntity.id, 5)
 
 					if (result.text.isNotBlank() && result.languageCode.isNotBlank() && result.confidence != 0f) {
 						claimTranscriptionRepository.save(
@@ -40,16 +46,16 @@ class TranscriptAlternativeController(
 								it.alternatives_list = result.alternatives.map {
 									ClaimTranscriptionAlternative.from(it)
 								}.toMutableList()
-								it.claimId = claimId
+								it.claim = claimEntity
 								it.confidenceScore = result.confidence
 								it.languageCode = result.languageCode
 							}
 						)
 					}
-					log.info("Backfilling audio for claim ${it.id}  -  Ended")
+					log.info("Backfilling audio for claim ${claimEntity.id}  -  Ended")
 					numTranscribed++
 				} catch (e: Exception) {
-					log.error("Backfilling audio for claim ${it.id} - Caught exception transcribing audio", e)
+					log.error("Backfilling audio for claim ${claimEntity.id} - Caught exception transcribing audio", e)
 				}
 			} else {
 				log.info("audio url null, skipping")
