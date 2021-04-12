@@ -6,6 +6,7 @@ import com.hedvig.homer.repository.ClaimTranscription
 import com.hedvig.homer.repository.ClaimTranscriptionAlternative
 import com.hedvig.homer.repository.ClaimTranscriptionRepository
 import org.slf4j.LoggerFactory
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,6 +24,7 @@ class TranscriptAlternativeController(
 		log.info("Filling ${list.size} claims")
 		var numTranscribed = 0
 		var numNull = 0
+
 		list.forEach {
 			Thread.sleep(50)
 			if (it.audioURL != null) {
@@ -30,6 +32,7 @@ class TranscriptAlternativeController(
 					log.info("Backfilling audio for claim ${it.id} -  Started")
 					val claimId = it.id
 					val result = speechToTextService.convertSpeechToText(it.audioURL, claimId, 5)
+
 					if (result.text.isNotBlank() && result.languageCode.isNotBlank() && result.confidence != 0f) {
 						claimTranscriptionRepository.save(
 							ClaimTranscription().also {
@@ -42,7 +45,6 @@ class TranscriptAlternativeController(
 								it.languageCode = result.languageCode
 							}
 						)
-
 					}
 					log.info("Backfilling audio for claim ${it.id}  -  Ended")
 					numTranscribed++
