@@ -2,7 +2,14 @@ package com.hedvig.homer.repository
 
 import com.hedvig.claims.query.ClaimEntity
 import javax.annotation.Nullable
-import javax.persistence.*
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 
 @Entity
 class ClaimTranscription (

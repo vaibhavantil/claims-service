@@ -27,7 +27,7 @@ class TranscriptAlternativeController(
             list.remove(it.claim)
         }
 		log.info("Filling ${list.size} claims")
-        
+
 		var numTranscribed = 0
 		var numNull = 0
 
