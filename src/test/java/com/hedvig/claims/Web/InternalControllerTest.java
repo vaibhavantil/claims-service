@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.claims.ClaimServiceTestConfiguration;
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.CreateClaimCommand;
+import com.hedvig.claims.commands.SelectedPayoutDetails;
 import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
 import com.hedvig.claims.events.AutomaticPaymentInitiatedEvent;
 import com.hedvig.claims.query.Carrier;
@@ -19,7 +20,6 @@ import com.hedvig.claims.serviceIntegration.paymentService.PaymentService;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PaymentResponse;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest;
 import com.hedvig.claims.serviceIntegration.paymentService.dto.TransactionStatus;
-import com.hedvig.claims.serviceIntegration.predictor.Predictor;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingClient;
 import com.hedvig.claims.serviceIntegration.productPricing.ProductPricingService;
 import com.hedvig.claims.serviceIntegration.ticketService.TicketService;
@@ -103,9 +103,6 @@ public class InternalControllerTest {
     @MockBean
     private SpeechToTextService speechToTextService;
 
-    @MockBean
-    private Predictor predictor;
-
     @Test
     public void Should_ReturnAnInitiatedPaymentEvent_WhenPaymentSuccessfullyCompletedFromPaymentService() {
 
@@ -127,7 +124,8 @@ public class InternalControllerTest {
             false,
             HEDVIG_HANDLER,
             false,
-            Carrier.HDI
+            Carrier.HDI,
+            SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
@@ -159,7 +157,8 @@ public class InternalControllerTest {
             false,
             HEDVIG_HANDLER,
             false,
-            Carrier.HDI
+            Carrier.HDI,
+            SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
@@ -191,7 +190,8 @@ public class InternalControllerTest {
             false,
             HEDVIG_HANDLER,
             false,
-            Carrier.HDI
+            Carrier.HDI,
+            SelectedPayoutDetails.NotSelected.INSTANCE
         ));
 
         val events = eventStore.readEvents(CLAIM_ID.toString()).asStream().collect(Collectors.toList());
@@ -213,11 +213,13 @@ public class InternalControllerTest {
         return new Member("12345",
             "Kikos",
             "Kikou",
+            "191212121212",
             LocalDate.of(1989, 2, 17),
             "street",
             "city",
             "12345",
-            "SE");
+            "SE"
+            );
     }
 
     private ClaimEntity makeClaimEntity(String id) {

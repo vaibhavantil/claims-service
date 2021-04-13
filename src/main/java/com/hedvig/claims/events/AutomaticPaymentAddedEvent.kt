@@ -1,11 +1,12 @@
-package com.hedvig.claims.commands
+package com.hedvig.claims.events
 
 import com.hedvig.claims.query.Carrier
-import org.axonframework.commandhandling.TargetAggregateIdentifier
+import org.axonframework.serialization.Revision
 import javax.money.MonetaryAmount
 
-data class AddAutomaticPaymentCommand(
-    @TargetAggregateIdentifier
+@Revision("3.0")
+class AutomaticPaymentAddedEvent(
+    val Id: String,
     val claimId: String,
     val memberId: String,
     val amount: MonetaryAmount,
@@ -14,6 +15,7 @@ data class AddAutomaticPaymentCommand(
     val isExGracia: Boolean,
     val handlerReference: String,
     val sanctionCheckSkipped: Boolean,
-    val carrier: Carrier,
-    val payoutDetails: SelectedPayoutDetails
+    var carrier: Carrier,
+    val payoutDetails : PayoutDetails
 )
+

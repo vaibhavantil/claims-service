@@ -3,7 +3,6 @@ package com.hedvig.claims.sagas
 import com.hedvig.claims.commands.TranscribeAudioCommand
 import com.hedvig.claims.commands.UpdateClaimTypeCommand
 import com.hedvig.claims.events.ClaimCreatedEvent
-import com.hedvig.claims.serviceIntegration.predictor.Predictor
 import com.hedvig.homer.SpeechToTextService
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.eventhandling.saga.EndSaga
@@ -25,10 +24,6 @@ class TranscribeAudioSaga {
     @Transient
     lateinit var speechToTextService: SpeechToTextService
 
-    @Autowired
-    @Transient
-    lateinit var predictor: Predictor
-
     @StartSaga
     @EndSaga
     @SagaEventHandler(associationProperty = "id")
@@ -44,17 +39,6 @@ class TranscribeAudioSaga {
                         result.languageCode
                     )
                 )
-
-                if (predictor.predictIfItsAccidentClaim(result.text)) {
-                    commandGateway.sendAndWait<Void>(
-                        UpdateClaimTypeCommand(
-                            event.id,
-                            event.userId,
-                            LocalDateTime.now(),
-                            DRULLE
-                        )
-                    )
-                }
             }
         } catch (e: Exception) {
             logger.error("Caught exception transcribing audio", e)

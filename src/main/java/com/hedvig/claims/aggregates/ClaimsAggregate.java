@@ -2,6 +2,8 @@ package com.hedvig.claims.aggregates;
 
 import static com.hedvig.claims.util.TzHelper.SWEDEN_TZ;
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
+
+
 import com.hedvig.claims.commands.AddAutomaticPaymentCommand;
 import com.hedvig.claims.commands.AddDataItemCommand;
 import com.hedvig.claims.commands.AddExpensePaymentCommand;
@@ -21,6 +23,7 @@ import com.hedvig.claims.commands.UpdateClaimsReserveCommand;
 import com.hedvig.claims.commands.UpdateClaimsStateCommand;
 import com.hedvig.claims.commands.UpdateEmployeeClaimStatusCommand;
 import com.hedvig.claims.commands.UploadClaimFileCommand;
+import com.hedvig.claims.commands.SelectedPayoutDetails;
 import com.hedvig.claims.events.AudioTranscribedEvent;
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent;
 import com.hedvig.claims.events.AutomaticPaymentFailedEvent;
@@ -43,12 +46,14 @@ import com.hedvig.claims.events.PaymentAddedEvent;
 import com.hedvig.claims.query.Carrier;
 import com.hedvig.claims.query.ClaimFile;
 import com.hedvig.claims.web.dto.PaymentType;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
@@ -191,6 +196,7 @@ public class ClaimsAggregate {
         ne.setId(command.getId());
         ne.setText(command.getText());
         ne.setUserId(this.userId);
+        ne.setHandlerReference(command.getHandlerReference());
         apply(ne);
     }
 
@@ -246,6 +252,7 @@ public class ClaimsAggregate {
     @CommandHandler
     public void handle(AddAutomaticPaymentCommand command) {
         ensureSamePaymentCarrierOrThrow(command.getCarrier());
+
         apply(new AutomaticPaymentAddedEvent(
             UUID.randomUUID().toString(),
             command.getClaimId(),
@@ -256,7 +263,8 @@ public class ClaimsAggregate {
             command.isExGracia(),
             command.getHandlerReference(),
             command.getSanctionCheckSkipped(),
-            command.getCarrier()
+            command.getCarrier(),
+            SelectedPayoutDetails.Companion.toEvent(command.getPayoutDetails())
         ));
     }
 
@@ -534,6 +542,7 @@ public class ClaimsAggregate {
         note.text = event.getText();
         note.userId = event.getUserId();
         note.date = event.getDate();
+        note.handlerReference = event.getHandlerReference();
         notes.add(note);
     }
 
@@ -585,7 +594,7 @@ public class ClaimsAggregate {
 
 
     private void ensureSamePaymentCarrierOrThrow(Carrier carrier) {
-        if (this.payments.isEmpty()){
+        if (this.payments.isEmpty()) {
             return;
         }
         if (this.payments.values().stream().anyMatch((payment -> payment.carrier != carrier))) {
