@@ -1,4 +1,4 @@
-package com.hedvig.claims.web
+package com.hedvig.homer.web
 
 import com.hedvig.claims.query.ClaimsRepository
 import com.hedvig.homer.SpeechToTextService
@@ -6,7 +6,6 @@ import com.hedvig.homer.repository.ClaimTranscription
 import com.hedvig.homer.repository.ClaimTranscriptionAlternative
 import com.hedvig.homer.repository.ClaimTranscriptionRepository
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
