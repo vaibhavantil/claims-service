@@ -19,7 +19,7 @@ class TranscriptAlternativeController(
 		method = [RequestMethod.POST]
 	)
 	fun fillAlternatives() {
-		val list = claimsRepository.findAll()
+        val list = claimsRepository.findAll()
         val transcribed = claimTranscriptionRepository.findAll()
 
         transcribed.forEach {
