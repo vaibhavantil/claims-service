@@ -19,36 +19,39 @@ class TranscriptAlternativeController(
 		method = [RequestMethod.POST]
 	)
 	fun fillAlternatives() {
-        val list = claimsRepository.findAll()
-        val transcribed = claimTranscriptionRepository.findAll()
+        val claims = claimsRepository.findAll()
+        val transcriptions = claimTranscriptionRepository.findAll()
 
-        transcribed.forEach {
-            list.remove(it.claim)
+        transcriptions.forEach {
+            claims.remove(it.claim)
         }
-		log.info("Filling ${list.size} claims")
+		log.info("Filling ${claims.size} claims")
 
 		var numTranscribed = 0
 		var numNull = 0
 
-		list.forEach { claimEntity ->
+		claims.forEach { claimEntity ->
 			Thread.sleep(50)
 			if (claimEntity.audioURL != null) {
 				try {
 					log.info("Backfilling audio for claim ${claimEntity.id} -  Started")
 					val result = speechToTextService.convertSpeechToText(
-                        claimEntity.audioURL, claimEntity.id, 5)
+                        claimEntity.audioURL,
+                        claimEntity.id,
+                        5
+                    )
 
 					if (result.text.isNotBlank() && result.languageCode.isNotBlank() && result.confidence != 0f) {
 						claimTranscriptionRepository.save(
-							ClaimTranscription().also {
-								it.bestTranscript = result.text
-								it.alternatives_list = result.alternatives.map {
-									ClaimTranscriptionAlternative.from(it)
-								}.toMutableList()
-								it.claim = claimEntity
-								it.confidenceScore = result.confidence
-								it.languageCode = result.languageCode
-							}
+							ClaimTranscription(
+                                bestTranscript = result.text,
+                                alternativesList = result.alternatives.map {
+                                    ClaimTranscriptionAlternative(transcript = it)
+                                }.toMutableList(),
+                                claim = claimEntity,
+                                confidenceScore = result.confidence,
+                                languageCode = result.languageCode
+							)
 						)
 					}
 					log.info("Backfilling audio for claim ${claimEntity.id}  -  Ended")
@@ -62,7 +65,7 @@ class TranscriptAlternativeController(
 			}
 		}
 		log.info("Backfilling finished with $numTranscribed successfully transcribed recordings " +
-			", $numNull missing audio urls and ${list.size - numTranscribed} exceptions")
+			", $numNull missing audio urls and ${claims.size - numTranscribed} exceptions")
 	}
 
 	companion object {

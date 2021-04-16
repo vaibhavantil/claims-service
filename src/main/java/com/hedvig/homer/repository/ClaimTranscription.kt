@@ -14,21 +14,13 @@ import javax.persistence.OneToOne
 @Entity
 class ClaimTranscription (
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    val id: Long = 0
-) {
+    val id: Long = 0,
     @OneToOne
-    var claim: ClaimEntity = ClaimEntity()
-
+    var claim: ClaimEntity,
     @OneToMany(cascade = [(CascadeType.ALL)])
-    var alternatives_list: MutableList<ClaimTranscriptionAlternative> = arrayListOf()
-
-    @Nullable
+    var alternativesList: MutableList<ClaimTranscriptionAlternative>,
     @Column(columnDefinition = "TEXT")
-    var bestTranscript: String? = null
-
-    @Nullable
-    var confidenceScore: Float? = null
-
-    @Nullable
-    var languageCode: String? = null
-}
+    var bestTranscript: String,
+    var confidenceScore: Float,
+    var languageCode: String?
+)
