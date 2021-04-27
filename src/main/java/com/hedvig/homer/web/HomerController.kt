@@ -11,15 +11,15 @@ import java.util.UUID
 
 @RestController
 class HomerController(
-  val speechToTextService: SpeechToTextService
+    val speechToTextService: SpeechToTextService
 ) {
-  @RequestMapping(
-    path = ["/testSpeechToText"],
-    method = [RequestMethod.POST]
-  )
-  fun test(@RequestBody aurioUrl: String): ResponseEntity<*>? {
-    val result: SpeechToTextResult =
-      speechToTextService.convertSpeechToText(aurioUrl, UUID.randomUUID().toString())
-    return ResponseEntity.ok(result.text + result.confidence)
-  }
+    @RequestMapping(
+        path = ["/testSpeechToText"],
+        method = [RequestMethod.POST]
+    )
+    fun test(@RequestBody aurioUrl: String): ResponseEntity<*>? {
+        val result: SpeechToTextResult =
+            speechToTextService.convertSpeechToText(aurioUrl, UUID.randomUUID().toString(), 10)
+        return ResponseEntity.ok(result.text + result.confidence + result.alternatives)
+    }
 }
