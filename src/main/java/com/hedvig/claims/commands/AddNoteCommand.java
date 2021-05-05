@@ -18,9 +18,10 @@ public class AddNoteCommand {
   public String text;
   public String userId;
   public String fileURL;
+  public String handlerReference; // optional email to IEX person
 
   public AddNoteCommand(
-      String id, String claimID, LocalDateTime date, String text, String userId, String fileURL) {
+      String id, String claimID, LocalDateTime date, String text, String userId, String fileURL, String handlerReference) {
     log.info("InitiateClaimCommand");
     this.id = id;
     this.claimID = claimID;
@@ -28,6 +29,7 @@ public class AddNoteCommand {
     this.text = text;
     this.userId = userId;
     this.fileURL = fileURL;
+    this.handlerReference = handlerReference;
     log.info(this.toString());
   }
 }

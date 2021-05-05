@@ -1,13 +1,17 @@
 package com.hedvig.claims.config;
 
 import com.hedvig.claims.events.upcast.AutomaticPaymentAddedEvent_v1;
+import com.hedvig.claims.events.upcast.AutomaticPaymentAddedEvent_v2;
 import com.hedvig.claims.events.upcast.ClaimCreatedEvent_v1;
 import com.hedvig.claims.events.upcast.ClaimFileUploadedEventUpcaster_v1;
 import com.hedvig.claims.events.upcast.ExpensePaymentAddedEvent_v1;
+import com.hedvig.claims.events.upcast.ExpensePaymentAddedEvent_v2;
 import com.hedvig.claims.events.upcast.IndemnityCostPaymentAddedEvent_v1;
+import com.hedvig.claims.events.upcast.IndemnityCostPaymentAddedEvent_v2;
 import com.hedvig.claims.events.upcast.PaymentAddedEvent_v1;
 import com.hedvig.claims.events.upcast.PaymentAddedEvent_v2;
 import com.hedvig.claims.events.upcast.PaymentAddedEvent_v3;
+import com.hedvig.claims.events.upcast.AutomaticPaymentAddedEventUpcaster_v3;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
 import org.axonframework.messaging.StreamableMessageSource;
@@ -28,8 +32,12 @@ public class AxonConfiguration {
             new PaymentAddedEvent_v3(),
             new ClaimFileUploadedEventUpcaster_v1(),
             new AutomaticPaymentAddedEvent_v1(),
+            new AutomaticPaymentAddedEvent_v2(),
             new IndemnityCostPaymentAddedEvent_v1(),
-            new ExpensePaymentAddedEvent_v1()
+            new IndemnityCostPaymentAddedEvent_v2(),
+            new ExpensePaymentAddedEvent_v1(),
+            new ExpensePaymentAddedEvent_v2(),
+            new AutomaticPaymentAddedEventUpcaster_v3()
         );
     }
 

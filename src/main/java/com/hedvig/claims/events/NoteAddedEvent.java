@@ -12,4 +12,5 @@ public class NoteAddedEvent {
   public String text;
   public String userId;
   public String fileURL;
+  public String handlerReference; // optional email to iex person
 }

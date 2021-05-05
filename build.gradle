@@ -1,12 +1,13 @@
+// Version numbers live in gradle.properties
 plugins {
-    id "io.freefair.lombok" version "5.3.0" //is this needed?
-    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id "io.freefair.lombok" version "${lombokPluginVersion}" //is this needed?
+    id "io.spring.dependency-management" version "${springDependencyManagementPluginVersion}"
     id "java"
     id "maven-publish"
-    id "org.jetbrains.kotlin.jvm" version "1.4.30"
-    id "org.springframework.boot" version "2.3.4.RELEASE" //any higher breaks spring-cloud compatibility
-    id "org.jetbrains.kotlin.plugin.allopen" version "1.4.30"
-    id "org.jetbrains.kotlin.plugin.noarg" version "1.4.30"
+    id "org.jetbrains.kotlin.jvm" version "${kotlinVersion}"
+    id "org.springframework.boot" version "${springFrameworkBootPluginVersion}"
+    id "org.jetbrains.kotlin.plugin.allopen" version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.plugin.noarg" version "${kotlinVersion}"
 }
 
 group = "com.hedvig.generic"
@@ -17,7 +18,7 @@ targetCompatibility = JavaVersion.VERSION_1_9
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Hoxton.SR10"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudDependenciesManagementPluginVersion}"
     }
 }
 
@@ -32,7 +33,7 @@ repositories {
 
 dependencies {
     // Google cloud libraries BOM:
-    api platform("com.google.cloud:libraries-bom:16.4.0")
+    api platform("com.google.cloud:libraries-bom:${googleLibrariesBomVersion}")
     // Dependencies that use this BOM:
     api "com.google.cloud:google-cloud-speech"
     api "com.google.cloud:google-cloud-storage"
@@ -57,41 +58,41 @@ dependencies {
     implementation "org.springframework.cloud:spring-cloud-kubernetes-ribbon"
 
     // Normal dependencies:
-    implementation "com.amazonaws:aws-java-sdk-s3:1.11.959"
+    implementation "com.amazonaws:aws-java-sdk-s3:${awsVersion}"
     //The following AWS dependencies are not directly used, but the aws-java-sdk pulls older versions, resulting in prod issues.
-    implementation "com.amazonaws:aws-java-sdk-kms:1.11.959"
-    implementation "com.amazonaws:aws-java-sdk-core:1.11.959"
-    implementation "com.amazonaws:jmespath-java:1.11.959"
-    implementation "com.h2database:h2:1.4.200"
-    implementation "com.vladmihalcea:hibernate-types-52:2.10.2"
-    implementation "javax.xml.bind:jaxb-api:2.3.1"
-    implementation "io.sentry:sentry-spring:4.1.0"
-    implementation "io.sentry:sentry-logback:4.1.0"
-    implementation "io.springfox:springfox-swagger2:3.0.0"
-    implementation "io.springfox:springfox-swagger-ui:3.0.0"
-    implementation "net.bramp.ffmpeg:ffmpeg:0.6.2"
-    implementation "net.logstash.logback:logstash-logback-encoder:6.6"
-    implementation "org.axonframework:axon-core:3.3.7"
-    implementation "org.axonframework:axon-spring-boot-starter:3.3.7"
-    implementation "org.hibernate:hibernate-java8:5.4.28.Final"
-    implementation "org.javamoney:moneta:1.4.2"
-    implementation "org.javassist:javassist:3.27.0-GA"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.30"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.30"
-    compileOnly "org.projectlombok:lombok:1.18.18"
-    annotationProcessor "org.projectlombok:lombok:1.18.18"
-    implementation "org.springframework.cloud:spring-cloud-starter-bootstrap:3.0.1"
-    implementation "org.zalando:jackson-datatype-money:1.2.1"
+    implementation "com.amazonaws:aws-java-sdk-kms:${awsVersion}"
+    implementation "com.amazonaws:aws-java-sdk-core:${awsVersion}"
+    implementation "com.amazonaws:jmespath-java:${awsVersion}"
+    implementation "com.h2database:h2:${hibernateVersion}"
+    implementation "com.vladmihalcea:hibernate-types-52:${hibernateTypesVersion}"
+    implementation "javax.xml.bind:jaxb-api:${jaxbApiVersion}"
+    implementation "io.sentry:sentry-spring:${sentryVersion}"
+    implementation "io.sentry:sentry-logback:${sentryVersion}"
+    implementation "io.springfox:springfox-swagger2:${springfoxVersion}"
+    implementation "io.springfox:springfox-swagger-ui:${springfoxVersion}"
+    implementation "net.bramp.ffmpeg:ffmpeg:${ffmpegVersion}"
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}"
+    implementation "org.axonframework:axon-core:${axonVersion}"
+    implementation "org.axonframework:axon-spring-boot-starter:${axonVersion}"
+    implementation "org.hibernate:hibernate-java8:${hibernateJava8Version}"
+    implementation "org.javamoney:moneta:${monetaVersion}"
+    implementation "org.javassist:javassist:${javassistVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-bootstrap:${springCloudStarterVersion}"
+    implementation "org.zalando:jackson-datatype-money:${jacksonDatatypeMoneyVersion}"
 
     // Test-only dependencies:
-    testImplementation "io.mockk:mockk:1.10.6"
-    testImplementation "org.assertj:assertj-core:3.19.0"
-    testImplementation "org.axonframework:axon-test:3.3.7"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:1.4.30"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:1.4.30"
-    testCompileOnly "org.projectlombok:lombok:1.18.18"
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.18"
-    testImplementation("org.springframework.boot:spring-boot-starter-test:2.3.5.RELEASE") {
+    testImplementation "io.mockk:mockk:${mockkVersion}"
+    testImplementation "org.assertj:assertj-core:${assertJVersion}"
+    testImplementation "org.axonframework:axon-test:${axonVersion}"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:${kotlinVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootStarterTestVersion}") {
         exclude group: 'org.assertj', module: 'assertj-core'
     }
 }
@@ -101,10 +102,10 @@ tasks.withType(JavaCompile) {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "9"
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "9"
 }
 
 // I don't think this is needed, but we can remove later. Rather "belt and braces" in prod at first.

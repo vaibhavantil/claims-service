@@ -1,35 +1,38 @@
-# Fake maven's dependencies stage so we can use the same pipelne.
-FROM scratch as dependencies
+##### Dependencies stage #####
+FROM amazoncorretto:11 AS gradle_setup
+WORKDIR /usr/app
+ENV GRADLE_USER_HOME=/usr/share/gradle/
+COPY gradlew .
+COPY gradle gradle
+RUN ./gradlew --version
 
-##### Copy files and build #####
-FROM gradle:6.8.2-jdk11 AS build
-WORKDIR /claims-service
-
-# set gradle cache
-RUN mkdir -p /gradle-cache
-ENV GRADLE_USER_HOME /home/gradle
-
-# copy files
+FROM gradle_setup AS dependencies
 COPY build.gradle .
 COPY settings.gradle .
+COPY gradle.properties .
 COPY lombok.config .
+
+# running 'build' with only a gradle-file will only fetch dependencies
+# we explicitly omit bootJar, since it requires a main class file, which we don't have at this stage
+RUN ./gradlew clean build -x bootJar --no-daemon
+
+
+##### Build stage #####
+FROM dependencies AS build
+
+# Copy application source and build it
 COPY src/main src/main
+RUN ./gradlew bootJar --no-daemon
 
-# build app
-RUN gradle --no-daemon build --stacktrace
 
-##### Run tests #####
+##### Test stage #####
 FROM build AS test
 COPY src/test src/test
-RUN gradle --no-daemon test --stacktrace
+RUN ./gradlew test --no-daemon
 
-##### Build jar #####
-FROM build AS bootjar
-RUN gradle --no-daemon bootjar --stacktrace
 
-##### Assemble artifact #####
+##### Assemble stage #####
 FROM amazoncorretto:11-alpine AS assemble
-WORKDIR /
 
 # Fetch the datadog agent
 RUN apk --no-cache add curl
@@ -39,7 +42,7 @@ RUN curl -o dd-java-agent.jar -L 'https://repository.sonatype.org/service/local/
 RUN apk --no-cache add ffmpeg
 
 # Copy the jar from build stage to this one
-COPY --from=bootjar claims-service/build/libs/claims-service-0.0.1-SNAPSHOT.jar /app/target/claims-service-0.0.1-SNAPSHOT.jar
+COPY --from=build /usr/app/build/libs/claims-service-0.0.1-SNAPSHOT.jar /app/target/claims-service-0.0.1-SNAPSHOT.jar
 
 # Define entry point
 ENTRYPOINT java -javaagent:/dd-java-agent.jar -jar /app/target/claims-service-0.0.1-SNAPSHOT.jar

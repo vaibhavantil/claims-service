@@ -34,7 +34,8 @@ class TranscribeClaimsUploadTest {
         every { textToSpeechService.convertSpeechToText("theUrl:)", "aClaimId") } returns SpeechToTextResult(
             "A weird text",
             1.0f,
-            "se-SV"
+            "se-SV",
+            mutableListOf("A weird text")
         )
 
         sagaFixture
@@ -54,7 +55,8 @@ class TranscribeClaimsUploadTest {
         every { textToSpeechService.convertSpeechToText(any(), any()) } returns SpeechToTextResult(
             "A weird text",
             1.0f,
-            "se-SV"
+            "se-SV",
+            mutableListOf("A weird text")
         )
 
 

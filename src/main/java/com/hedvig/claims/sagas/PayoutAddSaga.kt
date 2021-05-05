@@ -2,6 +2,7 @@ package com.hedvig.claims.sagas
 
 import com.hedvig.claims.commands.AddFailedAutomaticPaymentCommand
 import com.hedvig.claims.commands.AddInitiatedAutomaticPaymentCommand
+import com.hedvig.claims.commands.SelectedPayoutDetails.Companion.fromEvent
 import com.hedvig.claims.events.AutomaticPaymentAddedEvent
 import com.hedvig.claims.serviceIntegration.paymentService.PaymentService
 import com.hedvig.claims.serviceIntegration.paymentService.dto.PayoutRequest
@@ -33,7 +34,8 @@ class PayoutAddSaga {
                 amount = event.amount,
                 sanctionBypassed = event.sanctionCheckSkipped,
                 carrier = event.carrier,
-                handler = event.handlerReference
+                handler = event.handlerReference,
+                payoutDetails = fromEvent(event.payoutDetails)
             )
         )
         if (response.transactionStatus == TransactionStatus.INITIATED) {
