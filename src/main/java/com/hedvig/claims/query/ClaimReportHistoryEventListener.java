@@ -138,9 +138,6 @@ public class ClaimReportHistoryEventListener {
         updateDateOfLoss(claimHistoryEntry, LocalDateTime.parse(e.getValue()).toLocalDate());
       }
       claimReportHistoryRepository.save(claimHistoryEntry);
-    } else if (claimHistoryEntry.getDateOfLoss() != null) {
-      updateDateOfLoss(claimHistoryEntry, claimHistoryEntry.getNotificationDate());
-      claimReportHistoryRepository.save(claimHistoryEntry);
     }
   }
 
